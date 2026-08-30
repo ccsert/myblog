@@ -16,8 +16,6 @@ interface TreeNodeProps extends WorkspaceTreeProps {
   onToggle: (path: string) => void;
 }
 
-const WORKSPACE_TREE = getWorkspaceTree();
-
 function TreeNode({ node, selectedPath, expanded, onSelect, onToggle }: TreeNodeProps) {
   const isDirectory = node.type === 'directory';
   const isExpanded = isDirectory && expanded.has(node.path);
@@ -66,8 +64,14 @@ function TreeNode({ node, selectedPath, expanded, onSelect, onToggle }: TreeNode
 }
 
 export default function WorkspaceTree({ selectedPath, onSelect }: WorkspaceTreeProps) {
+  const workspaceTree = getWorkspaceTree();
   const [expanded, setExpanded] = useState<Set<string>>(
-    () => new Set([`${HOME_DIRECTORY}/projects`, `${HOME_DIRECTORY}/notes`, `${HOME_DIRECTORY}/docs`]),
+    () => new Set([
+      `${HOME_DIRECTORY}/archive`,
+      `${HOME_DIRECTORY}/projects`,
+      `${HOME_DIRECTORY}/notes`,
+      `${HOME_DIRECTORY}/docs`,
+    ]),
   );
 
   const toggleFolder = (path: string) => {
@@ -86,7 +90,7 @@ export default function WorkspaceTree({ selectedPath, onSelect }: WorkspaceTreeP
         <span>workspace</span>
       </div>
       <ul className={styles.treeList}>
-        {WORKSPACE_TREE.map(node => (
+        {workspaceTree.map(node => (
           <TreeNode
             key={node.path}
             node={node}

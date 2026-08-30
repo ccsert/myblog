@@ -16,12 +16,16 @@ import { useSiteTheme } from '@/app/components/theme/SiteThemeProvider';
 import {
   BUILTIN_COMMAND_NAMES,
   BUILTIN_COMMAND_DESCRIPTIONS,
+  ARCHIVE_SESSION_PATH,
   DEFAULT_PREVIEW_PATH,
   displayPath,
   executeShellCommand,
   getPathCompletions,
+  getPreviewDocument,
+  getWorkspaceEntry,
   HOME_DIRECTORY,
   parseCommandLine,
+  registerArchiveSession,
 } from '@/app/lib/terminal/shell';
 import { TerminalLine, TerminalProps } from '@/app/types/terminal';
 import styles from './TerminalWorkbench.module.css';
@@ -41,8 +45,64 @@ interface CompletionSession {
   options: CompletionOption[];
 }
 
+interface PersistedTerminalSession {
+  version: 1;
+  lines: Array<Omit<TerminalLine, 'timestamp'> & { timestamp?: string }>;
+  history: string[];
+  cwd: string;
+  previousCwd: string;
+  previewPath: string;
+  terminalView: TerminalView;
+  mobilePane: MobilePane;
+  archiveStoryIds: string[];
+}
+
+const TERMINAL_SESSION_STORAGE_KEY = 'ccsert-terminal:session';
+const ARCHIVE_HANDOFF_STORAGE_KEY = 'signal-archive:handoff';
+const TERMINAL_LINE_TYPES = new Set<TerminalLine['type']>(['input', 'output', 'error', 'success', 'info']);
+const ARCHIVE_HANDOFF_ACTIONS = ['status', 'tree', `open ${ARCHIVE_SESSION_PATH}`] as const;
+
+function parseTerminalSession(raw: string | null): PersistedTerminalSession | null {
+  if (!raw) return null;
+  try {
+    const value = JSON.parse(raw) as Partial<PersistedTerminalSession>;
+    if (value.version !== 1 || !Array.isArray(value.lines) || !Array.isArray(value.history)) return null;
+    const validLines = value.lines.every(line => (
+      typeof line === 'object'
+      && line !== null
+      && typeof line.content === 'string'
+      && TERMINAL_LINE_TYPES.has(line.type)
+      && (line.timestamp === undefined || typeof line.timestamp === 'string')
+    ));
+    if (!validLines || !value.history.every(item => typeof item === 'string')) return null;
+    const archiveStoryIds = Array.isArray(value.archiveStoryIds)
+      ? value.archiveStoryIds.filter(item => typeof item === 'string').slice(-64)
+      : [];
+    if (archiveStoryIds.length > 0) registerArchiveSession(archiveStoryIds);
+    if (typeof value.cwd !== 'string' || getWorkspaceEntry(value.cwd)?.type !== 'directory') return null;
+    if (typeof value.previousCwd !== 'string' || getWorkspaceEntry(value.previousCwd)?.type !== 'directory') return null;
+    if (typeof value.previewPath !== 'string' || !getPreviewDocument(value.previewPath)) return null;
+    if (value.terminalView !== 'shell' && value.terminalView !== 'docs') return null;
+    if (value.mobilePane !== 'terminal' && value.mobilePane !== 'files' && value.mobilePane !== 'preview') return null;
+    return {
+      version: 1,
+      lines: value.lines.slice(-300),
+      history: value.history.slice(-100),
+      cwd: value.cwd,
+      previousCwd: value.previousCwd,
+      previewPath: value.previewPath,
+      terminalView: value.terminalView,
+      mobilePane: value.mobilePane,
+      archiveStoryIds,
+    };
+  } catch {
+    return null;
+  }
+}
+
 const QUICK_COMMANDS = [
   { command: 'help', description: 'Show every available command' },
+  { command: 'archive', description: 'Enter the playable Signal Archive' },
   { command: 'open projects/agent-platform.md', description: 'Open a project in preview' },
   { command: 'search agent', description: 'Search paths and file contents' },
   { command: 'tree', description: 'Inspect the virtual workspace' },
@@ -52,6 +112,7 @@ const QUICK_COMMANDS = [
 ] as const;
 
 const PALETTE_ACTIONS: PaletteAction[] = [
+  { command: 'archive', label: 'Enter Signal Archive', description: 'Explore the playable archive room' },
   { command: 'open projects/agent-platform.md', label: 'Open Agent Platform', description: 'Preview the featured agent project' },
   { command: 'open projects/devops-pipeline.md', label: 'Open DevOps Pipeline', description: 'Preview delivery automation work' },
   { command: 'open skills/stack.txt', label: 'Open Technical Stack', description: 'Explore current capabilities' },
@@ -163,6 +224,10 @@ export default function Terminal({
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [completionIndex, setCompletionIndex] = useState(0);
   const [completionSession, setCompletionSession] = useState<CompletionSession | null>(null);
+  const [sessionReady, setSessionReady] = useState(false);
+  const [handoffActionsVisible, setHandoffActionsVisible] = useState(false);
+  const [liveAnnouncement, setLiveAnnouncement] = useState('');
+  const [archiveStoryIds, setArchiveStoryIds] = useState<string[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
   const outputRef = useRef<HTMLDivElement>(null);
   const workbenchRef = useRef<HTMLElement>(null);
@@ -182,6 +247,12 @@ export default function Terminal({
   );
   const completionOptions = completionSession?.options ?? suggestedCompletions;
   const activeCompletion = completionOptions[completionIndex] ?? completionOptions[0];
+  const latestSpokenLine = useMemo(() => {
+    for (let index = lines.length - 1; index >= 0; index -= 1) {
+      if (lines[index].content.trim()) return lines[index].content;
+    }
+    return '';
+  }, [lines]);
 
   const focusInput = useCallback(() => {
     window.requestAnimationFrame(() => inputRef.current?.focus({ preventScroll: true }));
@@ -216,8 +287,107 @@ export default function Terminal({
     return () => window.removeEventListener('keydown', openPalette);
   }, []);
 
+  useEffect(() => {
+    const frame = window.requestAnimationFrame(() => {
+      let persistedSession: PersistedTerminalSession | null = null;
+      let rawHandoff: string | null = null;
+      try {
+        persistedSession = parseTerminalSession(window.sessionStorage.getItem(TERMINAL_SESSION_STORAGE_KEY));
+        rawHandoff = window.sessionStorage.getItem(ARCHIVE_HANDOFF_STORAGE_KEY);
+      } catch {
+        // Session persistence is optional; the terminal must still mount.
+      }
+
+      if (persistedSession) {
+        setLines(persistedSession.lines.map(line => {
+          const timestamp = line.timestamp ? new Date(line.timestamp) : undefined;
+          return {
+            type: line.type,
+            content: line.content,
+            timestamp: timestamp && !Number.isNaN(timestamp.getTime()) ? timestamp : undefined,
+          };
+        }));
+        setHistory(persistedSession.history);
+        setCwd(persistedSession.cwd);
+        setPreviousCwd(persistedSession.previousCwd);
+        setPreviewPath(persistedSession.previewPath);
+        setTerminalView(persistedSession.terminalView);
+        setMobilePane(persistedSession.mobilePane);
+        setArchiveStoryIds(persistedSession.archiveStoryIds);
+      }
+
+      let handoffMessage = '';
+      let repairSummary = 'power · health · boot order';
+      let discoveredCount = 0;
+      if (rawHandoff) {
+        try {
+          const payload = JSON.parse(rawHandoff) as { repairSummary?: string[]; discoveredStoryIds?: string[] };
+          if (Array.isArray(payload.repairSummary) && payload.repairSummary.length > 0) {
+            repairSummary = payload.repairSummary.join(' · ');
+          }
+          if (Array.isArray(payload.discoveredStoryIds)) {
+            const discoveredStoryIds = payload.discoveredStoryIds.filter(item => typeof item === 'string').slice(-64);
+            setArchiveStoryIds(discoveredStoryIds);
+            discoveredCount = registerArchiveSession(discoveredStoryIds);
+          }
+        } catch {
+          // A malformed handoff must never block the terminal.
+        }
+        try {
+          window.sessionStorage.removeItem(ARCHIVE_HANDOFF_STORAGE_KEY);
+        } catch {
+          // A blocked storage write must not block the terminal.
+        }
+        handoffMessage = `[archive] Local node A-17 online · Restored: ${repairSummary} · Recovered signals: ${discoveredCount}.`;
+        const timestamp = new Date();
+        setLines(previousLines => [
+          ...previousLines,
+          { type: 'success', content: handoffMessage, timestamp },
+        ]);
+        setHandoffActionsVisible(true);
+        setTerminalView('shell');
+        setMobilePane('terminal');
+        setLiveAnnouncement(handoffMessage);
+      }
+      setSessionReady(true);
+      if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+        focusInput();
+      } else {
+        workbenchRef.current?.focus({ preventScroll: true });
+      }
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [focusInput]);
+
+  useEffect(() => {
+    if (!sessionReady) return;
+    const snapshot: PersistedTerminalSession = {
+      version: 1,
+      lines: lines.slice(-300).map(line => ({
+        type: line.type,
+        content: line.content,
+        timestamp: line.timestamp && !Number.isNaN(line.timestamp.getTime())
+          ? line.timestamp.toISOString()
+          : undefined,
+      })),
+      history: history.slice(-100),
+      cwd,
+      previousCwd,
+      previewPath,
+      terminalView,
+      mobilePane,
+      archiveStoryIds,
+    };
+    try {
+      window.sessionStorage.setItem(TERMINAL_SESSION_STORAGE_KEY, JSON.stringify(snapshot));
+    } catch {
+      // A blocked session store should not degrade the live terminal.
+    }
+  }, [archiveStoryIds, cwd, history, lines, mobilePane, previewPath, previousCwd, sessionReady, terminalView]);
+
   const handleCommand = useCallback(async (commandText: string) => {
     const trimmedCommand = commandText.trim();
+    setLiveAnnouncement('');
     setTerminalView('shell');
     setCompletionSession(null);
     setCompletionIndex(0);
@@ -301,6 +471,20 @@ export default function Terminal({
     void handleCommand(command);
   }, [handleCommand]);
 
+  const moveFocusFromInput = useCallback((backward: boolean) => {
+    const workbench = workbenchRef.current;
+    const inputElement = inputRef.current;
+    if (!workbench || !inputElement) return;
+
+    const focusable = Array.from(workbench.querySelectorAll<HTMLElement>(
+      'a[href], button:not(:disabled), input:not(:disabled), [tabindex]:not([tabindex="-1"])',
+    )).filter(element => element.getClientRects().length > 0);
+    const currentIndex = focusable.indexOf(inputElement);
+    if (currentIndex < 0 || focusable.length < 2) return;
+    const nextIndex = (currentIndex + (backward ? -1 : 1) + focusable.length) % focusable.length;
+    focusable[nextIndex]?.focus({ preventScroll: true });
+  }, []);
+
   const handleInputKeyDown = useCallback((event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.key === 'Enter') {
       event.preventDefault();
@@ -333,16 +517,21 @@ export default function Terminal({
       }
     } else if (event.key === 'Tab') {
       event.preventDefault();
-      if (completionOptions.length > 0) {
-        const nextIndex = completionSession
-          ? (completionIndex + (event.shiftKey ? -1 : 1) + completionOptions.length) % completionOptions.length
-          : completionIndex;
-        const nextOption = completionOptions[nextIndex];
-        const continueIntoFolder = completionOptions.length === 1 && nextOption.kind === 'folder';
-        setCompletionSession(continueIntoFolder ? null : { options: completionOptions });
-        setCompletionIndex(continueIntoFolder ? 0 : nextIndex);
-        setInput(nextOption.value);
+      const shouldApplyCompletion = !event.shiftKey
+        && completionOptions.length > 0
+        && activeCompletion?.value !== input;
+      if (!shouldApplyCompletion) {
+        moveFocusFromInput(event.shiftKey);
+        return;
       }
+      const nextIndex = completionSession
+        ? (completionIndex + 1) % completionOptions.length
+        : completionIndex;
+      const nextOption = completionOptions[nextIndex];
+      const continueIntoFolder = completionOptions.length === 1 && nextOption.kind === 'folder';
+      setCompletionSession(continueIntoFolder ? null : { options: completionOptions });
+      setCompletionIndex(continueIntoFolder ? 0 : nextIndex);
+      setInput(nextOption.value);
     } else if (event.key.toLowerCase() === 'l' && event.ctrlKey) {
       event.preventDefault();
       setLines([]);
@@ -368,7 +557,7 @@ export default function Terminal({
       setCompletionSession(null);
       setCompletionIndex(0);
     }
-  }, [completionIndex, completionOptions, completionSession, currentPrompt, handleCommand, history, historyIndex, input]);
+  }, [activeCompletion?.value, completionIndex, completionOptions, completionSession, currentPrompt, handleCommand, history, historyIndex, input, moveFocusFromInput]);
 
   const handleInputChange = (value: string) => {
     setInput(value);
@@ -394,7 +583,7 @@ export default function Terminal({
   };
 
   return (
-    <section ref={workbenchRef} className={styles.workbench} data-theme={theme} role="region" aria-label="ccsert.dev 终端工作台">
+    <section ref={workbenchRef} className={styles.workbench} data-theme={theme} role="region" aria-label="ccsert.dev 终端工作台" tabIndex={-1}>
       <header className={styles.topbar}>
         <div className={styles.tabs} role="tablist" aria-label="终端视图">
           <button
@@ -448,7 +637,6 @@ export default function Terminal({
               role="tabpanel"
               aria-labelledby="workbench-terminal-tab"
               onClick={focusInput}
-              aria-live="polite"
             >
               {lines.map((line, index) => (
                 <div key={`${line.timestamp?.getTime() ?? 0}-${index}`} className={getLineClass(line.type)}>
@@ -470,12 +658,30 @@ export default function Terminal({
                   aria-controls={completionOptions.length > 0 ? 'terminal-completions' : undefined}
                   aria-expanded={completionOptions.length > 0}
                   aria-activedescendant={activeCompletion ? `completion-${activeCompletion.id}` : undefined}
-                  autoFocus
                   autoCapitalize="none"
                   autoComplete="off"
                   spellCheck={false}
                 />
               </div>
+              {handoffActionsVisible ? (
+                <div className={styles.handoffActions} role="group" aria-label="档案室交接建议">
+                  <span>Archive handoff ready</span>
+                  <div>
+                    {ARCHIVE_HANDOFF_ACTIONS.map(action => (
+                      <button
+                        key={action}
+                        type="button"
+                        onClick={() => {
+                          setHandoffActionsVisible(false);
+                          runCommand(action);
+                        }}
+                      >
+                        {action}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
               {completionOptions.length > 0 ? (
                 <div id="terminal-completions" className={styles.completionPanel} role="listbox" aria-label="命令补全候选">
                   <div className={styles.completionHeader}>
@@ -581,6 +787,9 @@ export default function Terminal({
           onRun={runCommand}
         />
       ) : null}
+      <div className="sr-only" aria-live="polite" aria-atomic="true">
+        {liveAnnouncement || latestSpokenLine}
+      </div>
     </section>
   );
 }

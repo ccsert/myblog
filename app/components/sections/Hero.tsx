@@ -3,17 +3,28 @@
 import Terminal from '@/app/components/terminal/Terminal';
 import { Command } from '@/app/types/terminal';
 import { ArrowDown } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 export default function Hero() {
+  const router = useRouter();
   const scrollToSection = (sectionId: string, label: string) => {
     requestAnimationFrame(() => {
-      document.getElementById(sectionId)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      document.getElementById(sectionId)?.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' });
     });
 
     return `Opening ${label}...`;
   };
 
   const commands: Command[] = [
+    {
+      name: 'archive',
+      description: 'Enter the playable Signal Archive',
+      fn: () => {
+        router.push('/archive');
+        return 'Opening Signal Archive...';
+      },
+    },
     {
       name: 'about',
       description: 'Learn more about me',
@@ -65,6 +76,7 @@ export default function Hero() {
     '  search <query> — search workspace',
     '  tree — inspect files',
     '  status — show system health',
+    '  archive — enter the playable Signal Archive',
     '  theme <name> — green · cyan · amber · light',
     '',
     'Tip: type “o” to inspect matches, then press Tab to complete.',

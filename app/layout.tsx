@@ -42,6 +42,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="zh-CN"
+      data-scroll-behavior="smooth"
       className={`${inter.variable} ${jetBrainsMono.variable} ${sourceSerif.variable} h-full`}
     >
       <body className="min-h-full scanlines grain">

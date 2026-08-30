@@ -132,7 +132,7 @@ Status: the embedded Explore entry was intentionally removed after review. Its s
 ## Completion behavior
 
 - Partial commands expose a labelled listbox connected to the terminal combobox with `aria-controls`, `aria-expanded`, and `aria-activedescendant`.
-- Up and Down move the active candidate; Tab applies it, repeated Tab cycles, Shift+Tab cycles backward, and clicking a candidate fills the input without losing focus.
+- Up and Down move the active candidate; Tab applies it; when the value is already complete, Tab and Shift+Tab leave the prompt through the normal workbench focus order instead of trapping keyboard users. Clicking a candidate fills the input without losing focus.
 - Command names, theme values, curated search terms, and multi-level virtual paths are supported.
 - Live checks confirmed `t → Tab → tree → Tab → tail`, `theme l → Tab → theme light`, and `open p → Tab → projects/ → Tab → projects/agent-platform.md`.
 
@@ -143,3 +143,62 @@ Status: the embedded Explore entry was intentionally removed after review. Its s
 - React best-practices review found no new data-fetching, hydration, heavy dependency, inline component, unsafe TypeScript, or derived-state issue.
 
 final result: passed
+
+# Signal Archive — Design QA
+
+## QA setup
+
+- Source of truth: `output/design/signal-archive-interaction-rich-v2.png`
+- Implementation capture: `output/design/signal-archive-implementation-desktop-v6.png`
+- Full comparison: `output/design/signal-archive-design-qa-comparison-v5.png`
+- Focused narrow-screen evidence: `output/design/signal-archive-story-mode-mobile-320-v2.png`
+- Narrow-screen camera evidence: `output/design/signal-archive-mobile-camera-320-v2.png`
+- Wide-screen crop evidence: `output/design/signal-archive-implementation-wide-1440x810.png`
+- Paper-light evidence: `output/design/signal-archive-light-wide-1440x810.png`
+- Browser state: `/archive`, Signal green, archive restored and online
+- Viewport: 1486 × 1058 CSS pixels at device scale 1; source and implementation are both 1486 × 1058
+
+## Iteration record
+
+1. V1 exposed an unintended inset black frame and made the player substantially smaller than the reference. The scene was changed to full bleed and the runtime sprite scale was increased.
+2. V2 still read as under-scaled beside the furniture. The character cap was raised to 116 px while retaining proportional sprite dimensions.
+3. V3/V4 aligned the room crop, atmosphere, character proportion, primary panel weight, phase navigation, and bottom HUD closely enough to the selected reference.
+4. V5 preserved that match after the aspect-locked world transform, mobile camera follow, light-theme treatment, modal focus management, and terminal-session handoff fixes.
+5. V6 captures the final clean first-visit state after the online-revisit chooser, optional-discovery feedback, hidden-echo reward, dynamic terminal archive, and persistence fixes. The final clean browser session contains only development-runtime info messages and no warning or error.
+
+## Intentional differences
+
+- Interface copy is Chinese because the product and existing portfolio content are Chinese-first; the reference used English as visual placeholder copy.
+- The implementation shows the currently selected hotspot instead of labeling every hotspot at once, reducing first-visit intimidation and preserving exploration.
+- Repair traces and the restore counter are state-dependent. The reference is a composed interaction-rich frame, while the implementation reveals them through actual progress.
+- The player is a separate transparent runtime sprite and the room is a clean background asset, rather than one baked illustration.
+
+## Interaction and accessibility checks
+
+- Completed the full Explore → Diagnose → Repair → Boot flow in the browser.
+- Verified order-independent health repair, power connection, boot-order validation, adaptive hints, assisted completion, persisted state, online revisit, and terminal handoff.
+- Verified keyboard movement and interaction copy, terminal auto-focus after handoff, and Tab focus transfer when no completion is available.
+- Verified the same repair state machine through Story List mode at 320 × 568, including all three global actions and 44 px touch targets.
+- Verified the 320 × 568 scene camera follows the player without forcing the context panel open, while click-to-move no longer interferes with horizontal touch scrolling.
+- Verified the story dialog traps focus, closes with Escape, and restores focus to its opener.
+- Verified selecting a scene object moves focus into its action panel; when the panel is closed, only hotspots within the interaction radius enter the Tab order.
+- Verified intro → Story List, normal Story List, and Help overlays use explicit return targets so one overlay cleanup cannot steal focus from another.
+- Verified the archive handoff exposes `status`, `tree`, and `open /home/visitor/archive/session.log`; the generated recovery log opens in Preview with the recognized records from the current run.
+- Verified a `cd projects` session survives terminal → archive → online-terminal navigation, including command history, transcript, and the `~/projects` working directory.
+- Verified an online revisit offers three explicit choices: continue exploring, open the online terminal, or replay the room.
+- Verified the Task Lamp and Archive Box produce persistent object-state labels, unlock the optional hidden echo, and add their records plus the echo to the terminal recovery log.
+- Verified the handoff welcome line and recovery-log preview use the same recognized-record count, while the dynamically registered `archive/session.log` appears in the expanded Files tree.
+- Verified Paper light survives homepage ↔ archive client navigation and a full reload through persisted site-theme state.
+- Verified theme switching and reduced-motion-aware transitions.
+- Fresh desktop and mobile sessions reported no browser errors or warnings.
+
+## Severity review
+
+- P0: none
+- P1: none
+- P2: none after V6
+- P3: future polish can add more frame-by-frame character animation and richer ambient object reactions without changing the vertical-slice logic.
+
+## Final result
+
+passed

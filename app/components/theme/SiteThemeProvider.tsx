@@ -2,7 +2,7 @@
 
 import { createContext, ReactNode, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { flushSync } from 'react-dom';
-import { SiteTheme } from '@/app/lib/theme';
+import { isSiteTheme, SiteTheme } from '@/app/lib/theme';
 
 interface ThemeOrigin {
   x: number;
@@ -20,6 +20,7 @@ interface SiteThemeContextValue {
 }
 
 const SiteThemeContext = createContext<SiteThemeContextValue | null>(null);
+const SITE_THEME_STORAGE_KEY = 'ccsert-site:theme';
 
 function applyThemeAttribute(theme: SiteTheme) {
   document.documentElement.dataset.theme = theme;
@@ -30,6 +31,20 @@ export default function SiteThemeProvider({ children }: { children: ReactNode })
   const [transitionSequence, setTransitionSequence] = useState(0);
   const fallbackFrameRef = useRef<number | null>(null);
   const fallbackTimerRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    const frame = window.requestAnimationFrame(() => {
+      try {
+        const storedTheme = window.localStorage.getItem(SITE_THEME_STORAGE_KEY);
+        if (!storedTheme || !isSiteTheme(storedTheme)) return;
+        applyThemeAttribute(storedTheme);
+        setTheme(storedTheme);
+      } catch {
+        // Theme persistence is optional; the in-memory theme remains usable.
+      }
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, []);
 
   useEffect(() => () => {
     if (fallbackFrameRef.current !== null) window.cancelAnimationFrame(fallbackFrameRef.current);
@@ -52,6 +67,11 @@ export default function SiteThemeProvider({ children }: { children: ReactNode })
 
     const commitTheme = () => {
       applyThemeAttribute(nextTheme);
+      try {
+        window.localStorage.setItem(SITE_THEME_STORAGE_KEY, nextTheme);
+      } catch {
+        // A blocked store should not prevent the visible theme change.
+      }
       flushSync(() => {
         setTheme(nextTheme);
         setTransitionSequence(sequence => sequence + 1);

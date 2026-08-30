@@ -1,11 +1,13 @@
 'use client';
 
 import { MouseEvent, useEffect, useRef, useState } from 'react';
+import Link from 'next/link';
 import { Menu, Palette, X } from 'lucide-react';
 import { getNextSiteTheme, SITE_THEMES } from '@/app/lib/theme';
 import { useSiteTheme } from '@/app/components/theme/SiteThemeProvider';
 
 const navItems = [
+  { name: 'archive', href: '/archive' },
   { name: 'projects', href: '#projects' },
   { name: 'about', href: '#about' },
   { name: 'skills', href: '#skills' },
@@ -95,13 +97,23 @@ export default function Navigation() {
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-6">
             {navItems.map((item) => (
-              <a
-                key={item.name}
-                href={item.href}
-                className="font-mono text-sm text-text-secondary hover:text-accent transition-colors"
-              >
-                <span className="text-accent">~/</span>{item.name}
-              </a>
+              item.href.startsWith('/') ? (
+                <Link
+                  key={item.name}
+                  href={item.href}
+                  className="font-mono text-sm text-text-secondary hover:text-accent transition-colors"
+                >
+                  <span className="text-accent">~/</span>{item.name}
+                </Link>
+              ) : (
+                <a
+                  key={item.name}
+                  href={item.href}
+                  className="font-mono text-sm text-text-secondary hover:text-accent transition-colors"
+                >
+                  <span className="text-accent">~/</span>{item.name}
+                </a>
+              )
             ))}
             <ThemeCycleButton />
           </div>
@@ -126,14 +138,25 @@ export default function Navigation() {
         {isOpen && (
           <div id="mobile-navigation" className="md:hidden mt-4 pb-4 space-y-2">
             {navItems.map((item) => (
-              <a
-                key={item.name}
-                href={item.href}
-                onClick={() => setIsOpen(false)}
-                className="block px-4 py-2 font-mono text-sm text-text-secondary hover:text-accent hover:bg-surface rounded transition-colors"
-              >
-                <span className="text-accent">~/</span>{item.name}
-              </a>
+              item.href.startsWith('/') ? (
+                <Link
+                  key={item.name}
+                  href={item.href}
+                  onClick={() => setIsOpen(false)}
+                  className="block px-4 py-2 font-mono text-sm text-text-secondary hover:text-accent hover:bg-surface rounded transition-colors"
+                >
+                  <span className="text-accent">~/</span>{item.name}
+                </Link>
+              ) : (
+                <a
+                  key={item.name}
+                  href={item.href}
+                  onClick={() => setIsOpen(false)}
+                  className="block px-4 py-2 font-mono text-sm text-text-secondary hover:text-accent hover:bg-surface rounded transition-colors"
+                >
+                  <span className="text-accent">~/</span>{item.name}
+                </a>
+              )
             ))}
           </div>
         )}
