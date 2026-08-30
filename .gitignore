@@ -12,6 +12,8 @@
 
 # testing
 /coverage
+/.playwright-cli/
+/output/playwright/
 
 # next.js
 /.next/
@@ -23,6 +25,8 @@
 # misc
 .DS_Store
 *.pem
+/homepage*.png
+/public/fonts/*.zip
 
 # debug
 npm-debug.log*
