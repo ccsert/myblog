@@ -4,6 +4,13 @@ import {
   FIRST_ROOM_CORE_NODES,
   FIRST_ROOM_HIDDEN_ECHOES,
 } from '@/app/lib/archive/content';
+import {
+  CAPABILITY_GROUPS,
+  KNOWLEDGE_SIGNALS,
+  PORTFOLIO_PROFILE,
+  PORTFOLIO_PROJECTS,
+  PUBLIC_EVIDENCE_CHECKED_AT,
+} from '@/app/lib/content/portfolio';
 
 export const HOME_DIRECTORY = '/home/visitor';
 export const ARCHIVE_SESSION_PATH = `${HOME_DIRECTORY}/archive/session.log`;
@@ -80,17 +87,55 @@ export interface PreviewDocument {
   status: string;
   stage: string;
   updated: string;
-  stack: string[];
+  stack: readonly string[];
   overview: string;
-  signals?: {
-    requests: string;
-    latency: string;
-    errors: string;
-  };
+  evidence?: readonly { label: string; value: string }[];
+  href?: string;
   sectionId?: string;
 }
 
-export const DEFAULT_PREVIEW_PATH = `${HOME_DIRECTORY}/projects/agent-platform.md`;
+export const DEFAULT_PREVIEW_PATH = `${HOME_DIRECTORY}/projects/${PORTFOLIO_PROJECTS[0].slug}.md`;
+
+const PROJECT_FILE_ENTRIES = Object.fromEntries(PORTFOLIO_PROJECTS.map(project => [
+  `${HOME_DIRECTORY}/projects/${project.slug}.md`,
+  {
+    type: 'file',
+    content: [
+      `# ${project.title}`,
+      '',
+      project.description,
+      '',
+      `Repository: ${project.repositoryUrl}`,
+      `Status: ${project.status}`,
+      `Stage: ${project.stage}`,
+      `Updated: ${project.updated}`,
+      `Stack: ${project.stack.join(' · ')}`,
+      '',
+      'Evidence:',
+      ...project.evidence.map(item => `- ${item.label}: ${item.value}`),
+      '',
+      'Capabilities:',
+      ...project.capabilities.map(capability => `- ${capability}`),
+    ].join('\n'),
+  },
+])) as Record<string, VirtualEntry>;
+
+const KNOWLEDGE_FILE_ENTRIES = Object.fromEntries(KNOWLEDGE_SIGNALS.map(signal => [
+  `${HOME_DIRECTORY}/knowledge/${signal.slug}.md`,
+  {
+    type: 'file',
+    content: [
+      `# ${signal.title}`,
+      '',
+      signal.excerpt,
+      '',
+      `Open question: ${signal.openQuestion}`,
+      `Indexed: ${signal.indexed}`,
+      `Source: ${signal.sourceLabel} · ${signal.sourceUrl}`,
+      `Boundary: ${signal.boundary}`,
+    ].join('\n'),
+  },
+])) as Record<string, VirtualEntry>;
 
 const VIRTUAL_FILE_SYSTEM: Record<string, VirtualEntry> = {
   '/': { type: 'directory' },
@@ -105,18 +150,21 @@ const VIRTUAL_FILE_SYSTEM: Record<string, VirtualEntry> = {
     content: [
       '# ccsert.dev',
       '',
-      'A small interactive shell for exploring my work.',
+      PORTFOLIO_PROFILE.headline,
       '',
-      'Try `ls`, `cd projects`, `cat about.txt`, or `help`.',
+      `${PORTFOLIO_PROJECTS.length} public systems · ${KNOWLEDGE_SIGNALS.length} public-safe knowledge signals`,
+      '',
+      'Try `open projects/artifact-gateway.md`, `cd knowledge`, `search protocol`, or `help`.',
     ].join('\n'),
   },
   [`${HOME_DIRECTORY}/about.txt`]: {
     type: 'file',
     content: [
-      'Full Stack Developer · DevOps Engineer · AI Enthusiast',
+      PORTFOLIO_PROFILE.domains.join(' · '),
       '',
-      'I build reliable systems across frontend, backend, cloud-native',
-      'infrastructure, and AI agent platforms.',
+      PORTFOLIO_PROFILE.headline,
+      '',
+      PORTFOLIO_PROFILE.throughLine.en,
     ].join('\n'),
   },
   [`${HOME_DIRECTORY}/contact.txt`]: {
@@ -124,46 +172,14 @@ const VIRTUAL_FILE_SYSTEM: Record<string, VirtualEntry> = {
     content: 'Email:  hello@ccsert.dev\nGitHub: https://github.com/ccsert',
   },
   [`${HOME_DIRECTORY}/projects`]: { type: 'directory' },
-  [`${HOME_DIRECTORY}/projects/agent-platform.md`]: {
-    type: 'file',
-    content: 'Agent Platform\nAI Agent orchestration, multi-agent collaboration, and tool calling.\nStack: React · Node.js · Docker · Kubernetes',
-  },
-  [`${HOME_DIRECTORY}/projects/devops-pipeline.md`]: {
-    type: 'file',
-    content: 'DevOps Pipeline\nAutomated build, test, and deployment workflows.\nStack: GitLab CI · Docker · Kubernetes · Terraform',
-  },
-  [`${HOME_DIRECTORY}/projects/monitoring-dashboard.md`]: {
-    type: 'file',
-    content: 'Monitoring Dashboard\nLogs, metrics, dashboards, and alerting.\nStack: Grafana · Prometheus · Loki · Alertmanager',
-  },
-  [`${HOME_DIRECTORY}/projects/microservices-framework.md`]: {
-    type: 'file',
-    content: 'Microservices Framework\nService discovery, load balancing, and resilience.\nStack: Go · gRPC · Consul · Envoy',
-  },
+  ...PROJECT_FILE_ENTRIES,
   [`${HOME_DIRECTORY}/skills`]: { type: 'directory' },
   [`${HOME_DIRECTORY}/skills/stack.txt`]: {
     type: 'file',
-    content: [
-      'Frontend: React, TypeScript, Next.js, Tailwind CSS',
-      'Backend:  Node.js, Go, PostgreSQL, Redis',
-      'DevOps:   Docker, Kubernetes, CI/CD, Terraform',
-      'AI/ML:    LLM, Agents, Prompt Engineering, RAG',
-    ].join('\n'),
+    content: CAPABILITY_GROUPS.map(group => `${group.category}: ${group.items.join(', ')}`).join('\n'),
   },
-  [`${HOME_DIRECTORY}/blog`]: { type: 'directory' },
-  [`${HOME_DIRECTORY}/blog/README.md`]: {
-    type: 'file',
-    content: 'Draft notes on AI agents, DevOps practices, and software architecture.',
-  },
-  [`${HOME_DIRECTORY}/notes`]: { type: 'directory' },
-  [`${HOME_DIRECTORY}/notes/building-agents.md`]: {
-    type: 'file',
-    content: 'Building Agents\nNotes on orchestration, tool boundaries, memory, evaluation, and observability.',
-  },
-  [`${HOME_DIRECTORY}/notes/system-designs.md`]: {
-    type: 'file',
-    content: 'System Designs\nPractical trade-offs for reliable distributed systems and developer platforms.',
-  },
+  [`${HOME_DIRECTORY}/knowledge`]: { type: 'directory' },
+  ...KNOWLEDGE_FILE_ENTRIES,
   [`${HOME_DIRECTORY}/docs`]: { type: 'directory' },
   [`${HOME_DIRECTORY}/docs/commands.md`]: {
     type: 'file',
@@ -173,100 +189,80 @@ const VIRTUAL_FILE_SYSTEM: Record<string, VirtualEntry> = {
     type: 'file',
     content: 'Workbench Architecture\nA safe in-browser shell drives a virtual workspace and contextual preview pane.',
   },
+  [`${HOME_DIRECTORY}/docs/content-policy.md`]: {
+    type: 'file',
+    content: [
+      'Content Evidence Policy',
+      '',
+      `Public repository facts checked: ${PUBLIC_EVIDENCE_CHECKED_AT}`,
+      'Private Wiki material is reduced to public-safe themes and source boundaries.',
+      'Draft conversations, secrets, temporary addresses, and unverified outcomes stay private.',
+    ].join('\n'),
+  },
 };
 
+const PROJECT_PREVIEWS = Object.fromEntries(PORTFOLIO_PROJECTS.map(project => {
+  const path = `${HOME_DIRECTORY}/projects/${project.slug}.md`;
+  return [path, {
+    path,
+    title: project.title,
+    description: project.description,
+    status: project.status === 'released' ? 'Released' : 'Active',
+    stage: project.stage,
+    updated: project.updated,
+    stack: project.stack,
+    overview: project.overview,
+    evidence: project.evidence,
+    href: project.repositoryUrl,
+    sectionId: 'projects',
+  }];
+})) as Record<string, PreviewDocument>;
+
+const KNOWLEDGE_PREVIEWS = Object.fromEntries(KNOWLEDGE_SIGNALS.map(signal => {
+  const path = `${HOME_DIRECTORY}/knowledge/${signal.slug}.md`;
+  return [path, {
+    path,
+    title: signal.title,
+    description: signal.excerpt,
+    status: 'Indexed',
+    stage: signal.state === 'system' ? 'Knowledge system' : 'Research map',
+    updated: signal.indexed,
+    stack: signal.tags,
+    overview: `${signal.openQuestion} ${signal.boundary}`,
+    evidence: [
+      { label: 'Source', value: signal.sourceLabel },
+      { label: 'Visibility', value: 'Public-safe summary' },
+      { label: 'State', value: signal.state },
+    ],
+    href: signal.sourceUrl,
+    sectionId: 'blog',
+  }];
+})) as Record<string, PreviewDocument>;
+
 const PREVIEW_DOCUMENTS: Record<string, PreviewDocument> = {
-  [`${HOME_DIRECTORY}/projects/agent-platform.md`]: {
-    path: `${HOME_DIRECTORY}/projects/agent-platform.md`,
-    title: 'Agent Platform',
-    description: 'AI Agent orchestration, multi-agent collaboration, and tool calling.',
-    status: 'Active',
-    stage: 'Production',
-    updated: 'Aug 2026',
-    stack: ['TypeScript', 'Node.js', 'PostgreSQL', 'Redis', 'Docker', 'Kubernetes'],
-    overview: 'A modular agent runtime with pluggable capabilities, persistent memory, observable workflows, and reliable delivery boundaries.',
-    signals: { requests: '1.18k/min', latency: '84 ms', errors: '0.3%' },
-    sectionId: 'projects',
-  },
-  [`${HOME_DIRECTORY}/projects/devops-pipeline.md`]: {
-    path: `${HOME_DIRECTORY}/projects/devops-pipeline.md`,
-    title: 'DevOps Pipeline',
-    description: 'Automated build, test, artifact, and deployment workflows.',
-    status: 'Active',
-    stage: 'Production',
-    updated: 'Aug 2026',
-    stack: ['GitLab CI', 'Jenkins', 'Docker', 'Kubernetes', 'Terraform'],
-    overview: 'A traceable delivery system designed around reproducible builds, explicit promotion gates, and safe production rollouts.',
-    signals: { requests: '48 builds/day', latency: '7m 14s', errors: '1.2%' },
-    sectionId: 'projects',
-  },
-  [`${HOME_DIRECTORY}/projects/monitoring-dashboard.md`]: {
-    path: `${HOME_DIRECTORY}/projects/monitoring-dashboard.md`,
-    title: 'Monitoring Dashboard',
-    description: 'Unified logs, metrics, dashboards, and alerting.',
-    status: 'Healthy',
-    stage: 'Production',
-    updated: 'Jul 2026',
-    stack: ['Grafana', 'Prometheus', 'Loki', 'Alertmanager'],
-    overview: 'An observability surface that connects service health with searchable logs and actionable alerts.',
-    signals: { requests: '26 services', latency: '2.4 s', errors: '0 open' },
-    sectionId: 'projects',
-  },
-  [`${HOME_DIRECTORY}/projects/microservices-framework.md`]: {
-    path: `${HOME_DIRECTORY}/projects/microservices-framework.md`,
-    title: 'Microservices Framework',
-    description: 'Service discovery, load balancing, and resilience primitives.',
-    status: 'Building',
-    stage: 'Development',
-    updated: 'Aug 2026',
-    stack: ['Go', 'gRPC', 'Consul', 'Envoy'],
-    overview: 'A focused service foundation for predictable communication, progressive delivery, and graceful failure handling.',
-    signals: { requests: '14 services', latency: '32 ms', errors: '0.8%' },
-    sectionId: 'projects',
-  },
+  ...PROJECT_PREVIEWS,
+  ...KNOWLEDGE_PREVIEWS,
   [`${HOME_DIRECTORY}/skills/stack.txt`]: {
     path: `${HOME_DIRECTORY}/skills/stack.txt`,
     title: 'Technical Stack',
     description: 'The tools I use to ship reliable products and platforms.',
     status: 'Current',
     stage: 'Toolkit',
-    updated: 'Aug 2026',
-    stack: ['React', 'TypeScript', 'Next.js', 'Go', 'PostgreSQL', 'Kubernetes', 'LLM', 'RAG'],
-    overview: 'Full-stack product engineering with strong delivery, infrastructure, and AI system capabilities.',
+    updated: PUBLIC_EVIDENCE_CHECKED_AT,
+    stack: ['Go', 'Rust', 'TypeScript', 'Python', 'React', 'Docker', 'PostgreSQL', 'Kubernetes', 'Linux'],
+    overview: 'Capabilities are grouped by public builds, the core toolbox visible on the GitHub profile, and active knowledge-map research. They are not proficiency scores.',
     sectionId: 'skills',
   },
   [`${HOME_DIRECTORY}/about.txt`]: {
     path: `${HOME_DIRECTORY}/about.txt`,
     title: 'About ccsert',
-    description: 'Full Stack Developer · DevOps Engineer · AI Enthusiast',
+    description: PORTFOLIO_PROFILE.domains.join(' · '),
     status: 'Online',
     stage: 'Profile',
-    updated: 'Aug 2026',
-    stack: ['Product Engineering', 'Cloud Native', 'AI Agents'],
-    overview: 'I turn complex technical problems into clear, reliable systems that are useful to real people.',
+    updated: PUBLIC_EVIDENCE_CHECKED_AT,
+    stack: ['Developer Tools', 'AI-assisted Engineering', 'Self-hosted Infrastructure'],
+    overview: `${PORTFOLIO_PROFILE.headline} ${PORTFOLIO_PROFILE.throughLine.en}`,
     sectionId: 'about',
-  },
-  [`${HOME_DIRECTORY}/notes/building-agents.md`]: {
-    path: `${HOME_DIRECTORY}/notes/building-agents.md`,
-    title: 'Building Agents',
-    description: 'Working notes on dependable agent systems.',
-    status: 'Draft',
-    stage: 'Research',
-    updated: 'Aug 2026',
-    stack: ['Tool Use', 'Memory', 'Evaluation', 'Observability'],
-    overview: 'Design notes on making agent behavior inspectable, recoverable, and aligned with explicit user intent.',
-    sectionId: 'blog',
-  },
-  [`${HOME_DIRECTORY}/notes/system-designs.md`]: {
-    path: `${HOME_DIRECTORY}/notes/system-designs.md`,
-    title: 'System Designs',
-    description: 'Architecture notes grounded in operational trade-offs.',
-    status: 'Draft',
-    stage: 'Notes',
-    updated: 'Aug 2026',
-    stack: ['Architecture', 'Reliability', 'Distributed Systems'],
-    overview: 'Short studies of boundaries, failure modes, observability, and the cost of complexity.',
-    sectionId: 'blog',
   },
   [`${HOME_DIRECTORY}/docs/commands.md`]: {
     path: `${HOME_DIRECTORY}/docs/commands.md`,
@@ -274,7 +270,7 @@ const PREVIEW_DOCUMENTS: Record<string, PreviewDocument> = {
     description: 'Keyboard-first ways to explore ccsert.dev.',
     status: 'Ready',
     stage: 'Docs',
-    updated: 'Aug 2026',
+    updated: PUBLIC_EVIDENCE_CHECKED_AT,
     stack: ['Shell', 'Keyboard', 'Search'],
     overview: 'Use help for all commands, Ctrl+K for the command palette, Tab for completion, and open <path> to drive this preview.',
   },
@@ -284,7 +280,7 @@ const PREVIEW_DOCUMENTS: Record<string, PreviewDocument> = {
     description: 'How the interactive homepage terminal is organized.',
     status: 'Ready',
     stage: 'Docs',
-    updated: 'Aug 2026',
+    updated: PUBLIC_EVIDENCE_CHECKED_AT,
     stack: ['Next.js', 'React', 'Virtual FS'],
     overview: 'A client-side virtual shell owns commands and paths while the workbench renders navigation and contextual previews without executing system commands.',
   },
@@ -467,7 +463,7 @@ function descendants(path: string): Array<{ path: string; entry: VirtualEntry }>
 }
 
 export function getWorkspaceTree(): WorkspaceNode[] {
-  const workspaceOrder = ['archive', 'projects', 'notes', 'docs', 'skills', 'about.txt', 'contact.txt', 'README.md'];
+  const workspaceOrder = ['archive', 'projects', 'knowledge', 'docs', 'skills', 'about.txt', 'contact.txt', 'README.md'];
   const buildNode = (path: string, entry: VirtualEntry): WorkspaceNode => ({
     name: basename(path),
     path,
@@ -499,7 +495,7 @@ export function getPreviewDocument(path: string): PreviewDocument | undefined {
     description: contentLines.find(line => line.trim()) ?? 'Workspace document',
     status: 'Ready',
     stage: 'File',
-    updated: 'Aug 2026',
+    updated: PUBLIC_EVIDENCE_CHECKED_AT,
     stack: [],
     overview: contentLines.slice(1).join(' ').trim() || entry.content,
   };
@@ -883,8 +879,10 @@ export function executeShellCommand(commandName: string, args: string[], context
           'status    online',
           'runtime   Next.js · React',
           'shell     virtual · sandboxed',
-          'workspace 12 documents indexed',
-          'latency   84 ms',
+          `workspace ${Object.values(VIRTUAL_FILE_SYSTEM).filter(entry => entry.type === 'file').length} documents indexed`,
+          `projects  ${PORTFOLIO_PROJECTS.length} public repositories`,
+          `knowledge ${KNOWLEDGE_SIGNALS.length} public-safe signals`,
+          `evidence  checked ${PUBLIC_EVIDENCE_CHECKED_AT}`,
         ].join('\n'),
         outputType: 'info',
       };
@@ -894,12 +892,12 @@ export function executeShellCommand(commandName: string, args: string[], context
         output: [
           'visitor@ccsert.dev',
           '──────────────────',
-          'Role:     Full Stack Developer · DevOps Engineer',
-          'Focus:    AI agents · platforms · reliable delivery',
-          'Stack:    TypeScript · Go · Kubernetes · PostgreSQL',
+          'Builds:   developer tools · self-hosted systems',
+          'Focus:    AI-assisted engineering · visible state',
+          'Stack:    Go · Rust · TypeScript · Python · Linux',
           'Shell:    /bin/bash (virtual)',
           `Theme:    ${context.theme}`,
-          'Status:   available for interesting problems',
+          `Evidence: public GitHub · ${PUBLIC_EVIDENCE_CHECKED_AT}`,
         ].join('\n'),
       };
     case 'theme': {

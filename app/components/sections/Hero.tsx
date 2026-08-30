@@ -1,6 +1,7 @@
 'use client';
 
 import Terminal from '@/app/components/terminal/Terminal';
+import { KNOWLEDGE_SIGNALS, PORTFOLIO_PROJECTS } from '@/app/lib/content/portfolio';
 import { Command } from '@/app/types/terminal';
 import { ArrowDown } from 'lucide-react';
 import { useRouter } from 'next/navigation';
@@ -41,9 +42,9 @@ export default function Hero() {
       fn: () => scrollToSection('skills', 'skills'),
     },
     {
-      name: 'blog',
-      description: 'Read my blog',
-      fn: () => scrollToSection('blog', 'blog'),
+      name: 'notes',
+      description: 'Browse the public knowledge index',
+      fn: () => scrollToSection('blog', 'field notes'),
     },
     {
       name: 'contact',
@@ -68,12 +69,12 @@ export default function Hero() {
   ];
 
   const welcomeMessage = [
-    'ccsert.dev interactive shell — explore, search, and open projects.',
-    'Virtual workspace indexed · session online',
+    'ccsert.dev — developer tools, AI-assisted engineering, self-hosted systems.',
+    `${PORTFOLIO_PROJECTS.length} public repositories · ${KNOWLEDGE_SIGNALS.length} knowledge signals · session online`,
     '',
     'Quick start:',
     '  open <path> — preview a file',
-    '  search <query> — search workspace',
+    '  search protocol — search projects and research notes',
     '  tree — inspect files',
     '  status — show system health',
     '  archive — enter the playable Signal Archive',
@@ -92,7 +93,7 @@ export default function Hero() {
             ccsert<span className="text-accent">.dev</span>
           </h1>
           <p className="text-lg md:text-xl text-text-secondary font-mono">
-            Full Stack Developer · DevOps Engineer · AI Enthusiast
+            Developer tools · AI-assisted engineering · self-hosted infrastructure
           </p>
         </div>
 

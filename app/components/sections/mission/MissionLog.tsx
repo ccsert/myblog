@@ -8,7 +8,7 @@ const CHAPTERS = [
   { id: 'projects', number: '02', label: 'Projects' },
   { id: 'about', number: '03', label: 'About' },
   { id: 'skills', number: '04', label: 'Skills' },
-  { id: 'blog', number: '05', label: 'Blog' },
+  { id: 'blog', number: '05', label: 'Notes' },
   { id: 'contact', number: '06', label: 'Contact' },
 ] as const;
 
@@ -101,7 +101,7 @@ export default function MissionLog({ children }: MissionLogProps) {
       <footer className={styles.missionFooter}>
         <span><CornerDownRight size={12} aria-hidden="true" />Mission log complete</span>
         <span>Built with TypeScript, Next.js, and a lot of care.</span>
-        <span className={styles.footerSignals} aria-label="All systems operational">
+        <span className={styles.footerSignals} aria-label="End of public portfolio sections">
           <Circle size={6} fill="currentColor" aria-hidden="true" />
           <Circle size={6} fill="currentColor" aria-hidden="true" />
           <Circle size={6} fill="currentColor" aria-hidden="true" />

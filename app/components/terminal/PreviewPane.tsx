@@ -1,8 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Check, Circle, Copy, ExternalLink, FileText, TerminalSquare } from 'lucide-react';
-import { Line, LineChart, ResponsiveContainer, Tooltip } from 'recharts';
+import { Check, Circle, Copy, CornerDownRight, ExternalLink, FileText, TerminalSquare } from 'lucide-react';
 import { displayPath, getPreviewDocument } from '@/app/lib/terminal/shell';
 import styles from './TerminalWorkbench.module.css';
 
@@ -11,21 +10,6 @@ interface PreviewPaneProps {
   onRunCommand: (command: string) => void;
   onOpenSection: (sectionId: string) => void;
 }
-
-const SIGNAL_DATA = [
-  { requests: 58, latency: 36, errors: 14 },
-  { requests: 64, latency: 42, errors: 12 },
-  { requests: 60, latency: 32, errors: 15 },
-  { requests: 52, latency: 46, errors: 11 },
-  { requests: 48, latency: 39, errors: 9 },
-  { requests: 62, latency: 55, errors: 13 },
-  { requests: 76, latency: 44, errors: 17 },
-  { requests: 71, latency: 38, errors: 12 },
-  { requests: 66, latency: 51, errors: 10 },
-  { requests: 74, latency: 48, errors: 14 },
-  { requests: 82, latency: 58, errors: 18 },
-  { requests: 91, latency: 54, errors: 16 },
-];
 
 export default function PreviewPane({ path, onRunCommand, onOpenSection }: PreviewPaneProps) {
   const [copied, setCopied] = useState(false);
@@ -76,6 +60,18 @@ export default function PreviewPane({ path, onRunCommand, onOpenSection }: Previ
           >
             {copied ? <Check size={14} aria-hidden="true" /> : <Copy size={14} aria-hidden="true" />}
           </button>
+          {document.href ? (
+            <a
+              className={styles.previewAction}
+              href={document.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="打开公开来源"
+              title="打开公开来源"
+            >
+              <ExternalLink size={14} aria-hidden="true" />
+            </a>
+          ) : null}
           {document.sectionId ? (
             <button
               type="button"
@@ -84,7 +80,7 @@ export default function PreviewPane({ path, onRunCommand, onOpenSection }: Previ
               aria-label="打开页面对应区域"
               title="打开页面对应区域"
             >
-              <ExternalLink size={14} aria-hidden="true" />
+              <CornerDownRight size={14} aria-hidden="true" />
             </button>
           ) : null}
         </div>
@@ -115,31 +111,16 @@ export default function PreviewPane({ path, onRunCommand, onOpenSection }: Previ
         <h3 className={styles.sectionTitle}>Overview</h3>
         <p className={styles.overview}>{document.overview}</p>
 
-        {document.signals ? (
-          <section className={styles.signalBlock} aria-label="系统信号">
-            <h3 className={styles.sectionTitle}>System Signals</h3>
-            <div className={styles.signalLegend} aria-hidden="true">
-              <span className={styles.signalLegendItem}><Circle size={6} fill="var(--color-accent)" color="var(--color-accent)" /> Requests</span>
-              <span className={styles.signalLegendItem}><Circle size={6} fill="var(--color-info)" color="var(--color-info)" /> Latency</span>
-              <span className={styles.signalLegendItem}><Circle size={6} fill="var(--color-warning)" color="var(--color-warning)" /> Errors</span>
-            </div>
-            <div className={styles.signalChart} role="img" aria-label="请求、延迟与错误趋势图">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={SIGNAL_DATA} margin={{ top: 8, right: 4, bottom: 4, left: 4 }}>
-                  <Tooltip
-                    contentStyle={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: 6, fontSize: 10 }}
-                    labelStyle={{ display: 'none' }}
-                  />
-                  <Line type="monotone" dataKey="requests" stroke="var(--color-accent)" strokeWidth={2} dot={false} isAnimationActive={false} />
-                  <Line type="monotone" dataKey="latency" stroke="var(--color-info)" strokeWidth={1.5} dot={false} isAnimationActive={false} />
-                  <Line type="monotone" dataKey="errors" stroke="var(--color-warning)" strokeWidth={1.5} dot={false} isAnimationActive={false} />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
+        {document.evidence ? (
+          <section className={styles.signalBlock} aria-label="公开证据">
+            <h3 className={styles.sectionTitle}>Evidence</h3>
             <div className={styles.signalMetrics}>
-              <div className={styles.signalMetric}><span>Requests</span><strong>{document.signals.requests}</strong></div>
-              <div className={styles.signalMetric}><span>Latency</span><strong>{document.signals.latency}</strong></div>
-              <div className={styles.signalMetric}><span>Errors</span><strong>{document.signals.errors}</strong></div>
+              {document.evidence.map(item => (
+                <div className={styles.signalMetric} key={item.label}>
+                  <span>{item.label}</span>
+                  <strong>{item.value}</strong>
+                </div>
+              ))}
             </div>
           </section>
         ) : null}

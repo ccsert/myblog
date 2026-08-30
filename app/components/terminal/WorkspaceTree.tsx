@@ -69,7 +69,7 @@ export default function WorkspaceTree({ selectedPath, onSelect }: WorkspaceTreeP
     () => new Set([
       `${HOME_DIRECTORY}/archive`,
       `${HOME_DIRECTORY}/projects`,
-      `${HOME_DIRECTORY}/notes`,
+      `${HOME_DIRECTORY}/knowledge`,
       `${HOME_DIRECTORY}/docs`,
     ]),
   );

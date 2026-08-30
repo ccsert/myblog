@@ -13,6 +13,7 @@ import CommandPalette, { PaletteAction } from '@/app/components/terminal/Command
 import PreviewPane from '@/app/components/terminal/PreviewPane';
 import WorkspaceTree from '@/app/components/terminal/WorkspaceTree';
 import { useSiteTheme } from '@/app/components/theme/SiteThemeProvider';
+import { KNOWLEDGE_SIGNALS, PORTFOLIO_PROJECTS } from '@/app/lib/content/portfolio';
 import {
   BUILTIN_COMMAND_NAMES,
   BUILTIN_COMMAND_DESCRIPTIONS,
@@ -103,8 +104,8 @@ function parseTerminalSession(raw: string | null): PersistedTerminalSession | nu
 const QUICK_COMMANDS = [
   { command: 'help', description: 'Show every available command' },
   { command: 'archive', description: 'Enter the playable Signal Archive' },
-  { command: 'open projects/agent-platform.md', description: 'Open a project in preview' },
-  { command: 'search agent', description: 'Search paths and file contents' },
+  { command: `open projects/${PORTFOLIO_PROJECTS[0].slug}.md`, description: 'Open a verified public project' },
+  { command: 'search protocol', description: 'Search projects and knowledge signals' },
   { command: 'tree', description: 'Inspect the virtual workspace' },
   { command: 'status', description: 'Show workbench health' },
   { command: 'neofetch', description: 'Show profile and system context' },
@@ -113,10 +114,18 @@ const QUICK_COMMANDS = [
 
 const PALETTE_ACTIONS: PaletteAction[] = [
   { command: 'archive', label: 'Enter Signal Archive', description: 'Explore the playable archive room' },
-  { command: 'open projects/agent-platform.md', label: 'Open Agent Platform', description: 'Preview the featured agent project' },
-  { command: 'open projects/devops-pipeline.md', label: 'Open DevOps Pipeline', description: 'Preview delivery automation work' },
+  ...PORTFOLIO_PROJECTS.map(project => ({
+    command: `open projects/${project.slug}.md`,
+    label: `Open ${project.title}`,
+    description: project.description,
+  })),
+  ...KNOWLEDGE_SIGNALS.map(signal => ({
+    command: `open knowledge/${signal.slug}.md`,
+    label: `Open ${signal.title}`,
+    description: signal.excerpt,
+  })),
   { command: 'open skills/stack.txt', label: 'Open Technical Stack', description: 'Explore current capabilities' },
-  { command: 'search agent', label: 'Search for agent work', description: 'Fuzzy-search workspace content' },
+  { command: 'search protocol', label: 'Search protocol boundaries', description: 'Fuzzy-search projects and research notes' },
   { command: 'tree', label: 'Show workspace tree', description: 'Print every indexed document' },
   { command: 'status', label: 'System status', description: 'Inspect shell and workspace health' },
   { command: 'neofetch', label: 'Profile summary', description: 'Show identity and environment information' },

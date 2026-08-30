@@ -31,6 +31,7 @@ import {
 import { useSiteTheme } from '@/app/components/theme/SiteThemeProvider';
 import {
   FIRST_ROOM_AMBIENT_INTERACTIONS,
+  FIRST_ROOM_BOOT_SEQUENCE,
   FIRST_ROOM_CORE_NODES,
   FIRST_ROOM_HIDDEN_ECHOES,
 } from '@/app/lib/archive/content';
@@ -99,11 +100,20 @@ const OBSTACLES = [
   { left: 73, right: 94, top: 20, bottom: 55 },
 ] as const;
 
-const BOOT_LABELS: Record<ArchiveBootService, { title: string; detail: string }> = {
-  build: { title: 'BUILD', detail: '准备可验证构建' },
-  test: { title: 'TEST', detail: '验证构建结果' },
-  deploy: { title: 'DEPLOY', detail: '最后恢复服务' },
+const BOOT_DETAILS: Record<ArchiveBootService, string> = {
+  build: '准备可验证构建',
+  test: '验证构建结果与边界',
+  deploy: '交付已验证版本',
 };
+
+const BOOT_LABELS = Object.fromEntries(FIRST_ROOM_BOOT_SEQUENCE.map(step => [
+  step.id,
+  { title: step.label.en.toUpperCase(), detail: BOOT_DETAILS[step.id] },
+])) as Record<ArchiveBootService, { title: string; detail: string }>;
+
+const BOOT_SEQUENCE_LABEL = FIRST_ROOM_BOOT_SEQUENCE
+  .map(step => step.label.en.toUpperCase())
+  .join(' → ');
 
 const PHASE_LABELS = {
   dormant: 'Explore',
@@ -126,7 +136,7 @@ const NEXT_ACTION_HINTS = {
   'connect-power-link': '检查服务器旁的断开线路，依次选择供电端与机架端。',
   'arm-health-probe': 'Agent 工作站还没有可信的健康读数。',
   'clear-filter': '探针需要有效气流；清理工作站滤网。',
-  'set-boot-order': '产品蓝图记录了 build → test → deploy 的依赖。',
+  'set-boot-order': `产品蓝图记录了 ${BOOT_SEQUENCE_LABEL} 的依赖。`,
   'start-boot': '三条环路已经恢复，回到服务器节点启动。',
   'complete-boot': '启动序列正在运行；可以跳过动画。',
   'enter-terminal': '档案节点在线，可以进入终端继续探索。',
@@ -561,11 +571,11 @@ export default function ArchiveExperience() {
       { type: 'discover-signal', signalId: 'core.product-blueprint', actionId: 'discover-core-product-blueprint' },
     ]);
     if (next.facts.bootOrderResolved) {
-      setLiveMessage('启动依赖成立：build → test → deploy。');
+      setLiveMessage(`启动依赖成立：${BOOT_SEQUENCE_LABEL}。`);
     } else {
       const attempts = next.puzzles['boot-order'].attemptCount;
       setLiveMessage(attempts >= 2
-        ? '仍有依赖冲突：构建产物必须先存在，测试通过后才能部署。'
+        ? '仍有依赖冲突：构建产物必须先存在，验证通过后才能交付。'
         : '顺序尚未成立；检查每一步依赖的输入。');
     }
   }, [bootDraft, commitActions]);

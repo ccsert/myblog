@@ -1,19 +1,20 @@
 import { Circle } from 'lucide-react';
 import MissionSection from '@/app/components/sections/mission/MissionSection';
+import { PORTFOLIO_PROFILE } from '@/app/lib/content/portfolio';
 import styles from '@/app/components/sections/mission/MissionLog.module.css';
 
 const VALUES = [
-  '技术应该服务于人，而不是相反',
-  '简单优于复杂，清晰优于聪明',
-  '持续学习，保持好奇',
-  '代码是写给人看的，顺便能运行',
+  '缩小操作面，不制造不必要的中间层',
+  '尊重原生协议，让用户沿用熟悉工具',
+  '让状态、风险与失败路径可以被看见',
+  '构建成功，不等于发布已经验证',
 ];
 
 const INTERESTS = [
-  'AI Agent 与多智能体系统',
-  'DevOps 与云原生技术',
-  '系统设计与架构',
-  '开发者工具与体验',
+  'Developer tools 与 terminal UX',
+  'AI-assisted engineering workflows',
+  'Protocol-native artifact infrastructure',
+  'Self-hosted 与 offline-first products',
 ];
 
 export default function About() {
@@ -25,25 +26,25 @@ export default function About() {
       railSubtitle="Operator profile"
       eyebrow="// Operator profile"
       title="About"
-      subtitle="Who am I?"
+      subtitle="The through-line behind the repositories"
     >
       <div className={styles.aboutIntro}>
         <div className={styles.aboutCopy}>
           <p>
-            我是一名全栈开发工程师，专注于构建可靠、可扩展的系统。我的工作跨越前端、后端和 DevOps，
-            致力于将复杂的技术问题转化为清晰、可演进的解决方案。
+            我关心的不是堆叠更多技术名词，而是把复杂工程工作变成真正有人愿意使用、也能放心操作的工具。
+            公开项目横跨开发者工具、AI 辅助工程与自托管基础设施，但它们都在处理同一个问题：怎样让复杂度留在系统内部。
           </p>
           <p>
-            目前，我在探索 AI Agent 平台的设计与实现，思考如何让机器更好地理解人类意图，
-            以及如何让复杂系统保持可观察、可验证和可交付。
+            {PORTFOLIO_PROFILE.throughLine.zh}
+            这也解释了为什么项目会反复出现 diff 预览、可恢复写入、协议兼容、离线部署、来源追溯与显式质量门禁。
           </p>
         </div>
 
         <div className={styles.operatorCard} aria-label="Operator profile summary">
           <div className={styles.operatorRow}><span>Operator ID</span><strong>ccsert.dev</strong></div>
-          <div className={styles.operatorRow}><span>Role</span><strong>Full Stack Developer</strong></div>
-          <div className={styles.operatorRow}><span>Focus</span><strong>DevOps · AI Agents</strong></div>
-          <div className={styles.operatorRow}><span>Status</span><strong data-accent="true">Active</strong></div>
+          <div className={styles.operatorRow}><span>Builds</span><strong>Developer tools</strong></div>
+          <div className={styles.operatorRow}><span>Focus</span><strong>AI · Self-hosted systems</strong></div>
+          <div className={styles.operatorRow}><span>Loop</span><strong data-accent="true">Build → Verify → Ship</strong></div>
         </div>
       </div>
 
@@ -66,10 +67,10 @@ export default function About() {
           <h3 className={styles.subpanelTitle}>{'// 工作方式'}</h3>
           <div className={styles.codeBlock} aria-label="工作方式代码片段">
             <div>{'{'}</div>
-            <div className={styles.codeLine}><span>focus:</span><strong>&apos;deep work&apos;</strong>,</div>
-            <div className={styles.codeLine}><span>communication:</span><strong>&apos;async-first&apos;</strong>,</div>
-            <div className={styles.codeLine}><span>documentation:</span><strong>&apos;write it down&apos;</strong>,</div>
-            <div className={styles.codeLine}><span>iteration:</span><strong>&apos;ship early&apos;</strong>,</div>
+            <div className={styles.codeLine}><span>surface:</span><strong>&apos;keep it small&apos;</strong>,</div>
+            <div className={styles.codeLine}><span>boundary:</span><strong>&apos;native protocols&apos;</strong>,</div>
+            <div className={styles.codeLine}><span>state:</span><strong>&apos;make it visible&apos;</strong>,</div>
+            <div className={styles.codeLine}><span>release:</span><strong>&apos;verify, then ship&apos;</strong>,</div>
             <div>{'}'}</div>
           </div>
         </div>

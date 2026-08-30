@@ -1,7 +1,7 @@
 'use client';
 
 import { FormEvent, useState } from 'react';
-import { AtSign, Clock3, GitBranch, Mail, Send } from 'lucide-react';
+import { GitBranch, Mail, MessageSquareText, Send } from 'lucide-react';
 import MissionSection from '@/app/components/sections/mission/MissionSection';
 import styles from '@/app/components/sections/mission/MissionLog.module.css';
 
@@ -30,7 +30,7 @@ export default function Contact() {
       railSubtitle="Open channel"
       eyebrow="// Open channel"
       title="Contact"
-      subtitle="Get in touch"
+      subtitle="Start with the problem, its constraints, and the outcome you need"
     >
       <div className={styles.contactGrid}>
         <div className={styles.directPanel}>
@@ -39,14 +39,13 @@ export default function Contact() {
             <div className={styles.directLinks}>
               <a href="mailto:hello@ccsert.dev"><Mail size={14} aria-hidden="true" />hello@ccsert.dev</a>
               <a href="https://github.com/ccsert" target="_blank" rel="noopener noreferrer"><GitBranch size={14} aria-hidden="true" />github.com/ccsert</a>
-              <a href="https://twitter.com/ccsert" target="_blank" rel="noopener noreferrer"><AtSign size={14} aria-hidden="true" />ccsert</a>
             </div>
           </div>
           <div className={styles.directBlock}>
-            <h3 className={styles.subpanelTitle}>Availability</h3>
+            <h3 className={styles.subpanelTitle}>Useful context</h3>
             <p className={styles.availability}>
-              <Clock3 size={13} aria-hidden="true" /> 通常在 24 小时内回复<br />
-              工作时间：UTC+8 · 09:00—18:00
+              <MessageSquareText size={13} aria-hidden="true" /> 问题背景 · 已知约束 · 期待结果<br />
+              如果与某个公开项目有关，也可以直接附上仓库链接或 Issue。
             </p>
           </div>
         </div>

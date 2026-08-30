@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import ClientLayout from "./client-layout";
+import { PORTFOLIO_PROFILE } from "./lib/content/portfolio";
 
 const inter = localFont({
   src: [
@@ -34,8 +35,8 @@ const sourceSerif = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "ccsert.dev｜全栈开发、DevOps 与 AI 工程",
-  description: "ccsert 的个人主页：全栈开发、DevOps、云原生与 AI Agent 工程实践。",
+  title: PORTFOLIO_PROFILE.metadata.title,
+  description: PORTFOLIO_PROFILE.metadata.description,
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

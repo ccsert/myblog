@@ -1,8 +1,8 @@
 /**
  * Signal Archive 首房内容定义。
  *
- * 这里的作者相关文案只改写自站点现有公开内容。每一项都带有可替换插槽，
- * 后续只有在作者确认真实经历后，才应把它升级为更具体的故事。
+ * 作者相关文案只采用公开 GitHub 事实和 LLM Wiki 的 public-safe 高层索引。
+ * 私有原文、待复核会话和未经证明的指标不会进入游戏内容。
  */
 
 import type { ArchiveBootService, ArchiveFacts } from './types';
@@ -15,50 +15,65 @@ export interface LocalizedText {
 export type ArchiveFactKey = keyof ArchiveFacts;
 
 export const FIRST_ROOM_SOURCE_REFERENCES = {
-  about: {
-    kind: 'section',
-    target: '#about',
-    note: 'About、Values、Interests 与工作方式的现有公开文案',
+  githubProfile: {
+    kind: 'github',
+    target: 'https://github.com/ccsert/ccsert',
+    note: '公开 GitHub Profile 的项目主线与工程原则',
   },
-  projects: {
-    kind: 'section',
-    target: '#projects',
-    note: '四个现有项目条目及其能力摘要',
+  githubOpenCodeReview: {
+    kind: 'github',
+    target: 'https://github.com/ccsert/opencode-review-gitea',
+    note: 'Gitea / Forgejo AI PR 审查项目的公开 README',
+  },
+  githubArtifactGateway: {
+    kind: 'github',
+    target: 'https://github.com/ccsert/artifact-gateway',
+    note: 'Artifact Gateway 的公开 README 与 v0.1.0 状态',
+  },
+  githubDocBabel: {
+    kind: 'github',
+    target: 'https://github.com/ccsert/DocBabel',
+    note: 'DocBabel 的公开 README 与 v0.1.0 状态',
+  },
+  githubOmzPm: {
+    kind: 'github',
+    target: 'https://github.com/ccsert/omz-pm',
+    note: 'omz-pm 的公开 README 与 v0.3.0 状态',
+  },
+  knowledgeIndex: {
+    kind: 'public-safe-index',
+    target: '#blog',
+    note: '私有 LLM Wiki 只读查询后形成的可公开知识主题与证据边界',
   },
   terminalAbout: {
     kind: 'terminal-file',
     target: '/home/visitor/about.txt',
     note: '终端中的现有个人简介',
   },
-  terminalAgentPlatform: {
+  terminalOpenCodeReview: {
     kind: 'terminal-file',
-    target: '/home/visitor/projects/agent-platform.md',
-    note: 'Agent Platform 的现有公开摘要',
+    target: '/home/visitor/projects/opencode-review-gitea.md',
+    note: 'OpenCode Gitea Review 的终端公开摘要',
   },
-  terminalDevopsPipeline: {
+  terminalArtifactGateway: {
     kind: 'terminal-file',
-    target: '/home/visitor/projects/devops-pipeline.md',
-    note: 'DevOps Pipeline 的现有公开摘要',
+    target: '/home/visitor/projects/artifact-gateway.md',
+    note: 'Artifact Gateway 的终端公开摘要',
   },
-  terminalMonitoring: {
+  terminalDocBabel: {
     kind: 'terminal-file',
-    target: '/home/visitor/projects/monitoring-dashboard.md',
-    note: 'Monitoring Dashboard 的现有公开摘要',
+    target: '/home/visitor/projects/DocBabel.md',
+    note: 'DocBabel 的终端公开摘要',
   },
-  terminalMicroservices: {
+  terminalOmzPm: {
     kind: 'terminal-file',
-    target: '/home/visitor/projects/microservices-framework.md',
-    note: 'Microservices Framework 的现有公开摘要',
+    target: '/home/visitor/projects/omz-pm.md',
+    note: 'omz-pm 的终端公开摘要',
   },
-  terminalAgentNotes: {
+  terminalKnowledgeSystem: {
     kind: 'terminal-file',
-    target: '/home/visitor/notes/building-agents.md',
-    note: 'Agent 工具边界、记忆、评估与可观察性的现有笔记摘要',
-  },
-  terminalSystemNotes: {
-    kind: 'terminal-file',
-    target: '/home/visitor/notes/system-designs.md',
-    note: '系统边界、故障模式、可观察性与复杂度成本的现有笔记摘要',
+    target: '/home/visitor/knowledge/github-first-llm-wiki.md',
+    note: 'GitHub-first LLM Wiki 的 public-safe 终端摘要',
   },
   terminalArchitecture: {
     kind: 'terminal-file',
@@ -70,7 +85,7 @@ export const FIRST_ROOM_SOURCE_REFERENCES = {
 export type FirstRoomSourceReferenceId = keyof typeof FIRST_ROOM_SOURCE_REFERENCES;
 
 interface ReplaceableEditorialCopy {
-  status: 'existing-site-derived' | 'ambient-only';
+  status: 'public-source-derived' | 'knowledge-index-derived' | 'ambient-only';
   replaceable: true;
   slotId: string;
   guidance: LocalizedText;
@@ -123,6 +138,15 @@ export interface FirstRoomHiddenEcho extends FirstRoomContentBase {
   blocksBoot: false;
 }
 
+export const FIRST_ROOM_BOOT_SEQUENCE = [
+  { id: 'build', label: { zh: '构建', en: 'Build' } },
+  { id: 'test', label: { zh: '验证', en: 'Verify' } },
+  { id: 'deploy', label: { zh: '交付', en: 'Ship' } },
+] as const satisfies readonly {
+  id: ArchiveBootService;
+  label: LocalizedText;
+}[];
+
 export const FIRST_ROOM_CORE_NODES = [
   {
     id: 'core.engineering-console',
@@ -138,20 +162,20 @@ export const FIRST_ROOM_CORE_NODES = [
       en: 'Topology mapped: power, health loop, and boot order.',
     },
     storyReveal: {
-      zh: '公开档案反复强调一个方向：把复杂技术问题转化为清晰、可靠、可演进的系统。',
-      en: 'The public profile returns to one goal: turning complex technical problems into clear, reliable, evolvable systems.',
+      zh: '四个公开项目表面不同，却共享同一条标准：缩小操作面、贴近原生协议、让状态可见，并区分“构建成功”和“交付已验证”。',
+      en: 'Four public projects look different but share one standard: small operational surfaces, native boundaries, visible state, and a clear line between a successful build and a verified release.',
     },
     discoveredClueId: 'clue.system-topology',
     setsFacts: ['serverDiagnosed'],
     relatedTerminalPath: '/home/visitor/about.txt',
-    sourceRefs: ['about', 'terminalAbout', 'terminalSystemNotes'],
+    sourceRefs: ['githubProfile', 'terminalAbout'],
     editorial: {
-      status: 'existing-site-derived',
+      status: 'public-source-derived',
       replaceable: true,
       slotId: 'FIRST_ROOM_ENGINEERING_STORY',
       guidance: {
-        zh: '替换为一段经作者确认的工程经历：约束、选择、结果与复盘。',
-        en: 'Replace with an owner-confirmed engineering story covering constraint, choice, result, and reflection.',
+        zh: '只有在公开资料更新或作者确认后，才增加具体经历、规模与结果。',
+        en: 'Add specific experience, scale, or outcomes only after the public source changes or the owner confirms them.',
       },
     },
   },
@@ -169,20 +193,20 @@ export const FIRST_ROOM_CORE_NODES = [
       en: 'Probe armed; waiting for valid airflow to establish a trusted baseline.',
     },
     storyReveal: {
-      zh: '当前公开方向聚焦 AI Agent 与多智能体系统，并持续关注工具边界、记忆、评估和可观察性。',
-      en: 'The current public focus is AI agents and multi-agent systems, with continuing attention to tool boundaries, memory, evaluation, and observability.',
+      zh: 'OpenCode Gitea Review 把 AI 审查放回代码所在的 forge：由 Gitea Actions 触发，读取增量 diff，再提交行级评论与结构化结论。',
+      en: 'OpenCode Gitea Review keeps AI review inside the forge: Gitea Actions trigger it, incremental diffs scope it, and line comments plus structured decisions carry the result.',
     },
     discoveredClueId: 'clue.agent-observability',
     setsFacts: ['healthProbeArmed'],
-    relatedTerminalPath: '/home/visitor/notes/building-agents.md',
-    sourceRefs: ['about', 'terminalAgentPlatform', 'terminalAgentNotes'],
+    relatedTerminalPath: '/home/visitor/projects/opencode-review-gitea.md',
+    sourceRefs: ['githubOpenCodeReview', 'terminalOpenCodeReview'],
     editorial: {
-      status: 'existing-site-derived',
+      status: 'public-source-derived',
       replaceable: true,
       slotId: 'FIRST_ROOM_AGENT_STORY',
       guidance: {
-        zh: '替换为一段经作者确认的 Agent 或自动化案例，不补写未经验证的规模与结果。',
-        en: 'Replace with an owner-confirmed agent or automation case without inventing scale or outcomes.',
+        zh: '若加入实际审查效果，必须同时给出公开版本、范围和验证方式。',
+        en: 'Any claimed review outcome must name the public version, scope, and verification method.',
       },
     },
   },
@@ -191,35 +215,32 @@ export const FIRST_ROOM_CORE_NODES = [
     kind: 'core',
     title: { zh: '产品蓝图桌', en: 'Product Blueprint' },
     prompt: {
-      zh: '蓝图把构建、测试和部署画成有方向的依赖。',
-      en: 'The blueprint draws build, test, and deploy as directed dependencies.',
+      zh: '蓝图把构建、验证和交付画成有方向的依赖。',
+      en: 'The blueprint draws build, verify, and ship as directed dependencies.',
     },
     primaryAction: { zh: '查看依赖', en: 'Inspect dependencies' },
     resolvedFeedback: {
-      zh: '顺序线索已记录：先构建，再测试，最后部署。',
-      en: 'Sequence recorded: build first, test next, deploy last.',
+      zh: '顺序线索已记录：先构建，再验证，最后交付。',
+      en: 'Sequence recorded: build first, verify next, ship last.',
     },
     storyReveal: {
-      zh: '公开项目把 Agent 平台、可追溯交付、可观察性和服务韧性放在同一张系统图上。',
-      en: 'The public project index connects agent platforms, traceable delivery, observability, and service resilience in one systems view.',
+      zh: 'Artifact Gateway 把 PostgreSQL 控制面与 S3 字节面分开：同一 Gateway 可单机运行或拆分角色，客户端仍沿用各自的原生包管理协议。',
+      en: 'Artifact Gateway separates a PostgreSQL control plane from an S3 byte plane: one Gateway can stay compact or split roles while clients keep their native package protocols.',
     },
     discoveredClueId: 'clue.boot-dependency',
     setsFacts: [],
-    relatedTerminalPath: '/home/visitor/projects/devops-pipeline.md',
+    relatedTerminalPath: '/home/visitor/projects/artifact-gateway.md',
     sourceRefs: [
-      'projects',
-      'terminalAgentPlatform',
-      'terminalDevopsPipeline',
-      'terminalMonitoring',
-      'terminalMicroservices',
+      'githubArtifactGateway',
+      'terminalArtifactGateway',
     ],
     editorial: {
-      status: 'existing-site-derived',
+      status: 'public-source-derived',
       replaceable: true,
       slotId: 'FIRST_ROOM_PRODUCT_DECISION',
       guidance: {
-        zh: '替换为一个经确认的产品或架构判断，并保留真实依赖与权衡。',
-        en: 'Replace with a confirmed product or architecture decision while preserving its real dependencies and trade-offs.',
+        zh: '继续保留 early release 边界，不把预览能力或路线图写成正式支持。',
+        en: 'Preserve the early-release boundary and never promote preview or roadmap items to supported capability.',
       },
     },
   },
@@ -237,20 +258,20 @@ export const FIRST_ROOM_CORE_NODES = [
       en: 'Recovery principle aligned: keep it simple, write down the relationship, then advance.',
     },
     storyReveal: {
-      zh: '现有现场笔记围绕 Agent、DevOps 实践和架构权衡；公开原则是简单优于复杂，清晰优于聪明。',
-      en: 'The existing field notes cover agents, DevOps practice, and architecture trade-offs; the published principle favors simplicity over complexity and clarity over cleverness.',
+      zh: '知识系统把 raw source 视为证据，把 Wiki 视为可演进综合层：事实要能回到来源，推断要标明，公开发布则需要单独批准。',
+      en: 'The knowledge system treats raw sources as evidence and the Wiki as an evolvable synthesis layer: claims trace back, inferences stay labeled, and publication requires separate approval.',
     },
     discoveredClueId: 'clue.recovery-context',
     setsFacts: [],
-    relatedTerminalPath: '/home/visitor/notes/system-designs.md',
-    sourceRefs: ['about', 'terminalAgentNotes', 'terminalSystemNotes'],
+    relatedTerminalPath: '/home/visitor/knowledge/github-first-llm-wiki.md',
+    sourceRefs: ['knowledgeIndex', 'terminalKnowledgeSystem'],
     editorial: {
-      status: 'existing-site-derived',
+      status: 'knowledge-index-derived',
       replaceable: true,
       slotId: 'FIRST_ROOM_FIELD_NOTE',
       guidance: {
-        zh: '替换为作者确认过的原话、转折或仍在追问的问题。',
-        en: 'Replace with an owner-confirmed quote, turning point, or open question.',
+        zh: '只扩展 public-safe 摘要，不复制私有来源、日志或待复核会话。',
+        en: 'Extend only the public-safe summary; never copy private sources, logs, or unreviewed conversations.',
       },
     },
   },
@@ -276,7 +297,7 @@ export const FIRST_ROOM_CORE_NODES = [
     relatedTerminalPath: '/home/visitor/docs/architecture.md',
     sourceRefs: ['terminalArchitecture'],
     editorial: {
-      status: 'existing-site-derived',
+      status: 'public-source-derived',
       replaceable: true,
       slotId: 'FIRST_ROOM_TERMINAL_HANDOFF',
       guidance: {
@@ -335,14 +356,14 @@ export const FIRST_ROOM_REPAIR_LOOPS = [
     },
     requiredFacts: ['filterCleared', 'healthProbeArmed'],
     clueNodeIds: ['core.agent-workstation', 'core.server-node'],
-    sourceRefs: ['terminalMonitoring', 'terminalAgentNotes'],
+    sourceRefs: ['githubArtifactGateway', 'terminalArtifactGateway'],
     editorial: {
-      status: 'existing-site-derived',
+      status: 'public-source-derived',
       replaceable: true,
       slotId: 'FIRST_ROOM_HEALTH_REPAIR',
       guidance: {
-        zh: '可替换为真实可观察性案例，但必须由作者确认指标、故障和结果。',
-        en: 'May be replaced with a real observability case only after the owner confirms its signals, failure, and outcome.',
+        zh: '只借用 readiness 需要有效证据这一原则，不附加未公开的健康指标。',
+        en: 'Use only the principle that readiness needs valid evidence; do not attach unpublished health metrics.',
       },
     },
   },
@@ -355,8 +376,8 @@ export const FIRST_ROOM_REPAIR_LOOPS = [
       en: 'Three stages have dependencies, but their order is unresolved.',
     },
     objective: {
-      zh: '按照公开流水线语义排列：构建、测试、部署。',
-      en: 'Arrange the published pipeline sequence: build, test, deploy.',
+      zh: '按照公开工程循环排列：构建、验证、交付。',
+      en: 'Arrange the public engineering loop: build, verify, ship.',
     },
     resolvedFeedback: {
       zh: '依赖成立；启动门槛将重新计算。',
@@ -364,19 +385,15 @@ export const FIRST_ROOM_REPAIR_LOOPS = [
     },
     requiredFacts: ['bootOrderResolved'],
     clueNodeIds: ['core.product-blueprint', 'core.field-notes'],
-    sequence: [
-      { id: 'build', label: { zh: '构建', en: 'Build' } },
-      { id: 'test', label: { zh: '测试', en: 'Test' } },
-      { id: 'deploy', label: { zh: '部署', en: 'Deploy' } },
-    ],
-    sourceRefs: ['projects', 'terminalDevopsPipeline'],
+    sequence: FIRST_ROOM_BOOT_SEQUENCE,
+    sourceRefs: ['githubProfile', 'githubArtifactGateway'],
     editorial: {
-      status: 'existing-site-derived',
+      status: 'public-source-derived',
       replaceable: true,
       slotId: 'FIRST_ROOM_BOOT_ORDER',
       guidance: {
-        zh: '可替换为真实交付路径，但不得添加站点现有内容中没有的门禁或成果。',
-        en: 'May be replaced with a real delivery path without adding gates or outcomes absent from current site content.',
+        zh: '玩法动作保持三步；真实发布仍以各仓库的门禁和状态说明为准。',
+        en: 'Keep the gameplay at three steps; real releases still follow each repository\'s own gates and status notes.',
       },
     },
   },
@@ -389,13 +406,13 @@ export const FIRST_ROOM_AMBIENT_INTERACTIONS = [
     title: { zh: '任务灯', en: 'Task Lamp' },
     primaryAction: { zh: '打开灯', en: 'Switch on' },
     feedback: {
-      zh: '光线照出页边的一句话：简单优于复杂，清晰优于聪明。',
-      en: 'The light reveals a margin note: simplicity over complexity, clarity over cleverness.',
+      zh: '光线照出页边的一句话：先缩小操作面，再让状态变得可见。',
+      en: 'The light reveals a margin note: shrink the operational surface, then make state visible.',
     },
     blocksBoot: false,
-    sourceRefs: ['about'],
+    sourceRefs: ['githubProfile'],
     editorial: {
-      status: 'existing-site-derived',
+      status: 'public-source-derived',
       replaceable: true,
       slotId: 'FIRST_ROOM_VALUE_NOTE',
       guidance: {
@@ -410,13 +427,13 @@ export const FIRST_ROOM_AMBIENT_INTERACTIONS = [
     title: { zh: '工作抽屉', en: 'Work Drawer' },
     primaryAction: { zh: '拉开抽屉', en: 'Open drawer' },
     feedback: {
-      zh: '一张现有工作方式卡片：深度工作、异步优先、写下来、尽早迭代。',
-      en: 'An existing work-mode card: deep work, async-first, write it down, ship early.',
+      zh: '一张工程循环卡片：BUILD → VERIFY → SHIP → IMPROVE。',
+      en: 'An engineering loop card: BUILD → VERIFY → SHIP → IMPROVE.',
     },
     blocksBoot: false,
-    sourceRefs: ['about'],
+    sourceRefs: ['githubProfile'],
     editorial: {
-      status: 'existing-site-derived',
+      status: 'public-source-derived',
       replaceable: true,
       slotId: 'FIRST_ROOM_WORK_STYLE',
       guidance: {
@@ -431,19 +448,18 @@ export const FIRST_ROOM_AMBIENT_INTERACTIONS = [
     title: { zh: '档案箱', en: 'Archive Box' },
     primaryAction: { zh: '翻看索引', en: 'Browse index' },
     feedback: {
-      zh: '公开索引列出四个主题：Agent Platform、DevOps Pipeline、Monitoring Dashboard、Microservices Framework。',
-      en: 'The public index lists four themes: Agent Platform, DevOps Pipeline, Monitoring Dashboard, and Microservices Framework.',
+      zh: '公开索引里有四份可核验档案：OpenCode Gitea Review、Artifact Gateway v0.1.0、DocBabel v0.1.0 与 omz-pm v0.3.0。',
+      en: 'The public index holds four verifiable files: OpenCode Gitea Review, Artifact Gateway v0.1.0, DocBabel v0.1.0, and omz-pm v0.3.0.',
     },
     blocksBoot: false,
     sourceRefs: [
-      'projects',
-      'terminalAgentPlatform',
-      'terminalDevopsPipeline',
-      'terminalMonitoring',
-      'terminalMicroservices',
+      'githubOpenCodeReview',
+      'githubArtifactGateway',
+      'githubDocBabel',
+      'githubOmzPm',
     ],
     editorial: {
-      status: 'existing-site-derived',
+      status: 'public-source-derived',
       replaceable: true,
       slotId: 'FIRST_ROOM_PROJECT_EVIDENCE',
       guidance: {
@@ -487,13 +503,13 @@ export const FIRST_ROOM_HIDDEN_ECHOES = [
     ],
     requiresServerOnline: true,
     reveal: {
-      zh: '维修记录与两条可选档案在同一点汇合：技术应当服务于人，复杂系统则需要保持可观察、可验证和可交付。',
-      en: 'The recovery record and two optional archives converge on one idea: technology should serve people, while complex systems should remain observable, verifiable, and deliverable.',
+      zh: '维修记录与两条可选档案在同一点汇合：复杂工程最终应变成真正有人能使用的工具，而它的状态、边界与交付证据必须看得见。',
+      en: 'The recovery record and two optional archives converge on one idea: complex engineering should become a tool people can actually use, with visible state, boundaries, and delivery evidence.',
     },
     blocksBoot: false,
-    sourceRefs: ['about', 'terminalAbout', 'terminalAgentNotes', 'terminalSystemNotes'],
+    sourceRefs: ['githubProfile', 'terminalAbout', 'knowledgeIndex'],
     editorial: {
-      status: 'existing-site-derived',
+      status: 'public-source-derived',
       replaceable: true,
       slotId: 'FIRST_ROOM_HIDDEN_ECHO',
       guidance: {
@@ -519,7 +535,7 @@ export const FIRST_ROOM_DISCOVERY_POLICY = {
 
 export const FIRST_ROOM_CONTENT = {
   roomId: 'first-room',
-  contentVersion: 1,
+  contentVersion: 2,
   title: { zh: '失联节点', en: 'The Silent Node' },
   coreNodes: FIRST_ROOM_CORE_NODES,
   repairLoops: FIRST_ROOM_REPAIR_LOOPS,

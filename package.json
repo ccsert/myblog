@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "node --test app/lib/archive/state.test.mjs"
+    "test": "node --test app/lib/archive/state.test.mjs app/lib/content/portfolio.test.mjs"
   },
   "dependencies": {
     "@react-three/drei": "^10.7.8",
@@ -20,7 +20,6 @@
     "next": "16.3.3",
     "react": "19.2.8",
     "react-dom": "19.2.8",
-    "recharts": "^3.10.1",
     "simple-icons": "^16.29.0",
     "three": "^0.185.1",
     "use-sound": "^5.0.0"
