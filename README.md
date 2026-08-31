@@ -14,7 +14,20 @@ pnpm dev
 bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000), or use any IP address of
+the development machine (for example `http://192.168.110.83:3000`) from another
+device on the same network.
+
+The development server automatically allows Next.js assets and HMR connections
+from every address currently assigned to the machine. When accessing it through
+a custom DNS or reverse-proxy hostname, append that hostname explicitly:
+
+```bash
+NEXT_ALLOWED_DEV_ORIGINS=blog.dev.example npm run dev
+```
+
+Multiple hostnames can be separated with commas. Restart the development server
+after an IP address or hostname changes.
 
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
