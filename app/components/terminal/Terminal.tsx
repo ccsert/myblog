@@ -271,15 +271,6 @@ export default function Terminal({
     setLines(previousLines => [...previousLines, { type, content: text, timestamp: new Date() }]);
   }, []);
 
-  const getThemeTransitionOrigin = useCallback(() => {
-    const rect = workbenchRef.current?.getBoundingClientRect();
-    if (!rect) return undefined;
-    return {
-      x: Math.max(0, Math.min(window.innerWidth, rect.right - 48)),
-      y: Math.max(0, Math.min(window.innerHeight, rect.bottom - 22)),
-    };
-  }, []);
-
   useEffect(() => {
     const output = outputRef.current;
     if (output) output.scrollTop = output.scrollHeight;
@@ -451,7 +442,7 @@ export default function Terminal({
       }
       if (shellResult.previewPath) setPreviewPath(shellResult.previewPath);
       if (shellResult.nextTheme) {
-        changeTheme(shellResult.nextTheme, { origin: getThemeTransitionOrigin() });
+        changeTheme(shellResult.nextTheme, { animate: false });
       }
       if (shellResult.openCommandPalette) setPaletteOpen(true);
       if (shellResult.output !== undefined) {
@@ -473,7 +464,7 @@ export default function Terminal({
 
     onCommand?.(trimmedCommand);
     focusInput();
-  }, [changeTheme, commands, currentPrompt, cwd, focusInput, getThemeTransitionOrigin, history, onCommand, previousCwd, theme, writeLine]);
+  }, [changeTheme, commands, currentPrompt, cwd, focusInput, history, onCommand, previousCwd, theme, writeLine]);
 
   const runCommand = useCallback((command: string) => {
     setMobilePane('terminal');

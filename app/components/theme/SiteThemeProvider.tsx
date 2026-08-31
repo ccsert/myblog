@@ -14,23 +14,93 @@ interface ChangeThemeOptions {
   origin?: ThemeOrigin;
 }
 
+interface ThemePreviewOptions {
+  direction: -1 | 1;
+}
+
 interface SiteThemeContextValue {
   theme: SiteTheme;
   changeTheme: (theme: SiteTheme, options?: ChangeThemeOptions) => void;
+  beginThemePreview: (theme: SiteTheme, options: ThemePreviewOptions) => boolean;
+  updateThemePreview: (progress: number) => void;
+  finishThemePreview: (commit: boolean) => void;
 }
 
 const SiteThemeContext = createContext<SiteThemeContextValue | null>(null);
 const SITE_THEME_STORAGE_KEY = 'ccsert-site:theme';
+const INTERACTIVE_TRANSITION_DURATION = 1000;
+const INTERACTIVE_SETTLE_MAX_DURATION = 220;
+
+interface ActiveThemePreview {
+  animations: Animation[];
+  discrete: boolean;
+  from: SiteTheme;
+  frame: number | null;
+  intent: boolean | null;
+  progress: number;
+  ready: boolean;
+  sequence: number;
+  to: SiteTheme;
+  transition: ViewTransition | null;
+}
 
 function applyThemeAttribute(theme: SiteTheme) {
   document.documentElement.dataset.theme = theme;
 }
 
+function persistTheme(theme: SiteTheme) {
+  try {
+    window.localStorage.setItem(SITE_THEME_STORAGE_KEY, theme);
+  } catch {
+    // A blocked store should not prevent the visible theme change.
+  }
+}
+
+function clampProgress(progress: number) {
+  return Math.min(1, Math.max(0, progress));
+}
+
+function isViewTransitionAnimation(animation: Animation) {
+  const effect = animation.effect as (KeyframeEffect & { pseudoElement?: string | null }) | null;
+  return effect?.pseudoElement?.includes('view-transition') ?? false;
+}
+
+function getAnimationDuration(animation: Animation) {
+  const duration = animation.effect?.getTiming().duration;
+  return typeof duration === 'number' ? duration : INTERACTIVE_TRANSITION_DURATION;
+}
+
 export default function SiteThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setTheme] = useState<SiteTheme>('green');
   const [transitionSequence, setTransitionSequence] = useState(0);
+  const themeRef = useRef<SiteTheme>('green');
+  const previewSequenceRef = useRef(0);
+  const activePreviewRef = useRef<ActiveThemePreview | null>(null);
+  const directTransitionRef = useRef<ViewTransition | null>(null);
+  const directTransitionSequenceRef = useRef(0);
+  const activeDirectTransitionRef = useRef<number | null>(null);
   const fallbackFrameRef = useRef<number | null>(null);
   const fallbackTimerRef = useRef<number | null>(null);
+
+  const cancelDirectThemeTransition = useCallback(() => {
+    if (fallbackFrameRef.current !== null) {
+      window.cancelAnimationFrame(fallbackFrameRef.current);
+      fallbackFrameRef.current = null;
+    }
+    if (fallbackTimerRef.current !== null) {
+      window.clearTimeout(fallbackTimerRef.current);
+      fallbackTimerRef.current = null;
+    }
+    directTransitionRef.current?.skipTransition();
+    directTransitionRef.current = null;
+    directTransitionSequenceRef.current += 1;
+    activeDirectTransitionRef.current = null;
+
+    const root = document.documentElement;
+    delete root.dataset.themeReducedTransitioning;
+    delete root.dataset.themeFallbackTransitioning;
+    delete root.dataset.themeTransitioning;
+  }, []);
 
   useEffect(() => {
     const frame = window.requestAnimationFrame(() => {
@@ -38,6 +108,7 @@ export default function SiteThemeProvider({ children }: { children: ReactNode })
         const storedTheme = window.localStorage.getItem(SITE_THEME_STORAGE_KEY);
         if (!storedTheme || !isSiteTheme(storedTheme)) return;
         applyThemeAttribute(storedTheme);
+        themeRef.current = storedTheme;
         setTheme(storedTheme);
       } catch {
         // Theme persistence is optional; the in-memory theme remains usable.
@@ -47,14 +118,199 @@ export default function SiteThemeProvider({ children }: { children: ReactNode })
   }, []);
 
   useEffect(() => () => {
-    if (fallbackFrameRef.current !== null) window.cancelAnimationFrame(fallbackFrameRef.current);
-    if (fallbackTimerRef.current !== null) window.clearTimeout(fallbackTimerRef.current);
-  }, []);
+    cancelDirectThemeTransition();
+    const activePreview = activePreviewRef.current;
+    if (activePreview) {
+      if (activePreview.frame !== null) window.cancelAnimationFrame(activePreview.frame);
+      applyThemeAttribute(activePreview.from);
+      activePreview.transition?.skipTransition();
+      activePreviewRef.current = null;
+    }
+    const root = document.documentElement;
+    delete root.dataset.themePreviewing;
+    delete root.dataset.themePreviewDirection;
+    delete root.dataset.themeOverlaySuppressed;
+  }, [cancelDirectThemeTransition]);
 
-  const changeTheme = useCallback((nextTheme: SiteTheme, options: ChangeThemeOptions = {}) => {
-    if (nextTheme === theme) return;
+  const clearThemePreview = useCallback((preview: ActiveThemePreview) => {
+    if (activePreviewRef.current?.sequence !== preview.sequence) return;
 
     const root = document.documentElement;
+    delete root.dataset.themePreviewing;
+    delete root.dataset.themePreviewDirection;
+    activePreviewRef.current = null;
+  }, []);
+
+  const syncPreviewAnimations = useCallback((preview: ActiveThemePreview, progress: number) => {
+    const clampedProgress = clampProgress(progress);
+    preview.progress = clampedProgress;
+
+    preview.animations.forEach(animation => {
+      animation.pause();
+      animation.currentTime = getAnimationDuration(animation) * clampedProgress;
+    });
+  }, []);
+
+  const settleThemePreview = useCallback((preview: ActiveThemePreview) => {
+    if (!preview.ready || preview.intent === null) return;
+
+    const targetProgress = preview.intent ? 1 : 0;
+    const startProgress = preview.progress;
+    const distance = Math.abs(targetProgress - startProgress);
+
+    if (distance === 0) {
+      preview.transition?.skipTransition();
+      clearThemePreview(preview);
+      return;
+    }
+
+    const duration = Math.max(100, INTERACTIVE_SETTLE_MAX_DURATION * distance);
+    const startTime = performance.now();
+
+    const tick = (now: number) => {
+      if (activePreviewRef.current?.sequence !== preview.sequence) return;
+
+      const elapsed = Math.min(1, (now - startTime) / duration);
+      const eased = 1 - Math.pow(1 - elapsed, 3);
+      syncPreviewAnimations(preview, startProgress + (targetProgress - startProgress) * eased);
+
+      if (elapsed < 1) {
+        preview.frame = window.requestAnimationFrame(tick);
+        return;
+      }
+
+      preview.frame = null;
+      preview.transition?.skipTransition();
+      clearThemePreview(preview);
+    };
+
+    preview.frame = window.requestAnimationFrame(tick);
+  }, [clearThemePreview, syncPreviewAnimations]);
+
+  const beginThemePreview = useCallback((nextTheme: SiteTheme, options: ThemePreviewOptions) => {
+    if (activeDirectTransitionRef.current !== null) cancelDirectThemeTransition();
+    if (activePreviewRef.current || nextTheme === themeRef.current) return false;
+
+    const root = document.documentElement;
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const preview: ActiveThemePreview = {
+      animations: [],
+      discrete: reduceMotion || !document.startViewTransition,
+      from: themeRef.current,
+      frame: null,
+      intent: null,
+      progress: 0,
+      ready: false,
+      sequence: previewSequenceRef.current + 1,
+      to: nextTheme,
+      transition: null,
+    };
+
+    previewSequenceRef.current = preview.sequence;
+    activePreviewRef.current = preview;
+    root.dataset.themePreviewing = 'true';
+    root.dataset.themePreviewDirection = options.direction > 0 ? 'forward' : 'backward';
+    root.dataset.themeOverlaySuppressed = 'true';
+
+    if (preview.discrete) return true;
+
+    try {
+      preview.transition = document.startViewTransition(() => {
+        if (activePreviewRef.current?.sequence === preview.sequence) {
+          applyThemeAttribute(nextTheme);
+        }
+      });
+
+      void preview.transition.ready.then(() => {
+        if (activePreviewRef.current?.sequence !== preview.sequence) return;
+
+        if (preview.intent !== null) {
+          applyThemeAttribute(preview.intent ? preview.to : preview.from);
+        }
+
+        preview.animations = document.getAnimations().filter(isViewTransitionAnimation);
+        if (preview.animations.length === 0) {
+          preview.discrete = true;
+          preview.ready = true;
+          applyThemeAttribute(preview.intent === null
+            ? (preview.progress >= 0.5 ? preview.to : preview.from)
+            : (preview.intent ? preview.to : preview.from));
+          if (preview.intent !== null) clearThemePreview(preview);
+          return;
+        }
+        preview.ready = true;
+        syncPreviewAnimations(preview, preview.progress);
+        settleThemePreview(preview);
+      }).catch(() => {
+        if (activePreviewRef.current?.sequence !== preview.sequence) return;
+        preview.discrete = true;
+        preview.ready = true;
+        applyThemeAttribute(preview.intent === null
+          ? (preview.progress >= 0.5 ? preview.to : preview.from)
+          : (preview.intent ? preview.to : preview.from));
+        if (preview.intent !== null) clearThemePreview(preview);
+      });
+    } catch {
+      preview.discrete = true;
+      preview.ready = true;
+    }
+
+    return true;
+  }, [cancelDirectThemeTransition, clearThemePreview, settleThemePreview, syncPreviewAnimations]);
+
+  const updateThemePreview = useCallback((progress: number) => {
+    const preview = activePreviewRef.current;
+    if (!preview || preview.intent !== null) return;
+
+    const clampedProgress = clampProgress(progress);
+    preview.progress = clampedProgress;
+
+    if (preview.discrete) {
+      applyThemeAttribute(clampedProgress >= 0.5 ? preview.to : preview.from);
+      return;
+    }
+
+    if (preview.ready) syncPreviewAnimations(preview, clampedProgress);
+  }, [syncPreviewAnimations]);
+
+  const finishThemePreview = useCallback((commit: boolean) => {
+    const preview = activePreviewRef.current;
+    if (!preview || preview.intent !== null) return;
+
+    preview.intent = commit;
+
+    if (commit) {
+      applyThemeAttribute(preview.to);
+      persistTheme(preview.to);
+      themeRef.current = preview.to;
+      flushSync(() => setTheme(preview.to));
+    } else {
+      applyThemeAttribute(preview.from);
+    }
+
+    if (!commit && preview.progress <= 0.001) {
+      preview.transition?.skipTransition();
+      clearThemePreview(preview);
+      return;
+    }
+
+    if (preview.discrete) {
+      preview.transition?.skipTransition();
+      clearThemePreview(preview);
+      return;
+    }
+
+    settleThemePreview(preview);
+  }, [clearThemePreview, settleThemePreview]);
+
+  const changeTheme = useCallback((nextTheme: SiteTheme, options: ChangeThemeOptions = {}) => {
+    if (activePreviewRef.current) return;
+    if (activeDirectTransitionRef.current !== null) cancelDirectThemeTransition();
+    if (nextTheme === themeRef.current) return;
+
+    const root = document.documentElement;
+    if (options.animate === false) root.dataset.themeOverlaySuppressed = 'true';
+    else delete root.dataset.themeOverlaySuppressed;
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const origin = options.origin ?? { x: window.innerWidth / 2, y: window.innerHeight / 2 };
     const radius = Math.hypot(
@@ -67,34 +323,53 @@ export default function SiteThemeProvider({ children }: { children: ReactNode })
 
     const commitTheme = () => {
       applyThemeAttribute(nextTheme);
-      try {
-        window.localStorage.setItem(SITE_THEME_STORAGE_KEY, nextTheme);
-      } catch {
-        // A blocked store should not prevent the visible theme change.
-      }
+      persistTheme(nextTheme);
+      themeRef.current = nextTheme;
       flushSync(() => {
         setTheme(nextTheme);
-        setTransitionSequence(sequence => sequence + 1);
+        if (options.animate !== false && !reduceMotion) {
+          setTransitionSequence(sequence => sequence + 1);
+        }
       });
     };
 
-    if (options.animate === false || reduceMotion) {
+    if (options.animate === false) {
       commitTheme();
       return;
     }
 
+    if (reduceMotion) {
+      const sequence = directTransitionSequenceRef.current + 1;
+      directTransitionSequenceRef.current = sequence;
+      activeDirectTransitionRef.current = sequence;
+      root.dataset.themeReducedTransitioning = 'true';
+      void root.offsetWidth;
+      commitTheme();
+      fallbackTimerRef.current = window.setTimeout(() => {
+        if (activeDirectTransitionRef.current !== sequence) return;
+        delete root.dataset.themeReducedTransitioning;
+        fallbackTimerRef.current = null;
+        activeDirectTransitionRef.current = null;
+      }, 140);
+      return;
+    }
+
     if (!document.startViewTransition) {
-      if (fallbackFrameRef.current !== null) window.cancelAnimationFrame(fallbackFrameRef.current);
-      if (fallbackTimerRef.current !== null) window.clearTimeout(fallbackTimerRef.current);
+      const sequence = directTransitionSequenceRef.current + 1;
+      directTransitionSequenceRef.current = sequence;
+      activeDirectTransitionRef.current = sequence;
 
       root.dataset.themeFallbackTransitioning = 'true';
       fallbackFrameRef.current = window.requestAnimationFrame(() => {
         fallbackFrameRef.current = window.requestAnimationFrame(() => {
+          if (activeDirectTransitionRef.current !== sequence) return;
           commitTheme();
           fallbackFrameRef.current = null;
           fallbackTimerRef.current = window.setTimeout(() => {
+            if (activeDirectTransitionRef.current !== sequence) return;
             delete root.dataset.themeFallbackTransitioning;
             fallbackTimerRef.current = null;
+            activeDirectTransitionRef.current = null;
           }, 280);
         });
       });
@@ -104,13 +379,26 @@ export default function SiteThemeProvider({ children }: { children: ReactNode })
     root.style.setProperty('--theme-reveal-radius', `${radius}px`);
     root.dataset.themeTransitioning = 'true';
 
+    const sequence = directTransitionSequenceRef.current + 1;
+    directTransitionSequenceRef.current = sequence;
+    activeDirectTransitionRef.current = sequence;
     const transition = document.startViewTransition(commitTheme);
+    directTransitionRef.current = transition;
     void transition.finished.finally(() => {
+      if (activeDirectTransitionRef.current !== sequence) return;
       delete root.dataset.themeTransitioning;
+      directTransitionRef.current = null;
+      activeDirectTransitionRef.current = null;
     });
-  }, [theme]);
+  }, [cancelDirectThemeTransition]);
 
-  const value = useMemo(() => ({ theme, changeTheme }), [changeTheme, theme]);
+  const value = useMemo(() => ({
+    theme,
+    changeTheme,
+    beginThemePreview,
+    updateThemePreview,
+    finishThemePreview,
+  }), [beginThemePreview, changeTheme, finishThemePreview, theme, updateThemePreview]);
 
   return (
     <SiteThemeContext.Provider value={value}>

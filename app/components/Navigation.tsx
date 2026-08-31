@@ -1,10 +1,9 @@
 'use client';
 
-import { MouseEvent, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
-import { Menu, Palette, X } from 'lucide-react';
-import { getNextSiteTheme, SITE_THEMES } from '@/app/lib/theme';
-import { useSiteTheme } from '@/app/components/theme/SiteThemeProvider';
+import { Menu, X } from 'lucide-react';
+import ThemeSignalFader from '@/app/components/theme/ThemeSignalFader';
 
 const navItems = [
   { name: 'archive', href: '/archive' },
@@ -14,38 +13,6 @@ const navItems = [
   { name: 'notes', href: '#blog' },
   { name: 'contact', href: '#contact' },
 ];
-
-function ThemeCycleButton({ mobile = false }: { mobile?: boolean }) {
-  const { theme, changeTheme } = useSiteTheme();
-  const currentTheme = SITE_THEMES.find(item => item.id === theme) ?? SITE_THEMES[0];
-  const nextThemeId = getNextSiteTheme(theme);
-  const nextTheme = SITE_THEMES.find(item => item.id === nextThemeId) ?? SITE_THEMES[0];
-
-  const handleThemeChange = (event: MouseEvent<HTMLButtonElement>) => {
-    changeTheme(nextThemeId, {
-      origin: { x: event.clientX, y: event.clientY },
-    });
-  };
-
-  return (
-    <button
-      type="button"
-      onClick={handleThemeChange}
-      className={`inline-flex h-9 items-center justify-center gap-2 rounded-full border border-border bg-surface/80 font-mono text-[11px] text-text-secondary transition-colors duration-150 hover:border-accent/50 hover:text-accent ${mobile ? 'w-9 p-0' : 'px-3'}`}
-      aria-label={`当前主题：${currentTheme.label}；切换到：${nextTheme.label}`}
-      title={`Theme: ${currentTheme.label} → ${nextTheme.label}`}
-      data-theme-control
-    >
-      <Palette className="h-3.5 w-3.5" aria-hidden="true" />
-      {!mobile ? (
-        <>
-          <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: currentTheme.accent }} aria-hidden="true" />
-          <span>{currentTheme.shortLabel}</span>
-        </>
-      ) : null}
-    </button>
-  );
-}
 
 export default function Navigation() {
   const [isOpen, setIsOpen] = useState(false);
@@ -95,7 +62,7 @@ export default function Navigation() {
           </a>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center gap-6">
+          <div className="hidden lg:flex items-center gap-6">
             {navItems.map((item) => (
               item.href.startsWith('/') ? (
                 <Link
@@ -115,12 +82,12 @@ export default function Navigation() {
                 </a>
               )
             ))}
-            <ThemeCycleButton />
+            <ThemeSignalFader />
           </div>
 
           {/* Mobile Actions */}
-          <div className="flex items-center gap-2 md:hidden">
-            <ThemeCycleButton mobile />
+          <div className="flex items-center gap-2 lg:hidden">
+            <ThemeSignalFader compact />
             <button
               type="button"
               onClick={() => setIsOpen(!isOpen)}
@@ -136,7 +103,7 @@ export default function Navigation() {
 
         {/* Mobile Navigation */}
         {isOpen && (
-          <div id="mobile-navigation" className="md:hidden mt-4 pb-4 space-y-2">
+          <div id="mobile-navigation" className="lg:hidden mt-4 pb-4 space-y-2">
             {navItems.map((item) => (
               item.href.startsWith('/') ? (
                 <Link

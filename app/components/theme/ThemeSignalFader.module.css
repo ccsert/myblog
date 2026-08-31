@@ -1,0 +1,190 @@
+.fader {
+  display: inline-flex;
+  height: 38px;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 7px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background:
+    linear-gradient(180deg, var(--color-highlight-soft), transparent),
+    var(--color-surface);
+  box-shadow:
+    inset 0 1px 0 var(--color-line-soft),
+    0 8px 24px color-mix(in srgb, var(--color-bg) 80%, transparent);
+  color: var(--color-text-secondary);
+}
+
+.readout {
+  display: grid;
+  width: 58px;
+  gap: 1px;
+  border-right: 1px solid var(--color-border);
+  line-height: 1;
+}
+
+.eyebrow {
+  color: var(--color-text-dim);
+  font-family: var(--font-mono);
+  font-size: 7px;
+  letter-spacing: 0.16em;
+}
+
+.value {
+  overflow: hidden;
+  color: var(--color-accent);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.04em;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.track {
+  position: relative;
+  width: 132px;
+  height: 28px;
+  flex: 0 0 auto;
+}
+
+.rail,
+.railGlow {
+  position: absolute;
+  top: 12px;
+  right: 11px;
+  left: 11px;
+  height: 3px;
+  border-radius: 999px;
+}
+
+.rail {
+  border: 1px solid var(--color-border);
+  background: var(--color-bg);
+  box-shadow: inset 0 1px 2px color-mix(in srgb, var(--color-bg) 85%, black);
+}
+
+.railGlow {
+  background: linear-gradient(
+    90deg,
+    var(--color-accent-20),
+    var(--color-accent),
+    var(--color-accent-20)
+  );
+  filter: blur(3px);
+  opacity: 0.42;
+}
+
+.detents {
+  position: absolute;
+  inset: -4px 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.detent {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  width: 28px;
+  height: 36px;
+  padding: 0;
+  place-items: center;
+  border: 0;
+  background: transparent;
+  color: var(--color-text-dim);
+}
+
+.detent::after {
+  width: 2px;
+  height: 7px;
+  border-radius: 999px;
+  background: currentColor;
+  content: '';
+  opacity: 0.58;
+}
+
+.detent:hover,
+.detent[data-active='true'] {
+  color: var(--color-accent);
+}
+
+.detent[data-active='true']::after {
+  box-shadow: 0 0 7px var(--color-accent-glow);
+  opacity: 1;
+}
+
+.handle {
+  position: absolute;
+  z-index: 2;
+  top: 2px;
+  left: 0;
+  display: grid;
+  width: 22px;
+  height: 24px;
+  place-items: center;
+  border: 1px solid var(--color-accent-50);
+  border-radius: 5px;
+  background:
+    linear-gradient(90deg, transparent 31%, var(--color-line-soft) 31% 36%, transparent 36% 64%, var(--color-line-soft) 64% 69%, transparent 69%),
+    linear-gradient(180deg, var(--color-elevated), var(--color-surface));
+  box-shadow:
+    0 0 0 1px var(--color-bg),
+    0 0 12px var(--color-accent-20),
+    inset 0 1px 0 var(--color-highlight-soft);
+  color: var(--color-accent);
+  touch-action: none;
+  user-select: none;
+  will-change: transform;
+}
+
+.handle::after {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 7px var(--color-accent-glow);
+  content: '';
+}
+
+.handle::before {
+  position: absolute;
+  inset: -8px;
+  content: '';
+}
+
+.handle[data-dragging='true'] {
+  border-color: var(--color-accent);
+  box-shadow:
+    0 0 0 1px var(--color-bg),
+    0 0 22px var(--color-accent-glow),
+    inset 0 1px 0 var(--color-highlight-soft);
+}
+
+.compact {
+  width: 112px;
+  gap: 0;
+  padding-inline: 4px;
+}
+
+.compact .readout {
+  display: none;
+}
+
+.compact .track {
+  width: 102px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .handle {
+    will-change: auto;
+  }
+}
+
+@media (forced-colors: active) {
+  .fader,
+  .handle {
+    forced-color-adjust: auto;
+  }
+}
