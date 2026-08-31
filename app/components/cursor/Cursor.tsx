@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { syncCursorPosition } from './position';
 
 type CursorState = 'default' | 'link' | 'button' | 'drag' | 'text';
 
@@ -10,38 +11,35 @@ export default function Cursor() {
   const [label, setLabel] = useState('');
   const [hasMoved, setHasMoved] = useState(false);
   const hasMovedRef = useRef(false);
-  const position = useRef({ x: 0, y: 0 });
-  const targetPosition = useRef({ x: 0, y: 0 });
 
   useEffect(() => {
     const documentElement = document.documentElement;
     documentElement.dataset.customCursor = 'true';
 
     const pointerQuery = window.matchMedia('(min-width: 768px) and (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference)');
-    let animationFrameId = 0;
     let isActive = false;
 
-    const handleMouseMove = (e: MouseEvent) => {
+    const handlePointerMove = (event: PointerEvent) => {
       if (!hasMovedRef.current) {
         hasMovedRef.current = true;
         setHasMoved(true);
       }
 
-      targetPosition.current = { x: e.clientX, y: e.clientY };
+      syncCursorPosition(cursorRef.current, event);
 
       // 检测悬停元素
-      const target = e.target as HTMLElement;
+      const target = event.target instanceof Element ? event.target : null;
 
-      if (target.closest('a')) {
+      if (target?.closest('a')) {
         setState('link');
         setLabel('→');
-      } else if (target.tagName === 'BUTTON' || target.closest('button')) {
+      } else if (target?.closest('button')) {
         setState('button');
         setLabel('View');
-      } else if (target.closest('[data-cursor="drag"]')) {
+      } else if (target?.closest('[data-cursor="drag"]')) {
         setState('drag');
         setLabel('Drag');
-      } else if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') {
+      } else if (target?.matches('input, textarea, [contenteditable="true"]')) {
         setState('text');
         setLabel('');
       } else {
@@ -50,31 +48,16 @@ export default function Cursor() {
       }
     };
 
-    const animate = () => {
-      // Lerp 平滑跟随
-      position.current.x += (targetPosition.current.x - position.current.x) * 0.15;
-      position.current.y += (targetPosition.current.y - position.current.y) * 0.15;
-
-      if (cursorRef.current) {
-        cursorRef.current.style.transform = `translate3d(${position.current.x}px, ${position.current.y}px, 0) translate(-50%, -50%)`;
-      }
-
-      animationFrameId = requestAnimationFrame(animate);
-    };
-
     const start = () => {
       if (isActive || !pointerQuery.matches) return;
       isActive = true;
-      window.addEventListener('mousemove', handleMouseMove);
-      animationFrameId = requestAnimationFrame(animate);
+      window.addEventListener('pointermove', handlePointerMove, { passive: true });
     };
 
     const stop = (resetState: boolean) => {
       if (!isActive) return;
       isActive = false;
-      window.removeEventListener('mousemove', handleMouseMove);
-      cancelAnimationFrame(animationFrameId);
-      animationFrameId = 0;
+      window.removeEventListener('pointermove', handlePointerMove);
 
       if (resetState) {
         hasMovedRef.current = false;
