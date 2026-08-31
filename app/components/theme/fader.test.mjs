@@ -25,41 +25,71 @@ const faderOutput = faderTranspiled.outputText.replaceAll('@/app/lib/theme', the
 const moduleUrl = `data:text/javascript;base64,${Buffer.from(faderOutput).toString('base64')}`;
 const {
   FADER_COMMIT_PROGRESS,
-  getFaderDragState,
   getFaderEdgeOffset,
   getFaderReleaseVelocity,
+  getFaderSegmentState,
+  getFaderTrackState,
   getThemeAtFaderIndex,
   shouldCommitFaderDrag,
 } = await import(moduleUrl);
 
-test('推杆只预览当前主题的相邻档位', () => {
-  assert.deepEqual(getFaderDragState('cyan', 100, 150, 100), {
+test('一次拖拽可以在完整四档轨道上连续移动', () => {
+  assert.deepEqual(getFaderTrackState('green', 100, 340, 100), {
+    edgeOffset: 0,
+    position: 2.4,
+    rawPosition: 2.4,
+  });
+});
+
+test('跨过整档后可以用剩余拖拽距离继续预览下一主题', () => {
+  assert.deepEqual(getFaderSegmentState('green', 2.4), {
     direction: 1,
-    progress: 0.5,
-    position: 1.5,
+    progress: 1,
+    targetTheme: 'cyan',
+  });
+
+  assert.deepEqual(getFaderSegmentState('cyan', 2.4), {
+    direction: 1,
+    progress: 1,
     targetTheme: 'amber',
   });
 
-  assert.deepEqual(getFaderDragState('cyan', 100, 50, 100), {
+  const finalSegment = getFaderSegmentState('amber', 2.4);
+  assert.equal(finalSegment.direction, 1);
+  assert.equal(Number(finalSegment.progress.toFixed(4)), 0.4);
+  assert.equal(finalSegment.targetTheme, 'light');
+});
+
+test('同一次拖拽跨档后仍可反向穿回之前的主题', () => {
+  assert.deepEqual(getFaderSegmentState('amber', 0.3), {
     direction: -1,
-    progress: 0.5,
-    position: 0.5,
+    progress: 1,
+    targetTheme: 'cyan',
+  });
+
+  assert.deepEqual(getFaderSegmentState('cyan', 0.3), {
+    direction: -1,
+    progress: 0.7,
     targetTheme: 'green',
   });
 });
 
-test('首尾档位不会越界或循环穿越', () => {
-  assert.deepEqual(getFaderDragState('green', 100, 20, 100), {
+test('完整轨道在首尾档位钳制位置并且不会循环穿越', () => {
+  const beforeGreen = getFaderTrackState('green', 100, 20, 100);
+  assert.equal(beforeGreen.position, 0);
+  assert.ok(beforeGreen.rawPosition < 0);
+  assert.deepEqual(getFaderSegmentState('green', beforeGreen.position), {
     direction: 0,
     progress: 0,
-    position: 0,
     targetTheme: 'green',
   });
 
-  assert.deepEqual(getFaderDragState('light', 100, 180, 100), {
+  const afterLight = getFaderTrackState('light', 100, 180, 100);
+  assert.equal(afterLight.position, 3);
+  assert.ok(afterLight.rawPosition > 3);
+  assert.deepEqual(getFaderSegmentState('light', afterLight.position), {
     direction: 0,
     progress: 0,
-    position: 3,
     targetTheme: 'light',
   });
 });
@@ -69,6 +99,11 @@ test('推到轨道边缘时使用递增阻力而不是生硬停住', () => {
   assert.equal(getFaderEdgeOffset(8), 4);
   assert.equal(getFaderEdgeOffset(30), 8);
   assert.equal(getFaderEdgeOffset(-8), -4);
+  assert.deepEqual(getFaderTrackState('green', 100, 92, 100), {
+    edgeOffset: -4,
+    position: 0,
+    rawPosition: -0.08,
+  });
 });
 
 test('越过 55% 阈值才按位置提交主题', () => {

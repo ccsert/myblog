@@ -13,10 +13,10 @@ import { SITE_THEMES, SiteTheme } from '@/app/lib/theme';
 import { useSiteTheme } from '@/app/components/theme/SiteThemeProvider';
 import {
   FaderDirection,
-  getFaderDragState,
-  getFaderEdgeOffset,
   getFaderReleaseVelocity,
+  getFaderSegmentState,
   getFaderThemeIndex,
+  getFaderTrackState,
   getThemeAtFaderIndex,
   shouldCommitFaderDrag,
 } from './fader';
@@ -31,15 +31,16 @@ interface TrackGeometry {
 }
 
 interface ActiveDrag {
+  baseIndex: number;
+  baseTheme: SiteTheme;
   direction: FaderDirection;
   lastTime: number;
   lastX: number;
+  originIndex: number;
+  originTheme: SiteTheme;
   pointerId: number;
   progress: number;
-  startIndex: number;
-  startTheme: SiteTheme;
   startX: number;
-  targetTheme: SiteTheme;
   velocityX: number;
 }
 
@@ -50,9 +51,12 @@ export default function ThemeSignalFader({ compact = false }: ThemeSignalFaderPr
   const {
     theme,
     changeTheme,
+    beginThemeGesture,
     beginThemePreview,
     updateThemePreview,
-    finishThemePreview,
+    advanceThemePreview,
+    cancelThemePreview,
+    finishThemeGesture,
   } = useSiteTheme();
   const trackRef = useRef<HTMLDivElement>(null);
   const handleRef = useRef<HTMLDivElement>(null);
@@ -119,8 +123,9 @@ export default function ThemeSignalFader({ compact = false }: ThemeSignalFaderPr
     const drag = dragRef.current;
     if (!drag) return;
 
-    if (drag.direction !== 0) finishThemePreview(false);
-    moveHandleToIndex(drag.startIndex, immediate);
+    if (drag.direction !== 0) cancelThemePreview({ immediate: true });
+    finishThemeGesture(false);
+    moveHandleToIndex(drag.originIndex, immediate);
     dragRef.current = null;
     if (handleRef.current) {
       handleRef.current.dataset.dragging = 'false';
@@ -128,7 +133,7 @@ export default function ThemeSignalFader({ compact = false }: ThemeSignalFaderPr
         handleRef.current.releasePointerCapture(drag.pointerId);
       }
     }
-  }, [finishThemePreview, moveHandleToIndex]);
+  }, [cancelThemePreview, finishThemeGesture, moveHandleToIndex]);
 
   useEffect(() => () => {
     settleAnimationRef.current?.stop();
@@ -137,21 +142,25 @@ export default function ThemeSignalFader({ compact = false }: ThemeSignalFaderPr
 
   const handlePointerDown = (event: PointerEvent<HTMLDivElement>) => {
     if (event.button !== 0 || dragRef.current) return;
+    if (!beginThemeGesture()) return;
 
     settleAnimationRef.current?.stop();
     measureTrack();
+    const originTheme = themeRef.current;
+    const originIndex = getFaderThemeIndex(originTheme);
     event.currentTarget.setPointerCapture(event.pointerId);
     event.currentTarget.dataset.dragging = 'true';
     dragRef.current = {
+      baseIndex: originIndex,
+      baseTheme: originTheme,
       direction: 0,
       lastTime: event.timeStamp,
       lastX: event.clientX,
+      originIndex,
+      originTheme,
       pointerId: event.pointerId,
       progress: 0,
-      startIndex: getFaderThemeIndex(theme),
-      startTheme: theme,
       startX: event.clientX,
-      targetTheme: theme,
       velocityX: 0,
     };
   };
@@ -160,62 +169,85 @@ export default function ThemeSignalFader({ compact = false }: ThemeSignalFaderPr
     const drag = dragRef.current;
     if (!drag || drag.pointerId !== event.pointerId) return;
 
-    const delta = event.clientX - drag.startX;
-    const dragState = getFaderDragState(
-      drag.startTheme,
+    const { step } = geometryRef.current;
+    const trackState = getFaderTrackState(
+      drag.originTheme,
       drag.startX,
       event.clientX,
-      geometryRef.current.step,
+      step,
     );
-    const crossedPastOrigin = drag.direction !== 0
-      && dragState.direction !== 0
-      && dragState.direction !== drag.direction
-      && Math.abs(delta) >= DRAG_ACTIVATION_DISTANCE;
-
-    if (crossedPastOrigin) {
-      updateThemePreview(0);
-      finishThemePreview(false);
-      drag.direction = 0;
-      drag.progress = 0;
-      drag.targetTheme = drag.startTheme;
-    }
-
-    if (drag.direction === 0 && Math.abs(delta) >= DRAG_ACTIVATION_DISTANCE) {
-      if (dragState.targetTheme !== drag.startTheme
-        && dragState.direction !== 0
-        && beginThemePreview(dragState.targetTheme, { direction: dragState.direction })) {
-        drag.direction = dragState.direction;
-        drag.targetTheme = dragState.targetTheme;
-      } else if (dragState.targetTheme === drag.startTheme) {
-        handleX.set(drag.startIndex * geometryRef.current.step + getFaderEdgeOffset(delta));
-      }
-    }
-
-    if (drag.direction === 0) {
-      if (Math.abs(delta) >= DRAG_ACTIVATION_DISTANCE) {
-        handleX.set(drag.startIndex * geometryRef.current.step + getFaderEdgeOffset(delta));
-      }
-      return;
-    }
 
     const elapsed = Math.max(1, event.timeStamp - drag.lastTime);
     drag.velocityX = (event.clientX - drag.lastX) / elapsed;
     drag.lastX = event.clientX;
     drag.lastTime = event.timeStamp;
-    drag.progress = dragState.direction === drag.direction ? dragState.progress : 0;
 
-    handleX.set((drag.startIndex + drag.direction * drag.progress) * geometryRef.current.step);
-    updateThemePreview(drag.progress);
+    handleX.set(trackState.position * step + trackState.edgeOffset);
+
+    for (let segmentCount = 0; segmentCount < SITE_THEMES.length; segmentCount += 1) {
+      const segment = getFaderSegmentState(drag.baseTheme, trackState.position);
+      const distanceFromBase = Math.abs(trackState.position - drag.baseIndex) * step;
+      const crossedIntoOppositeSegment = drag.direction !== 0
+        && segment.direction !== 0
+        && segment.direction !== drag.direction
+        && distanceFromBase >= DRAG_ACTIVATION_DISTANCE;
+
+      if (crossedIntoOppositeSegment) {
+        cancelThemePreview({ immediate: true });
+        drag.direction = 0;
+        drag.progress = 0;
+        continue;
+      }
+
+      if (drag.direction === 0) {
+        if (segment.direction === 0 || distanceFromBase < DRAG_ACTIVATION_DISTANCE) break;
+        if (!beginThemePreview(segment.targetTheme, { direction: segment.direction })) break;
+
+        drag.direction = segment.direction;
+      }
+
+      drag.progress = segment.direction === drag.direction ? segment.progress : 0;
+      updateThemePreview(drag.progress);
+      if (drag.progress < 1) break;
+
+      const advancedTheme = advanceThemePreview();
+      if (!advancedTheme) break;
+
+      drag.baseTheme = advancedTheme;
+      drag.baseIndex = getFaderThemeIndex(advancedTheme);
+      drag.direction = 0;
+      drag.progress = 0;
+    }
   };
 
   const finishDrag = (event: PointerEvent<HTMLDivElement>, cancelled = false) => {
     const drag = dragRef.current;
     if (!drag || drag.pointerId !== event.pointerId) return;
 
-    const releaseVelocity = getFaderReleaseVelocity(drag.velocityX, drag.lastTime, event.timeStamp);
-    const commit = !cancelled && shouldCommitFaderDrag(drag.progress, releaseVelocity, drag.direction);
-    if (drag.direction !== 0) finishThemePreview(commit);
-    moveHandleToIndex(commit ? getFaderThemeIndex(drag.targetTheme) : drag.startIndex);
+    if (cancelled) {
+      if (drag.direction !== 0) cancelThemePreview({ immediate: true });
+      finishThemeGesture(false);
+      moveHandleToIndex(drag.originIndex);
+    } else {
+      const releaseVelocity = getFaderReleaseVelocity(drag.velocityX, drag.lastTime, event.timeStamp);
+      const commitSegment = shouldCommitFaderDrag(drag.progress, releaseVelocity, drag.direction);
+
+      if (drag.direction !== 0) {
+        if (commitSegment) {
+          const advancedTheme = advanceThemePreview();
+          if (advancedTheme) {
+            drag.baseTheme = advancedTheme;
+            drag.baseIndex = getFaderThemeIndex(advancedTheme);
+          }
+        } else {
+          cancelThemePreview();
+        }
+      }
+
+      finishThemeGesture(true);
+      moveHandleToIndex(drag.baseIndex);
+    }
+
     dragRef.current = null;
     event.currentTarget.dataset.dragging = 'false';
     if (event.currentTarget.hasPointerCapture(event.pointerId)) {

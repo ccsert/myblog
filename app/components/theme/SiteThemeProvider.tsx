@@ -18,12 +18,19 @@ interface ThemePreviewOptions {
   direction: -1 | 1;
 }
 
+interface CancelThemePreviewOptions {
+  immediate?: boolean;
+}
+
 interface SiteThemeContextValue {
   theme: SiteTheme;
   changeTheme: (theme: SiteTheme, options?: ChangeThemeOptions) => void;
+  beginThemeGesture: () => boolean;
   beginThemePreview: (theme: SiteTheme, options: ThemePreviewOptions) => boolean;
   updateThemePreview: (progress: number) => void;
-  finishThemePreview: (commit: boolean) => void;
+  advanceThemePreview: () => SiteTheme | null;
+  cancelThemePreview: (options?: CancelThemePreviewOptions) => void;
+  finishThemeGesture: (commit: boolean) => void;
 }
 
 const SiteThemeContext = createContext<SiteThemeContextValue | null>(null);
@@ -42,6 +49,11 @@ interface ActiveThemePreview {
   sequence: number;
   to: SiteTheme;
   transition: ViewTransition | null;
+}
+
+interface ActiveThemeGesture {
+  current: SiteTheme;
+  origin: SiteTheme;
 }
 
 function applyThemeAttribute(theme: SiteTheme) {
@@ -74,8 +86,11 @@ export default function SiteThemeProvider({ children }: { children: ReactNode })
   const [theme, setTheme] = useState<SiteTheme>('green');
   const [transitionSequence, setTransitionSequence] = useState(0);
   const themeRef = useRef<SiteTheme>('green');
+  const committedThemeRef = useRef<SiteTheme>('green');
+  const themeHydratedRef = useRef(false);
   const previewSequenceRef = useRef(0);
   const activePreviewRef = useRef<ActiveThemePreview | null>(null);
+  const activeGestureRef = useRef<ActiveThemeGesture | null>(null);
   const directTransitionRef = useRef<ViewTransition | null>(null);
   const directTransitionSequenceRef = useRef(0);
   const activeDirectTransitionRef = useRef<number | null>(null);
@@ -109,9 +124,12 @@ export default function SiteThemeProvider({ children }: { children: ReactNode })
         if (!storedTheme || !isSiteTheme(storedTheme)) return;
         applyThemeAttribute(storedTheme);
         themeRef.current = storedTheme;
+        committedThemeRef.current = storedTheme;
         setTheme(storedTheme);
       } catch {
         // Theme persistence is optional; the in-memory theme remains usable.
+      } finally {
+        themeHydratedRef.current = true;
       }
     });
     return () => window.cancelAnimationFrame(frame);
@@ -119,13 +137,16 @@ export default function SiteThemeProvider({ children }: { children: ReactNode })
 
   useEffect(() => () => {
     cancelDirectThemeTransition();
+    const activeGesture = activeGestureRef.current;
     const activePreview = activePreviewRef.current;
     if (activePreview) {
       if (activePreview.frame !== null) window.cancelAnimationFrame(activePreview.frame);
-      applyThemeAttribute(activePreview.from);
       activePreview.transition?.skipTransition();
       activePreviewRef.current = null;
     }
+    if (activeGesture) applyThemeAttribute(activeGesture.origin);
+    else if (activePreview) applyThemeAttribute(activePreview.from);
+    activeGestureRef.current = null;
     const root = document.documentElement;
     delete root.dataset.themePreviewing;
     delete root.dataset.themePreviewDirection;
@@ -139,6 +160,7 @@ export default function SiteThemeProvider({ children }: { children: ReactNode })
     delete root.dataset.themePreviewing;
     delete root.dataset.themePreviewDirection;
     activePreviewRef.current = null;
+    if (!activeGestureRef.current) delete root.dataset.themeOverlaySuppressed;
   }, []);
 
   const syncPreviewAnimations = useCallback((preview: ActiveThemePreview, progress: number) => {
@@ -187,16 +209,27 @@ export default function SiteThemeProvider({ children }: { children: ReactNode })
     preview.frame = window.requestAnimationFrame(tick);
   }, [clearThemePreview, syncPreviewAnimations]);
 
-  const beginThemePreview = useCallback((nextTheme: SiteTheme, options: ThemePreviewOptions) => {
+  const beginThemeGesture = useCallback(() => {
+    if (!themeHydratedRef.current || activeGestureRef.current || activePreviewRef.current) return false;
     if (activeDirectTransitionRef.current !== null) cancelDirectThemeTransition();
-    if (activePreviewRef.current || nextTheme === themeRef.current) return false;
+
+    activeGestureRef.current = {
+      current: themeRef.current,
+      origin: themeRef.current,
+    };
+    return true;
+  }, [cancelDirectThemeTransition]);
+
+  const beginThemePreview = useCallback((nextTheme: SiteTheme, options: ThemePreviewOptions) => {
+    const gesture = activeGestureRef.current;
+    if (!gesture || activePreviewRef.current || nextTheme === gesture.current) return false;
 
     const root = document.documentElement;
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const preview: ActiveThemePreview = {
       animations: [],
       discrete: reduceMotion || !document.startViewTransition,
-      from: themeRef.current,
+      from: gesture.current,
       frame: null,
       intent: null,
       progress: 0,
@@ -256,7 +289,7 @@ export default function SiteThemeProvider({ children }: { children: ReactNode })
     }
 
     return true;
-  }, [cancelDirectThemeTransition, clearThemePreview, settleThemePreview, syncPreviewAnimations]);
+  }, [clearThemePreview, settleThemePreview, syncPreviewAnimations]);
 
   const updateThemePreview = useCallback((progress: number) => {
     const preview = activePreviewRef.current;
@@ -273,38 +306,72 @@ export default function SiteThemeProvider({ children }: { children: ReactNode })
     if (preview.ready) syncPreviewAnimations(preview, clampedProgress);
   }, [syncPreviewAnimations]);
 
-  const finishThemePreview = useCallback((commit: boolean) => {
+  const advanceThemePreview = useCallback(() => {
+    const preview = activePreviewRef.current;
+    const gesture = activeGestureRef.current;
+    if (!preview || !gesture || preview.intent !== null) return null;
+
+    preview.intent = true;
+    if (preview.frame !== null) {
+      window.cancelAnimationFrame(preview.frame);
+      preview.frame = null;
+    }
+    if (preview.ready && !preview.discrete) syncPreviewAnimations(preview, 1);
+
+    applyThemeAttribute(preview.to);
+    gesture.current = preview.to;
+    themeRef.current = preview.to;
+    setTheme(preview.to);
+    preview.transition?.skipTransition();
+    clearThemePreview(preview);
+    return preview.to;
+  }, [clearThemePreview, syncPreviewAnimations]);
+
+  const cancelThemePreview = useCallback((options: CancelThemePreviewOptions = {}) => {
     const preview = activePreviewRef.current;
     if (!preview || preview.intent !== null) return;
 
-    preview.intent = commit;
+    preview.intent = false;
+    applyThemeAttribute(preview.from);
 
-    if (commit) {
-      applyThemeAttribute(preview.to);
-      persistTheme(preview.to);
-      themeRef.current = preview.to;
-      flushSync(() => setTheme(preview.to));
-    } else {
-      applyThemeAttribute(preview.from);
-    }
-
-    if (!commit && preview.progress <= 0.001) {
-      preview.transition?.skipTransition();
-      clearThemePreview(preview);
-      return;
-    }
-
-    if (preview.discrete) {
+    if (options.immediate || preview.progress <= 0.001 || preview.discrete) {
+      if (preview.frame !== null) {
+        window.cancelAnimationFrame(preview.frame);
+        preview.frame = null;
+      }
+      if (preview.ready && !preview.discrete) syncPreviewAnimations(preview, 0);
       preview.transition?.skipTransition();
       clearThemePreview(preview);
       return;
     }
 
     settleThemePreview(preview);
-  }, [clearThemePreview, settleThemePreview]);
+  }, [clearThemePreview, settleThemePreview, syncPreviewAnimations]);
+
+  const finishThemeGesture = useCallback((commit: boolean) => {
+    const gesture = activeGestureRef.current;
+    if (!gesture) return;
+
+    if (activePreviewRef.current?.intent === null) {
+      cancelThemePreview({ immediate: true });
+    }
+
+    const nextTheme = commit ? gesture.current : gesture.origin;
+    applyThemeAttribute(nextTheme);
+    themeRef.current = nextTheme;
+
+    if (commit && nextTheme !== committedThemeRef.current) {
+      persistTheme(nextTheme);
+      committedThemeRef.current = nextTheme;
+    }
+
+    setTheme(nextTheme);
+    activeGestureRef.current = null;
+    if (!activePreviewRef.current) delete document.documentElement.dataset.themeOverlaySuppressed;
+  }, [cancelThemePreview]);
 
   const changeTheme = useCallback((nextTheme: SiteTheme, options: ChangeThemeOptions = {}) => {
-    if (activePreviewRef.current) return;
+    if (!themeHydratedRef.current || activeGestureRef.current || activePreviewRef.current) return;
     if (activeDirectTransitionRef.current !== null) cancelDirectThemeTransition();
     if (nextTheme === themeRef.current) return;
 
@@ -325,6 +392,7 @@ export default function SiteThemeProvider({ children }: { children: ReactNode })
       applyThemeAttribute(nextTheme);
       persistTheme(nextTheme);
       themeRef.current = nextTheme;
+      committedThemeRef.current = nextTheme;
       flushSync(() => {
         setTheme(nextTheme);
         if (options.animate !== false && !reduceMotion) {
@@ -382,7 +450,10 @@ export default function SiteThemeProvider({ children }: { children: ReactNode })
     const sequence = directTransitionSequenceRef.current + 1;
     directTransitionSequenceRef.current = sequence;
     activeDirectTransitionRef.current = sequence;
-    const transition = document.startViewTransition(commitTheme);
+    const transition = document.startViewTransition(() => {
+      if (activeDirectTransitionRef.current !== sequence) return;
+      commitTheme();
+    });
     directTransitionRef.current = transition;
     void transition.finished.finally(() => {
       if (activeDirectTransitionRef.current !== sequence) return;
@@ -395,10 +466,22 @@ export default function SiteThemeProvider({ children }: { children: ReactNode })
   const value = useMemo(() => ({
     theme,
     changeTheme,
+    beginThemeGesture,
     beginThemePreview,
     updateThemePreview,
-    finishThemePreview,
-  }), [beginThemePreview, changeTheme, finishThemePreview, theme, updateThemePreview]);
+    advanceThemePreview,
+    cancelThemePreview,
+    finishThemeGesture,
+  }), [
+    advanceThemePreview,
+    beginThemeGesture,
+    beginThemePreview,
+    cancelThemePreview,
+    changeTheme,
+    finishThemeGesture,
+    theme,
+    updateThemePreview,
+  ]);
 
   return (
     <SiteThemeContext.Provider value={value}>

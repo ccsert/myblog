@@ -9,11 +9,16 @@ export const FADER_FLICK_MAX_AGE = 80;
 
 export type FaderDirection = -1 | 0 | 1;
 
-export interface FaderDragState {
+export interface FaderSegmentState {
   direction: FaderDirection;
   progress: number;
-  position: number;
   targetTheme: SiteTheme;
+}
+
+export interface FaderTrackState {
+  edgeOffset: number;
+  position: number;
+  rawPosition: number;
 }
 
 function clamp(value: number, min: number, max: number) {
@@ -35,24 +40,39 @@ export function getFaderEdgeOffset(delta: number, activationDistance = 4, maxOff
   return Math.sign(delta) * Math.min(maxOffset, Math.sqrt(excess) * 2);
 }
 
-export function getFaderDragState(
-  theme: SiteTheme,
+export function getFaderTrackState(
+  originTheme: SiteTheme,
   startX: number,
   currentX: number,
   stepWidth: number,
-): FaderDragState {
-  const currentIndex = getFaderThemeIndex(theme);
+): FaderTrackState {
+  const originIndex = getFaderThemeIndex(originTheme);
   const safeStepWidth = Math.max(1, stepWidth);
-  const delta = currentX - startX;
+  const rawPosition = originIndex + (currentX - startX) / safeStepWidth;
+  const position = clamp(rawPosition, 0, FADER_THEME_ORDER.length - 1);
+  const overdrag = (rawPosition - position) * safeStepWidth;
+
+  return {
+    edgeOffset: getFaderEdgeOffset(overdrag),
+    position,
+    rawPosition,
+  };
+}
+
+export function getFaderSegmentState(
+  baseTheme: SiteTheme,
+  trackPosition: number,
+): FaderSegmentState {
+  const baseIndex = getFaderThemeIndex(baseTheme);
+  const safePosition = clamp(trackPosition, 0, FADER_THEME_ORDER.length - 1);
+  const delta = safePosition - baseIndex;
   const requestedDirection: FaderDirection = delta === 0 ? 0 : delta > 0 ? 1 : -1;
-  const targetIndex = clamp(currentIndex + requestedDirection, 0, FADER_THEME_ORDER.length - 1);
-  const direction = Math.sign(targetIndex - currentIndex) as FaderDirection;
-  const progress = direction === 0 ? 0 : clamp(Math.abs(delta) / safeStepWidth, 0, 1);
+  const targetIndex = clamp(baseIndex + requestedDirection, 0, FADER_THEME_ORDER.length - 1);
+  const direction = Math.sign(targetIndex - baseIndex) as FaderDirection;
 
   return {
     direction,
-    progress,
-    position: currentIndex + direction * progress,
+    progress: direction === 0 ? 0 : clamp(Math.abs(delta), 0, 1),
     targetTheme: getThemeAtFaderIndex(targetIndex),
   };
 }
