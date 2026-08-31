@@ -596,7 +596,6 @@ export default function Terminal({
       ref={workbenchRef}
       className={styles.workbench}
       data-theme={theme}
-      data-cursor-surface="custom"
       role="region"
       aria-label="ccsert.dev 终端工作台"
       tabIndex={-1}

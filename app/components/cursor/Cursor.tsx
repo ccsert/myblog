@@ -9,13 +9,15 @@ export default function Cursor() {
   const [state, setState] = useState<CursorState>('default');
   const [label, setLabel] = useState('');
   const [hasMoved, setHasMoved] = useState(false);
-  const [isCustomSurface, setIsCustomSurface] = useState(false);
   const hasMovedRef = useRef(false);
   const position = useRef({ x: 0, y: 0 });
   const targetPosition = useRef({ x: 0, y: 0 });
 
   useEffect(() => {
-    const pointerQuery = window.matchMedia('(min-width: 768px) and (hover: hover) and (pointer: fine)');
+    const documentElement = document.documentElement;
+    documentElement.dataset.customCursor = 'true';
+
+    const pointerQuery = window.matchMedia('(min-width: 768px) and (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference)');
     let animationFrameId = 0;
     let isActive = false;
 
@@ -29,7 +31,6 @@ export default function Cursor() {
 
       // 检测悬停元素
       const target = e.target as HTMLElement;
-      setIsCustomSurface(Boolean(target.closest('[data-cursor-surface="custom"]')));
 
       if (target.closest('a')) {
         setState('link');
@@ -78,7 +79,6 @@ export default function Cursor() {
       if (resetState) {
         hasMovedRef.current = false;
         setHasMoved(false);
-        setIsCustomSurface(false);
         setState('default');
         setLabel('');
       }
@@ -93,6 +93,7 @@ export default function Cursor() {
     start();
 
     return () => {
+      delete documentElement.dataset.customCursor;
       pointerQuery.removeEventListener('change', handlePointerChange);
       stop(false);
     };
@@ -109,7 +110,7 @@ export default function Cursor() {
         ${state === 'button' ? 'w-16 h-8' : ''}
         ${state === 'drag' ? 'w-12 h-12' : ''}
         ${state === 'text' ? 'w-0.5 h-5' : ''}
-        ${(state === 'text' && !isCustomSurface) || !hasMoved ? 'opacity-0' : 'opacity-100'}
+        ${!hasMoved ? 'opacity-0' : 'opacity-100'}
       `}
       data-state={state}
       style={{ transform: 'translate(-50%, -50%)' }}

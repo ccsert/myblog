@@ -24,13 +24,6 @@
   box-shadow: 0 28px 80px rgba(0, 0, 0, 0.44), 0 0 0 1px var(--terminal-accent-soft);
 }
 
-@media (min-width: 768px) and (hover: hover) and (pointer: fine) {
-  .workbench,
-  .workbench * {
-    cursor: none !important;
-  }
-}
-
 .topbar {
   display: flex;
   min-height: 48px;
@@ -850,12 +843,5 @@
 @media (prefers-reduced-motion: reduce) {
   .workbench {
     transition: none;
-  }
-}
-
-@media (forced-colors: active), (prefers-contrast: more) {
-  .workbench,
-  .workbench * {
-    cursor: revert !important;
   }
 }

@@ -335,13 +335,23 @@ html[data-theme-fallback-transitioning='true'] body *::after {
   display: none;
 }
 
-@media (min-width: 768px) and (hover: hover) and (pointer: fine) {
-  .custom-cursor {
+@media (min-width: 768px) and (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  html[data-custom-cursor='true'],
+  html[data-custom-cursor='true'] * {
+    cursor: none !important;
+  }
+
+  html[data-custom-cursor='true'] .custom-cursor {
     display: block;
   }
 }
 
 @media (forced-colors: active), (prefers-contrast: more) {
+  html[data-custom-cursor='true'],
+  html[data-custom-cursor='true'] * {
+    cursor: revert !important;
+  }
+
   .custom-cursor {
     display: none;
   }
