@@ -592,7 +592,15 @@ export default function Terminal({
   };
 
   return (
-    <section ref={workbenchRef} className={styles.workbench} data-theme={theme} role="region" aria-label="ccsert.dev 终端工作台" tabIndex={-1}>
+    <section
+      ref={workbenchRef}
+      className={styles.workbench}
+      data-theme={theme}
+      data-cursor-surface="custom"
+      role="region"
+      aria-label="ccsert.dev 终端工作台"
+      tabIndex={-1}
+    >
       <header className={styles.topbar}>
         <div className={styles.tabs} role="tablist" aria-label="终端视图">
           <button

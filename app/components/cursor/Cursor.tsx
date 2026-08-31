@@ -9,15 +9,15 @@ export default function Cursor() {
   const [state, setState] = useState<CursorState>('default');
   const [label, setLabel] = useState('');
   const [hasMoved, setHasMoved] = useState(false);
+  const [isCustomSurface, setIsCustomSurface] = useState(false);
   const hasMovedRef = useRef(false);
   const position = useRef({ x: 0, y: 0 });
   const targetPosition = useRef({ x: 0, y: 0 });
 
   useEffect(() => {
-    const pointerQuery = window.matchMedia('(hover: hover) and (pointer: fine)');
-    if (!pointerQuery.matches) return;
-
+    const pointerQuery = window.matchMedia('(min-width: 768px) and (hover: hover) and (pointer: fine)');
     let animationFrameId = 0;
+    let isActive = false;
 
     const handleMouseMove = (e: MouseEvent) => {
       if (!hasMovedRef.current) {
@@ -29,6 +29,7 @@ export default function Cursor() {
 
       // 检测悬停元素
       const target = e.target as HTMLElement;
+      setIsCustomSurface(Boolean(target.closest('[data-cursor-surface="custom"]')));
 
       if (target.closest('a')) {
         setState('link');
@@ -60,12 +61,40 @@ export default function Cursor() {
       animationFrameId = requestAnimationFrame(animate);
     };
 
-    window.addEventListener('mousemove', handleMouseMove);
-    animationFrameId = requestAnimationFrame(animate);
+    const start = () => {
+      if (isActive || !pointerQuery.matches) return;
+      isActive = true;
+      window.addEventListener('mousemove', handleMouseMove);
+      animationFrameId = requestAnimationFrame(animate);
+    };
 
-    return () => {
+    const stop = (resetState: boolean) => {
+      if (!isActive) return;
+      isActive = false;
       window.removeEventListener('mousemove', handleMouseMove);
       cancelAnimationFrame(animationFrameId);
+      animationFrameId = 0;
+
+      if (resetState) {
+        hasMovedRef.current = false;
+        setHasMoved(false);
+        setIsCustomSurface(false);
+        setState('default');
+        setLabel('');
+      }
+    };
+
+    const handlePointerChange = () => {
+      if (pointerQuery.matches) start();
+      else stop(true);
+    };
+
+    pointerQuery.addEventListener('change', handlePointerChange);
+    start();
+
+    return () => {
+      pointerQuery.removeEventListener('change', handlePointerChange);
+      stop(false);
     };
   }, []);
 
@@ -79,8 +108,10 @@ export default function Cursor() {
         ${state === 'link' ? 'w-8 h-8' : ''}
         ${state === 'button' ? 'w-16 h-8' : ''}
         ${state === 'drag' ? 'w-12 h-12' : ''}
-        ${state === 'text' || !hasMoved ? 'opacity-0' : 'opacity-100'}
+        ${state === 'text' ? 'w-0.5 h-5' : ''}
+        ${(state === 'text' && !isCustomSurface) || !hasMoved ? 'opacity-0' : 'opacity-100'}
       `}
+      data-state={state}
       style={{ transform: 'translate(-50%, -50%)' }}
     >
       <div
@@ -92,6 +123,7 @@ export default function Cursor() {
           ${state === 'link' ? 'bg-accent-10' : ''}
           ${state === 'button' ? 'bg-accent-10 rounded-full' : ''}
           ${state === 'drag' ? 'bg-accent-10' : ''}
+          ${state === 'text' ? 'bg-accent border-0 rounded-none' : ''}
         `}
       >
         {label && (
