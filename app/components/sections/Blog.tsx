@@ -1,13 +1,14 @@
 'use client';
 
-import { useState } from 'react';
+import { useSessionSelection } from './useSessionSelection';
 import { ArrowUpRight, FileText } from 'lucide-react';
 import MissionSection from '@/app/components/sections/mission/MissionSection';
 import { KNOWLEDGE_SIGNALS } from '@/app/lib/content/portfolio';
 import styles from '@/app/components/sections/mission/MissionLog.module.css';
+import { ArchiveLink } from '@/app/components/ArchiveLink';
 
 export default function Blog() {
-  const [selectedPostId, setSelectedPostId] = useState<string>(KNOWLEDGE_SIGNALS[0].id);
+  const [selectedPostId, setSelectedPostId] = useSessionSelection('home-selected-note', KNOWLEDGE_SIGNALS[0].id, KNOWLEDGE_SIGNALS.map(note => note.id));
   const selectedPost = KNOWLEDGE_SIGNALS.find(post => post.id === selectedPostId) ?? KNOWLEDGE_SIGNALS[0];
 
   return (
@@ -17,8 +18,8 @@ export default function Blog() {
       railTitle="Notes"
       railSubtitle="Knowledge signals"
       eyebrow="// Research index"
-      title="Field Notes"
-      subtitle="只展示可公开的知识脉络、证据边界与仍在追问的问题"
+      title="做东西，也留一点追问。"
+      subtitle="关于知识、网络、语音与系统，顺着一条线索继续读。"
       headerAside={(
         <span className={styles.indexBoundary}>Private notes · public-safe index</span>
       )}
@@ -33,6 +34,7 @@ export default function Blog() {
           <div className={styles.featuredMeta}>
             {selectedPost.tags.map(tag => <span className={styles.tag} key={tag}>{tag}</span>)}
             <span>Indexed {selectedPost.indexed}</span>
+            <ArchiveLink id={`note-read-${selectedPost.slug}`} className={styles.textLink} href={`/archive#read=${selectedPost.slug}`}>阅读这条手记 <ArrowUpRight size={11} aria-hidden="true" /></ArchiveLink>
             <a className={styles.textLink} href={selectedPost.sourceUrl} target="_blank" rel="noopener noreferrer">
               {selectedPost.sourceLabel} <ArrowUpRight size={11} aria-hidden="true" />
             </a>

@@ -745,7 +745,7 @@
   }
 }
 
-@media (max-width: 767px) {
+@media (max-width: 900px) {
   .workbench {
     grid-template-rows: auto minmax(0, 1fr) auto;
     border-radius: 8px;

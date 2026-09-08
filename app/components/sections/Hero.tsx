@@ -1,17 +1,30 @@
 'use client';
 
 import Terminal from '@/app/components/terminal/Terminal';
-import { KNOWLEDGE_SIGNALS, PORTFOLIO_PROJECTS } from '@/app/lib/content/portfolio';
-import { Command } from '@/app/types/terminal';
-import { ArrowDown } from 'lucide-react';
+import SignalObservatory from './exploration/SignalObservatory';
+import DiscoveryDock from './exploration/DiscoveryDock';
+import { KNOWLEDGE_SIGNALS, PORTFOLIO_PROJECTS, SITE_CONFIG } from '@/app/lib/content/portfolio';
+import { Command, TerminalHandle } from '@/app/types/terminal';
+import { ArrowDownRight, ArrowUpRight, TerminalSquare } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { ArchiveLink } from '@/app/components/ArchiveLink';
+import { rememberHomePosition, scrollToHomeSection } from '@/app/lib/home-navigation';
+import { useRef } from 'react';
+import styles from './Hero.module.css';
 
 export default function Hero() {
   const router = useRouter();
+  const terminalRef = useRef<TerminalHandle>(null);
+  const [brandPrefix, ...brandSuffix] = SITE_CONFIG.domain.split(/(?=\.)/);
+  const openDocument = (path: string) => {
+    const instant = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+      || document.activeElement?.matches(':focus-visible');
+    terminalRef.current?.openDocument(path);
+    scrollToHomeSection('workbench', Boolean(instant));
+  };
   const scrollToSection = (sectionId: string, label: string) => {
     requestAnimationFrame(() => {
-      const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      document.getElementById(sectionId)?.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' });
+      scrollToHomeSection(sectionId, true);
     });
 
     return `Opening ${label}...`;
@@ -20,10 +33,11 @@ export default function Hero() {
   const commands: Command[] = [
     {
       name: 'archive',
-      description: 'Enter the playable Signal Archive',
+      description: 'Explore the questions behind the projects',
       fn: () => {
-        router.push('/archive');
-        return 'Opening Signal Archive...';
+        rememberHomePosition();
+        router.push('/archive', { scroll: false });
+        return '正在打开个人实验场…';
       },
     },
     {
@@ -69,7 +83,7 @@ export default function Hero() {
   ];
 
   const welcomeMessage = [
-    'ccsert.dev — developer tools, AI-assisted engineering, self-hosted systems.',
+    `${SITE_CONFIG.domain} — developer tools, AI-assisted engineering, self-hosted systems.`,
     `${PORTFOLIO_PROJECTS.length} public repositories · ${KNOWLEDGE_SIGNALS.length} knowledge signals · session online`,
     '',
     'Quick start:',
@@ -77,7 +91,7 @@ export default function Hero() {
     '  search protocol — search projects and research notes',
     '  tree — inspect files',
     '  status — show system health',
-    '  archive — enter the playable Signal Archive',
+    '  archive — explore the questions behind the projects',
     '  theme <name> — green · cyan · amber · light',
     '',
     'Tip: type “o” to inspect matches, then press Tab to complete.',
@@ -86,27 +100,31 @@ export default function Hero() {
   ];
 
   return (
-    <section className="relative min-h-[100svh] flex items-center justify-center px-4 pb-16 pt-28 blueprint-grid">
-      <div className="w-full max-w-[1340px]">
-        <div className="mb-7 text-center">
-          <h1 className="text-4xl md:text-6xl font-bold mb-3 text-text-primary tracking-tight">
-            ccsert<span className="text-accent">.dev</span>
-          </h1>
-          <p className="text-lg md:text-xl text-text-secondary font-mono">
-            Developer tools · AI-assisted engineering · self-hosted infrastructure
-          </p>
-        </div>
-
-        <div className="h-[560px] md:h-[650px] lg:h-[clamp(620px,calc(100svh-225px),776px)]">
-          <Terminal commands={commands} welcomeMessage={welcomeMessage} />
-        </div>
-
-        <div className="mt-8 text-center">
-          <div className="inline-flex items-center gap-2 text-text-dim text-sm font-mono animate-bounce">
-            <span>Scroll down to explore</span>
-            <ArrowDown size={16} aria-hidden="true" />
+    <section id="home" className={`${styles.hero} blueprint-grid`} aria-label="个人信号观测台" tabIndex={-1}>
+      <div className={styles.inner}>
+        <div className={styles.intro}>
+          <div className={styles.identity}>
+            <div className={styles.eyebrow}>INDEPENDENT BUILDER / OPEN SYSTEMS</div>
+            <h1 className={styles.heading}>{brandPrefix}<span>{brandSuffix.join('')}</span></h1>
+            <p className={styles.invitation}>把复杂留给系统，把好奇心留给自己。</p>
+            <p className={styles.domains}>Developer tools · AI engineering · Self-hosted systems</p>
+            <nav className={styles.shortcuts} aria-label="开始探索">
+              <a href="#projects"><b>{String(PORTFOLIO_PROJECTS.length).padStart(2, '0')}</b> 公开构建</a>
+              <a href="#blog"><b>{String(KNOWLEDGE_SIGNALS.length).padStart(2, '0')}</b> 思考线索</a>
+              <ArchiveLink href="/archive" id="hero-playground"><span className="playground-colors" aria-hidden="true"><i /><i /><i /><i /></span> 个人实验场 <ArrowUpRight size={11} aria-hidden="true" /></ArchiveLink>
+            </nav>
           </div>
+          <SignalObservatory onOpenDocument={openDocument} />
         </div>
+        <div className={styles.workbenchHeading}>
+          <span><TerminalSquare size={13} aria-hidden="true" /><b>01</b> THE OPEN WORKBENCH</span>
+          <a href="#curiosity-heading">不知道从哪开始？ <ArrowDownRight size={13} aria-hidden="true" /></a>
+        </div>
+        <div className={styles.workbench} id="workbench">
+          <Terminal ref={terminalRef} commands={commands} welcomeMessage={welcomeMessage} />
+        </div>
+        <div className={styles.workbenchFooter}><span><i /> 每个文件，都是一条可以继续追问的线索。</span><span>TYPE A COMMAND. FOLLOW A SIGNAL.</span></div>
+        <DiscoveryDock onOpenDocument={openDocument} />
       </div>
     </section>
   );

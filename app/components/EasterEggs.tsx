@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
+import { SITE_CONFIG } from '@/app/lib/content/portfolio';
 
 export default function EasterEggs() {
   useEffect(() => {
@@ -51,7 +52,7 @@ export default function EasterEggs() {
     console.log('%cYou found the console. Here\'s a secret:', 'font-size: 14px; color: #A1A1AA;');
     console.log('%cTry the Konami Code: ↑↑↓↓←→←→BA', 'font-size: 14px; color: #00D9FF;');
     console.log('%cOr type "matrix" in the terminal.', 'font-size: 14px; color: #00D9FF;');
-    console.log('%c\nWant to work together? Email me: hello@ccsert.dev', 'font-size: 12px; color: #52525B;');
+    console.log(`%c\nWant to work together? Email me: ${SITE_CONFIG.email}`, 'font-size: 12px; color: #52525B;');
 
     window.addEventListener('keydown', handleKeyDown);
 

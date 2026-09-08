@@ -16,7 +16,16 @@ const {
   KNOWLEDGE_SIGNALS,
   PORTFOLIO_PROJECTS,
   PUBLIC_EVIDENCE_CHECKED_AT,
+  SITE_CONFIG,
 } = await import(moduleUrl);
+
+test('站点身份集中在单一配置源', () => {
+  assert.deepEqual(SITE_CONFIG, {
+    domain: 'me.ccsert.top',
+    url: 'https://me.ccsert.top',
+    email: 'ccsert@foxmail.com',
+  });
+});
 
 test('公开项目索引只包含唯一、可追溯的 ccsert GitHub 仓库', () => {
   assert.equal(PORTFOLIO_PROJECTS.length, 4);

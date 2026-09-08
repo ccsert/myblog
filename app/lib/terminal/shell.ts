@@ -10,6 +10,7 @@ import {
   PORTFOLIO_PROFILE,
   PORTFOLIO_PROJECTS,
   PUBLIC_EVIDENCE_CHECKED_AT,
+  SITE_CONFIG,
 } from '@/app/lib/content/portfolio';
 
 export const HOME_DIRECTORY = '/home/visitor';
@@ -148,7 +149,7 @@ const VIRTUAL_FILE_SYSTEM: Record<string, VirtualEntry> = {
   [`${HOME_DIRECTORY}/README.md`]: {
     type: 'file',
     content: [
-      '# ccsert.dev',
+      `# ${SITE_CONFIG.domain}`,
       '',
       PORTFOLIO_PROFILE.headline,
       '',
@@ -169,7 +170,7 @@ const VIRTUAL_FILE_SYSTEM: Record<string, VirtualEntry> = {
   },
   [`${HOME_DIRECTORY}/contact.txt`]: {
     type: 'file',
-    content: 'Email:  hello@ccsert.dev\nGitHub: https://github.com/ccsert',
+    content: `Email:  ${SITE_CONFIG.email}\nGitHub: https://github.com/ccsert`,
   },
   [`${HOME_DIRECTORY}/projects`]: { type: 'directory' },
   ...PROJECT_FILE_ENTRIES,
@@ -267,7 +268,7 @@ const PREVIEW_DOCUMENTS: Record<string, PreviewDocument> = {
   [`${HOME_DIRECTORY}/docs/commands.md`]: {
     path: `${HOME_DIRECTORY}/docs/commands.md`,
     title: 'CLI Reference',
-    description: 'Keyboard-first ways to explore ccsert.dev.',
+    description: `Keyboard-first ways to explore ${SITE_CONFIG.domain}.`,
     status: 'Ready',
     stage: 'Docs',
     updated: PUBLIC_EVIDENCE_CHECKED_AT,
@@ -864,18 +865,18 @@ export function executeShellCommand(commandName: string, args: string[], context
     case 'uname':
       if (args.length === 0) return { handled: true, output: 'Linux' };
       if (args.length === 1 && args[0] === '-a') {
-        return { handled: true, output: 'Linux ccsert.dev 6.8.0-virtual #1 SMP x86_64 GNU/Linux' };
+        return { handled: true, output: `Linux ${SITE_CONFIG.domain} 6.8.0-virtual #1 SMP x86_64 GNU/Linux` };
       }
       return { handled: true, output: `uname: invalid option -- '${args.join(' ')}'`, outputType: 'error' };
     case 'whoami':
       return { handled: true, output: 'visitor' };
     case 'hostname':
-      return { handled: true, output: 'ccsert.dev' };
+      return { handled: true, output: SITE_CONFIG.domain };
     case 'status':
       return {
         handled: true,
         output: [
-          'ccsert.dev workbench',
+          `${SITE_CONFIG.domain} workbench`,
           'status    online',
           'runtime   Next.js · React',
           'shell     virtual · sandboxed',
@@ -890,7 +891,7 @@ export function executeShellCommand(commandName: string, args: string[], context
       return {
         handled: true,
         output: [
-          'visitor@ccsert.dev',
+          `visitor@${SITE_CONFIG.domain}`,
           '──────────────────',
           'Builds:   developer tools · self-hosted systems',
           'Focus:    AI-assisted engineering · visible state',

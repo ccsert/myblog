@@ -3,6 +3,7 @@
 import { FormEvent, useState } from 'react';
 import { GitBranch, Mail, MessageSquareText, Send } from 'lucide-react';
 import MissionSection from '@/app/components/sections/mission/MissionSection';
+import { SITE_CONFIG } from '@/app/lib/content/portfolio';
 import styles from '@/app/components/sections/mission/MissionLog.module.css';
 
 export default function Contact() {
@@ -18,8 +19,8 @@ export default function Contact() {
     const subject = encodeURIComponent(`来自 ${name} 的网站留言`);
     const body = encodeURIComponent(`姓名：${name}\n邮箱：${email}\n\n${message}`);
 
-    window.location.href = `mailto:hello@ccsert.dev?subject=${subject}&body=${body}`;
-    setFormStatus('已请求打开系统邮件客户端；若没有反应，请直接发送至 hello@ccsert.dev。');
+    window.location.href = `mailto:${SITE_CONFIG.email}?subject=${subject}&body=${body}`;
+    setFormStatus(`已请求打开系统邮件客户端；若没有反应，请直接发送至 ${SITE_CONFIG.email}。`);
   };
 
   return (
@@ -37,7 +38,7 @@ export default function Contact() {
           <div className={styles.directBlock}>
             <h3 className={styles.subpanelTitle}>Direct links</h3>
             <div className={styles.directLinks}>
-              <a href="mailto:hello@ccsert.dev"><Mail size={14} aria-hidden="true" />hello@ccsert.dev</a>
+              <a href={`mailto:${SITE_CONFIG.email}`}><Mail size={14} aria-hidden="true" />{SITE_CONFIG.email}</a>
               <a href="https://github.com/ccsert" target="_blank" rel="noopener noreferrer"><GitBranch size={14} aria-hidden="true" />github.com/ccsert</a>
             </div>
           </div>

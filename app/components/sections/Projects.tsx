@@ -1,13 +1,14 @@
 'use client';
 
-import { useState } from 'react';
+import { useSessionSelection } from './useSessionSelection';
 import { Circle, ExternalLink, Minus, Plus } from 'lucide-react';
 import MissionSection from '@/app/components/sections/mission/MissionSection';
 import { PORTFOLIO_PROJECTS } from '@/app/lib/content/portfolio';
 import styles from '@/app/components/sections/mission/MissionLog.module.css';
+import { ArchiveLink } from '@/app/components/ArchiveLink';
 
 export default function Projects() {
-  const [openProjectId, setOpenProjectId] = useState<string>(PORTFOLIO_PROJECTS[0].id);
+  const [openProjectId, setOpenProjectId] = useSessionSelection('home-open-project', PORTFOLIO_PROJECTS[0].id, ['', ...PORTFOLIO_PROJECTS.map(project => project.id)]);
 
   return (
     <MissionSection
@@ -16,8 +17,8 @@ export default function Projects() {
       railTitle="Projects"
       railSubtitle="Public systems"
       eyebrow="// Verified repositories"
-      title="Selected Systems"
-      subtitle="来自公开仓库的真实构建，不再使用概念项目占位"
+      title="想法，已经在运行。"
+      subtitle="四个公开作品，从这里了解，也可以动手体验。"
       headerAside={(
         <div className={styles.summaryMetrics}>
           <div className={styles.summaryMetric}>
@@ -74,9 +75,11 @@ export default function Projects() {
                 <div className={styles.projectExpanded} id={contentId} role="region" aria-label={`${project.title} 项目详情`}>
                   <div className={styles.expandedOverview}>
                     <p>{project.overview}</p>
-                    <a className={styles.textLink} href={project.repositoryUrl} target="_blank" rel="noopener noreferrer">
-                      View repository <ExternalLink size={12} aria-hidden="true" />
-                    </a>
+                    <div className={styles.projectActions}>
+                      <ArchiveLink id={`project-play-${project.slug}`} className={styles.textLink} href={`/archive#play=${project.slug}`}><i className={styles.projectColor} data-project={project.slug} />动手体验 <ExternalLink size={12} aria-hidden="true" /></ArchiveLink>
+                      <ArchiveLink id={`project-read-${project.slug}`} className={styles.textLink} href={`/archive#read=${project.slug}`}>阅读档案 <ExternalLink size={12} aria-hidden="true" /></ArchiveLink>
+                      <a className={styles.textLink} href={project.repositoryUrl} target="_blank" rel="noopener noreferrer">项目源码 <ExternalLink size={12} aria-hidden="true" /></a>
+                    </div>
                   </div>
                   <div>
                     <h3 className={styles.capabilityTitle}>Key capabilities</h3>

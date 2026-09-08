@@ -1,49 +1,48 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# me.ccsert.top
 
-## Getting Started
+ccsert 的交互式个人站，展示开发者工具、AI 辅助工程、自托管系统和技术手记。
 
-First, run the development server:
+- **首页 `/`**：终端工作台、主题切换、项目探索和随滚动定位的章节目录。
+- **个人实验场 `/archive`**：四个交互演示、项目与手记阅读器、关联阅读和阅读位置恢复。
+- **分享入口**：`/archive#play=<项目标识>` 打开演示，`/archive#read=<内容标识>` 打开文章。
+
+技术栈：Next.js 16 App Router、React 19、TypeScript、Tailwind CSS 4 和 Motion。字体使用本地 Inter、JetBrains Mono、Source Serif 4，构建无需从字体服务下载资源。
+
+## 本地开发
+
+当前验证环境为 Node.js 24。使用 npm 和仓库中的 `package-lock.json` 安装锁定依赖：
 
 ```bash
+npm ci
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000), or use any IP address of
-the development machine (for example `http://192.168.110.83:3000`) from another
-device on the same network.
+打开 [localhost:3000](http://localhost:3000)。开发服务监听 `0.0.0.0`，也可以通过本机局域网 IP 在其他设备上预览。
 
-The development server automatically allows Next.js assets and HMR connections
-from every address currently assigned to the machine. When accessing it through
-a custom DNS or reverse-proxy hostname, append that hostname explicitly:
+开发资源和 HMR 默认允许本机网卡地址。通过自定义域名或反向代理访问时，显式追加开发域名：
 
 ```bash
-NEXT_ALLOWED_DEV_ORIGINS=blog.dev.example npm run dev
+NEXT_ALLOWED_DEV_ORIGINS=me.ccsert.top npm run dev
 ```
 
-Multiple hostnames can be separated with commas. Restart the development server
-after an IP address or hostname changes.
+多个域名用逗号分隔；IP 或域名变化后重启开发服务。该变量仅用于开发环境，正常构建和运行不需要配置环境变量。
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 验证与生产运行
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm test
+npm run lint
+npm run build
+npm start
+```
 
-## Learn More
+构建生成首页和实验场页面。交互演示在浏览器本地运行，联系表单打开系统邮件客户端；当前站点不依赖数据库或外部 API 密钥。
 
-To learn more about Next.js, take a look at the following resources:
+## 内容与设计
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- [站点配置和公开内容](app/lib/content/portfolio.ts)：域名、邮箱、项目索引、知识主题及资料核验日期。
+- [阅读内容](app/lib/archive/stories.ts)：文章场景、过程、取舍及关联阅读。
+- [实验场设计](docs/design/elastic-playground.md)：当前实验场的交互与布局说明。
+- [设计验收记录](design-qa.md)：响应式、滚动、阅读器和章节目录的验证记录。
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+内容基于注明日期的公开资料快照；演示不代表真实后端执行或服务的实时状态。

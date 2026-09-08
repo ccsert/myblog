@@ -1,204 +1,192 @@
-# Terminal Workbench — Design QA
-
-## Target and implementation
-
-- Selected visual: `output/product-design/terminal-workbench-selected.png`
-- Desktop implementation: `output/product-design/workbench-desktop-final.png`
-- Mobile implementation: `output/product-design/workbench-mobile-final.png`
-- Full comparison input: `output/product-design/workbench-design-comparison.png`
-- Focused workbench comparison: `output/product-design/workbench-focus-comparison.png`
-- Reference raster: 1487 × 1058
-- Desktop viewport: 1440 × 1024, DPR 1; browser capture: 1432 × 1018
-- Mobile viewport: 390 × 844, DPR 1; browser capture: 382 × 827
-- Compared state: Shell active, `search agent` completed, Agent Platform open in preview
-
-## Comparison history
-
-### Pass 1
-
-- P2: Workbench frame was wider than the target and the terminal column dominated the file tree and preview.
-- P2: Desktop frame ended too high, reducing the instrument-panel feel of the selected design.
-- P2: Mobile quick-start copy wrapped unevenly and reduced the usable prompt area.
-- Fixes: constrained the hero to 1340 px, rebalanced the three columns to terminal / 270 px tree / preview, extended the desktop workbench height, and shortened command hints.
-
-### Pass 2
-
-- Full-page and focused side-by-side inputs show matching hierarchy, density, dark surface treatment, green signal accent, three-panel proportions, borders, radius, and chart placement.
-- Existing site navigation labels and the expanded command inventory intentionally remain product-accurate; they do not alter the selected visual hierarchy.
-- No actionable P0, P1, or P2 visual mismatch remains.
-
-## Functional and responsive checks
-
-- Terminal focus is retained after Enter; history, completion, clear, cancel, and palette shortcuts work.
-- `help`, `pwd`, `ls`, `cd`, `cat`, `open`, `search`, `tree`, `find`, `grep`, `head`, `tail`, `echo`, `history`, `date`, `uname`, `whoami`, `hostname`, `status`, `neofetch`, `theme`, `docs`, and `clear` are available.
-- File-tree selection updates the preview; preview actions can print a file, copy its path, or open the matching page section.
-- Command palette opens from the button and `⌘K`, filters actions, runs commands, and changes theme.
-- Mobile Shell / Files / Preview switching works; selecting a file opens Preview and returning to Shell restores command entry.
-- Mobile has no horizontal overflow (`scrollWidth` 382 at a 390 px viewport).
-- Fresh browser console check after the final reload contains no errors or warnings.
-- Reduced-motion behavior is preserved by the workbench stylesheet.
-
----
-
-# Mission Log Lower Sections — Design QA
-
-## Target and implementation
-
-- Selected visual: `output/product-design/lower-sections/mission-log-selected.png`
-- Reference raster: 916 × 1716
-- Desktop captures: `projects-desktop-pass1.jpg`, `about-desktop-pass1.jpg`, `skills-desktop-pass1.jpg`, `blog-desktop-pass1.jpg`, and `contact-desktop-pass1.jpg`
-- Mobile captures: `projects-mobile-pass1.jpg` and `contact-mobile-pass1.jpg`
-- Full journey comparison input: `output/product-design/lower-sections/comparison-full-pass1.png` (1200 × 2140)
-- Focused comparison inputs: `comparison-projects-pass1.png`, `comparison-about-pass1.png`, `comparison-skills-pass1.png`, `comparison-blog-pass1.png`, and `comparison-contact-pass1.png`
-- Desktop viewport: 1440 × 1024, DPR 1; browser capture: 1432 × 1018
-- Mobile viewport: 390 × 844, DPR 1; browser capture: 382 × 827
-- Compared state: Agent Platform expanded, first blog entry featured, Contact composer idle
-
-## Comparison history
-
-### Pass 1
-
-- Full journey and five focused side-by-side inputs show the selected Mission Control structure: continuous left journey rail, numbered chapter markers, compact near-black panels, green system accent, restrained cyan/amber state colors, and dense mono metadata.
-- Layout, typography hierarchy, borders, radius, panel density, content order, status colors, and Lucide icon weight preserve the selected visual intent across Projects, About, Skills, Blog, and Contact.
-- No image asset is present in the target; the implementation therefore uses real interface content and the existing icon library without placeholder imagery, CSS illustration, inline SVG art, or fake assets.
-- P2 accessibility: interactive project rows and blog queue buttons relied mostly on surface color for keyboard focus.
-- P2 accessibility: J/K chapter navigation always requested smooth scrolling, even when the operating system preferred reduced motion.
-- Fixes: added explicit focus-visible outlines to chapter navigation, project rows, blog rows, and text links; chapter scrolling now switches to instant behavior under `prefers-reduced-motion: reduce`.
-
-### Pass 2
-
-- Desktop default state was reloaded at 1440 × 1024 after the accessibility fix; the chapter hierarchy, expanded-project layout, About handoff, and horizontal overflow remained stable.
-- Project accordion focus state is now visibly bounded without changing the selected panel geometry.
-- No actionable P0, P1, or P2 visual, responsive, accessibility, content, icon, or interaction mismatch remains.
-
-## Functional, responsive, and accessibility checks
-
-- Projects accordion switches the expanded panel correctly: Agent Platform collapses and DevOps Pipeline exposes exactly one labelled detail region.
-- Selecting a blog queue entry updates the featured card and its pressed state.
-- J moves from About toward Skills; K reverses the direction. When a form input is focused, typing `j` changes the input value and does not scroll the page.
-- Chapter buttons and visible controls are semantic buttons or links; headings, labelled regions, form labels, live status, and external-link behavior are present in the accessibility tree.
-- At 390 × 844, the chapter navigator becomes sticky and horizontally scrollable, all section grids collapse cleanly, the composer stacks vertically, and there is no horizontal overflow (`scrollWidth` 382).
-- Desktop at 1440 × 1024 also has no horizontal overflow.
-- Fresh in-app browser console checks after final desktop and mobile reloads contain no errors or warnings.
-- `npm run lint`, `npx tsc --noEmit`, `npm run build`, and `git diff --check` all pass.
-- React best-practices review found no data-fetch waterfalls, heavy client-only dependencies, inline component definitions, unsafe TypeScript assertions, or avoidable derived-state effects in the new sections.
-
----
-
-# Four-theme Site-wide Transition — QA
-
-## Implementation contract
-
-- `theme green`, `theme cyan`, `theme amber`, and `theme light` update one site-level theme provider instead of terminal-local state.
-- A persistent top-navigation theme control cycles Signal green → Telemetry cyan → Operations amber → Paper light and exposes both the current and next theme in its accessible label.
-- The active theme controls the document background, navigation, blueprint grid, terminal surfaces, Mission Log panels, borders, text hierarchy, cursor, status markers, charts, and action colors.
-- Browsers with the View Transitions API use a 280 ms radial reveal from the initiating control with the existing `--ease-in-out-quart` curve.
-- Browsers without that API use an interruptible 280 ms color, surface, border, shadow, fill, and stroke transition with `--ease-out-expo`.
-- Every animated switch adds a more legible 560 ms diagonal system sweep plus a 460 ms origin pulse; both overlays animate only transforms and opacity.
-- `prefers-reduced-motion: reduce` bypasses the programmatic transition and disables the reveal, fallback transitions, sweep, and pulse.
-
-## Browser evidence
-
-- Cyan terminal state: `output/theme-cyan-final.jpg`
-- Cyan Mission Log state: `output/theme-cyan-lower.jpg`
-- Amber terminal state: `output/theme-amber-final.jpg`
-- Amber Mission Log state: `output/theme-amber-lower.jpg`
-- Amber mobile state: `output/theme-amber-mobile.jpg`
-- Paper light terminal state: `output/theme-light-terminal.png`
-- Paper light Mission Log state: `output/theme-light-lower.png`
-- Paper light mobile state: `output/theme-light-mobile.png`
-- The in-app browser reported no View Transitions API, so the CSS fallback path was the live-tested path.
-- Cyan checks resolved `--color-accent: #00d9ff`, body `rgb(7, 16, 20)`, Mission Log panel `rgba(10, 23, 28, 0.94)`, and terminal `data-theme="cyan"`.
-- Amber checks resolved `--color-accent: #ffb800`, body `rgb(16, 12, 6)`, Mission Log panel `rgba(24, 18, 9, 0.95)`, and terminal `data-theme="amber"`.
-- Paper light checks resolved body `rgb(242, 244, 238)`, primary text `rgb(21, 33, 26)`, terminal `rgb(248, 250, 245)`, `color-scheme: light`, and Mission Log panel `rgba(251, 252, 248, 0.94)`.
-- The live fallback path exposed `theme-system-sweep` at 0.56 s, `theme-origin-pulse`, and button-relative origin coordinates; the top control's label advanced after every switch.
-- Skills semantic colors remain distinct in cyan and amber themes; Healthy, Stable, and Learning no longer collapse into similar hues.
-- `theme light` from the terminal updates the top button state, clears the command input, and preserves terminal focus after Enter.
-- Mobile at 390 × 844 and the available 614 px panel both have no horizontal overflow, and the final browser console contains no fresh warnings or errors.
-- `npm run lint`, `npx tsc --noEmit`, `npm run build`, and `git diff --check` pass.
-
----
-
-# Guided Exploration Prototype and Terminal Completion — QA
-
-Status: the embedded Explore entry was intentionally removed after review. Its screenshots remain design evidence for a future standalone experience; the current homepage opens directly into `shell`.
-
-## Prototype evidence
-
-- The evaluated prototype opened on an `Explore` tab and provided featured work, builder profile, and capability-map trails.
-- Product review concluded that the guided and terminal mental models should not share one workbench; this prototype is no longer rendered on the homepage.
-- The previous entry, guided entry, completion panel, mobile state, and full audit notes are saved under `output/exploration-audit/`.
-
-## Completion behavior
-
-- Partial commands expose a labelled listbox connected to the terminal combobox with `aria-controls`, `aria-expanded`, and `aria-activedescendant`.
-- Up and Down move the active candidate; Tab applies it; when the value is already complete, Tab and Shift+Tab leave the prompt through the normal workbench focus order instead of trapping keyboard users. Clicking a candidate fills the input without losing focus.
-- Command names, theme values, curated search terms, and multi-level virtual paths are supported.
-- Live checks confirmed `t → Tab → tree → Tab → tail`, `theme l → Tab → theme light`, and `open p → Tab → projects/ → Tab → projects/agent-platform.md`.
-
-## Responsive and quality gates
-
-- At the available 614 px viewport, the final default state is `shell`, the Explore tab is absent, horizontal overflow is zero, and the console has no warnings or errors.
-- `npm run lint`, `npx tsc --noEmit`, `npm run build`, and `git diff --check` pass.
-- React best-practices review found no new data-fetching, hydration, heavy dependency, inline component, unsafe TypeScript, or derived-state issue.
+# 个人实验场设计验收
 
 final result: passed
 
-# Signal Archive — Design QA
+已按照用户选中的第一张效果图实现。最新一轮修复首页章节浮层遮挡正文；四色橱窗与上一轮等高体验区保持原有设计。下方早期验收保留为历史，旧的 840px / 900px 与纵向折叠布局已被紧凑布局替代。
 
-## QA setup
+## 章节目录遮挡修复（2026-09-06，最新）
 
-- Source of truth: `output/design/signal-archive-interaction-rich-v2.png`
-- Implementation capture: `output/design/signal-archive-implementation-desktop-v6.png`
-- Full comparison: `output/design/signal-archive-design-qa-comparison-v5.png`
-- Focused narrow-screen evidence: `output/design/signal-archive-story-mode-mobile-320-v2.png`
-- Narrow-screen camera evidence: `output/design/signal-archive-mobile-camera-320-v2.png`
-- Wide-screen crop evidence: `output/design/signal-archive-implementation-wide-1440x810.png`
-- Paper-light evidence: `output/design/signal-archive-light-wide-1440x810.png`
-- Browser state: `/archive`, Signal green, archive restored and online
-- Viewport: 1486 × 1058 CSS pixels at device scale 1; source and implementation are both 1486 × 1058
+| Before | After | Why |
+| --- | --- | --- |
+| 桌面 760px 宽的横栏固定在 top=80px，横跨手记正文。 | 桌面目录放进独立的 126px 左侧列，正文位于右侧；目录与正文间隔 18px。 | 消除正文中间的横向遮挡，利用原有侧栏空间。 |
+| 整条页内阅读进度线紧贴 Tab 底部，容易被误认为选中指示。 | 当前章节使用局部边线与背景；桌面“阅读进度”和百分比单独放在目录下面。 | 明确区分当前章节和整页进度。 |
+| 手机章节栏与自动隐藏的顶栏之间会留下悬空区域。 | 手机章节导航贴合主导航，阅读区内保持主导航可见；五个章节仍同时可用。 | 减少浮层感，维持一致的阅读起始位置。 |
 
-## Iteration record
+- 复现用户截图对应的 1440 × 955px 场景：原目录覆盖 x=336～1096px、y=80～126px 的手记正文。
+- 320、390、774、980、981、1440px 六种宽度 × 五个章节，共 30 个状态；全部无页面横向溢出，五个按钮可见，当前章节与焦点一致。断点两侧 980 / 981px 均通过。
+- 桌面目录右边界 157px，正文左边界 175px，两者没有相交。桌面普通章节定位到约 top=88px；手机定位到约 top=136px。页尾保留浏览器原生钳制。
+- 本机生产页面 390px 下原生向下滚动后，主导航底部和章节栏顶部均为 73px；章节栏底部 121px，章节起点 135.8px。开发热更新期间出现过旧导航实例状态，完整刷新及生产页面复验均保持正确贴合。
+- 当前章节仍按阅读位置更新；到达文档底部时标记最后一章。因此截图中的“联系”选中可以由页尾位置解释，本次主要修复布局遮挡与进度语义，并同步桌面 / 手机定位阈值。
+- 31 / 31 测试、lint、TypeScript、生产构建和 git diff --check 通过；本机生产浏览器控制台 warn / error 为空。未部署、未提交 Git。
+- 证据：`output/design/home-chapter-fix-qa.json`；生产截图 `home-chapter-sidebar-desktop.jpg`、`home-chapter-dock-mobile.jpg`。
 
-1. V1 exposed an unintended inset black frame and made the player substantially smaller than the reference. The scene was changed to full bleed and the runtime sprite scale was increased.
-2. V2 still read as under-scaled beside the furniture. The character cap was raised to 116 px while retaining proportional sprite dimensions.
-3. V3/V4 aligned the room crop, atmosphere, character proportion, primary panel weight, phase navigation, and bottom HUD closely enough to the selected reference.
-4. V5 preserved that match after the aspect-locked world transform, mobile camera follow, light-theme treatment, modal focus management, and terminal-session handoff fixes.
-5. V6 captures the final clean first-visit state after the online-revisit chooser, optional-discovery feedback, hidden-echo reward, dynamic terminal archive, and persistence fixes. The final clean browser session contains only development-runtime info messages and no warning or error.
+## 首页衔接与滚动手感（2026-09-06）
 
-## Intentional differences
+| Before | After | Why |
+| --- | --- | --- |
+| 首页实验场入口是深色宣传卡，不同位置混用“技术档案”等名称。 | 入口统一为“个人实验场”，首页提供与实验场对应的纸色、四色试玩入口；作品和手记增加直达链接。 | 从首页就能预知会进入哪种体验，保留同一作品的颜色与名称。 |
+| 进入页面后再找作品；返回首页会丢失阅读位置及所选条目。 | 四个 `#play=` 链接直接选中试玩；返回恢复首页位置、链接焦点、展开作品与所选手记。 | 让浏览、试玩和阅读成为可往返的路径。 |
+| 顶栏遇到很小的反向滚动就回显，长距离目录滚动不能及时让出控制。 | 连续向下 56px 后隐藏、向上超过 24px 后回显；目录使用原生平滑滚动，可被滚轮、触摸开始、点击、键盘或动态偏好变化取消。 | 消除方向抖动，让新的操作接管当前滚动。 |
+| 首页移动章节栏部分按钮藏在横向滚动后，键盘跳章仍平滑移动。 | 桌面与手机都有五章节固定导航；手机五项同时可见，键盘立即定位并聚焦章节。 | 定位稳定，操作反馈明确。 |
+| 各入口重复设置顶部偏移；章节当前态只由局部 IntersectionObserver 回调决定。 | 统一基础偏移 88px，章节额外预留 56px 给章节栏；缓存章节位置并在尺寸变化时更新。 | 正文停在两层导航下方，展开项目和改变视口后仍能准确判断当前位置。 |
+| 页面纹理较强，章节状态缺乏连续反馈。 | 减弱首页纹理；章节线随阅读推进，标题首次进入视野时短距离淡入，反向阅读保持可见。 | 增加阅读节奏并保持文字清晰；不拦截日常滚轮，不加入惯性库。 |
 
-- Interface copy is Chinese because the product and existing portfolio content are Chinese-first; the reference used English as visual placeholder copy.
-- The implementation shows the currently selected hotspot instead of labeling every hotspot at once, reducing first-visit intimidation and preserving exploration.
-- Repair traces and the restore counter are state-dependent. The reference is a composed interaction-rich frame, while the implementation reveals them through actual progress.
-- The player is a separate transparent runtime sprite and the room is a clean background asset, rather than one baked illustration.
+- 本次测试了 320、390、768、1440px 四种宽度 × 五个章节，共 20 个状态，全部无页面横向溢出；五个按钮都在视口内，当前章节与键盘焦点一致。通常章节顶部为约 144px；768 / 1440px 下最后一章受原生文档底部钳制，顶部分别为 252px / 460px，未人为增加页尾空白。
+- 开发页面：四个试玩链接都从 scrollY=0 打开正确作品。档案刷新后仍打开对应手记，返回保留首页的网络手记选择与入口焦点。
+- 开发页面：已聚焦的档案入口往返为 1636.5px → 1636.5px；浏览器后退为 2998px → 2998px。生产页面原生指针点击 DocBabel 入口往返为 1174px → 1174px，焦点回到 `discovery-DocBabel`。
+- Playwright 定位器在某些点击前自动调整源页面位置；这些样本不作为精确位置恢复证据。使用已聚焦的键盘激活和原生 AX 点击确认实际往返值。
+- 原生滚动中，6px 的反向微动保持顶栏隐藏，随后约 40px 上滚触发回显。目录定位实测经过 1672 → 1706.5 → 1854px；反向滚动中断后停在 2179px，后续样本保持不变，没有继续前往页尾。
+- 手机生产页面章节栏固定在 top=80px，章节约 top=144px；菜单跳章后关闭并将焦点放在目标章节。首页顶端、四色入口、章节正文、页尾均做了视觉检查。
+- 标题只在首次进入视野时使用 280ms 的 opacity / transform 动画；键盘及 reduced-motion 分支取消动画。当前工具未模拟操作系统媒体偏好或真实触屏硬件，不将响应式检查写成真机验收。
+- 工程检查：31 / 31 测试、lint、TypeScript 和最终生产构建通过。首次沙箱内构建无进展，停止该次构建后在允许本地构建进程通信的环境重新构建成功。开发服务保持运行。
+- 本次生产浏览器检查使用 `http://127.0.0.1:3001/` 的真实构建产物，控制台 warn / error 为空；未部署、未提交 Git。
+- 证据：`output/design/home-scroll-qa.json`；截图 `home-playground-bridge-desktop.jpg`、`home-playground-bridge-mobile.jpg`、`home-chapters-mobile.jpg`。
 
-## Interaction and accessibility checks
+## 内容阅读、滚动与动画（2026-09-06）
 
-- Completed the full Explore → Diagnose → Repair → Boot flow in the browser.
-- Verified order-independent health repair, power connection, boot-order validation, adaptive hints, assisted completion, persisted state, online revisit, and terminal handoff.
-- Verified keyboard movement and interaction copy, terminal auto-focus after handoff, and Tab focus transfer when no completion is available.
-- Verified the same repair state machine through Story List mode at 320 × 568, including all three global actions and 44 px touch targets.
-- Verified the 320 × 568 scene camera follows the player without forcing the context panel open, while click-to-move no longer interferes with horizontal touch scrolling.
-- Verified the story dialog traps focus, closes with Escape, and restores focus to its opener.
-- Verified selecting a scene object moves focus into its action panel; when the panel is closed, only hotspots within the interaction radius enter the Tab order.
-- Verified intro → Story List, normal Story List, and Help overlays use explicit return targets so one overlay cleanup cannot steal focus from another.
-- Verified the archive handoff exposes `status`, `tree`, and `open /home/visitor/archive/session.log`; the generated recovery log opens in Preview with the recognized records from the current run.
-- Verified a `cd projects` session survives terminal → archive → online-terminal navigation, including command history, transcript, and the `~/projects` working directory.
-- Verified an online revisit offers three explicit choices: continue exploring, open the online terminal, or replay the room.
-- Verified the Task Lamp and Archive Box produce persistent object-state labels, unlock the optional hidden echo, and add their records plus the echo to the terminal recovery log.
-- Verified the handoff welcome line and recovery-log preview use the same recognized-record count, while the dynamically registered `archive/session.log` appears in the expanded Files tree.
-- Verified Paper light survives homepage ↔ archive client navigation and a full reload through persisted site-theme state.
-- Verified theme switching and reduced-motion-aware transitions.
-- Fresh desktop and mobile sessions reported no browser errors or warnings.
+| Before | After | Why |
+| --- | --- | --- |
+| 详情以同一模板展示摘要、能力列表和观点。 | 八篇档案补充关键结论、具体场景、流程拆解、取舍与关联理由，首屏沿用作品主题色。 | 增加可继续阅读的内容层次，并保留项目辨识度。 |
+| 抽屉直接打开、关闭；文章直接替换。 | 指针打开 260ms、关闭 180ms、文章切换淡入 180ms；键盘立即响应，Escape 可中断。 | 让进出阅读器的关系清楚，同时保持操作及时。 |
+| 只有进度条；返回或重新打开会回到顶部。 | 固定四章节目录、滚动高亮、正文定位、每篇独立保存的阅读位置。 | 长文可定位，关联阅读可以接着读。 |
+| 手记静态呈现，操作主要靠文字更新。 | 手记首次进入视野时错开淡入；请求路径进度线、状态淡入和代码修改高亮。 | 动画解释出现顺序与状态变化，不改变页面布局。 |
 
-## Severity review
+- 320 × 740、390 × 844、774 × 964、1440 × 1024 四种尺寸，每种检查全部八篇档案，共 32 个状态。正文、标题和章节导航均无横向溢出；手机正文可视高度分别为 622px / 726px，四个章节按钮始终可用。
+- 390px 的章节点击滚动采样显示正文位置连续变化，最终“过程”章节停在 `scrollTop=575px`；阅读器页眉 top 始终为 0。
+- 实际指针打开动画从 translateX=64px / opacity=0 渐变，读取期间正文位置始终为 575px。关闭动画的实际样本从 translateX≈4px / opacity≈0.92 逐步退出，结束后 dialog 关闭。
+- 关闭中按 Escape 立即完成，焦点返回「作品档案」，根元素滚动锁解除。键盘打开时 transform=none、opacity=1，无动画等待。
+- 最终补充 Tab 首尾循环：从关闭按钮 Shift+Tab 到文末「回到开头」，从文末 Tab 返回关闭按钮，焦点始终在阅读器内。最终开发浏览器 warn / error 为空。
+- 关联跳转前后正文位置均为 2119.5px；关闭重开均为 575px；刷新前后均为 1281.5px。首次关联检查中定位工具点击链接时有约 3.5px 自动对齐，使用已聚焦链接确认实际保存与恢复值一致。
+- 手记滚动采样捕获第一个条目从 translateY=10px / opacity=0 进入，后续条目错开出现。IntersectionObserver 只处理每个条目一次；键盘输入或减弱动态效果设置变化会取消动画。
+- 网关键盘推进到 Gateway 节点时，路径进度为 scaleX(1/3)，transition-duration=0s；审查示例应用建议后显示 `await` 与成功状态，新增词具有短暂强调动画。
+- 阅读内容基于现有公开事实的编辑性解读，未刷新上游版本快照，未编造代码执行、性能测试或产品截图。内容覆盖测试验证全部档案都有正文和对应的关联推荐说明。
+- 工程检查：31 / 31 测试、lint、TypeScript 和最终生产构建通过。浏览器验收使用本地开发服务；不将其写成生产浏览器验收。
+- 验收记录：`output/design/archive-reader-qa.json`。本轮截图：`archive-reader-desktop.jpg`、`archive-reader-mobile.jpg`、`archive-reader-process-mobile.jpg`。
+- reduced-motion 的 CSS、JavaScript 分支与动态取消逻辑已检查；当前工具未模拟操作系统的媒体偏好，未声称完成真实触屏设备验收。未增加依赖、未部署或提交 Git。
 
-- P0: none
-- P1: none
-- P2: none after V6
-- P3: future polish can add more frame-by-frame character animation and richer ambient object reactions without changing the vertical-slice logic.
+## 紧凑布局与交互优化（2026-09-05）
 
-## Final result
+| Before | After | Why |
+| --- | --- | --- |
+| 标题、档案入口和示例一起滚动，长评论容易把入口推离视野。 | 标题与描述在固定栏首，编号和档案入口在固定栏尾；终端、文档、代码内容独立滚动。 | 阅读和操作过程中始终保留作品上下文。 |
+| 手机为 900px 展开面板加三条折叠作品行，总高 1206px。 | 顶部四个作品按钮，下方单个 580px 等高面板，总高 644px。 | 减少反复纵向寻找；作品切换不主动定位页面。 |
+| 双语示例只能切换语言或调整宽度。 | 点段落同步标出中英对应；手机直接显示另一种语言，调整视口后所选段落仍可见。 | 让访问者实际体验文档对照。 |
+| 网关只展示一次缓存命中。 | 可跟随首次读取和再次命中的四步路径，分别看到本次制品内容回源 1 次 / 0 次。 | 解释缓存如何改变读取过程，结果明确限定为本地示例。 |
 
-passed
+六种视口 × 四个作品共 24 个状态实测，作品区、栏尾和手记位置在同一视口下保持一致。均无页面横向溢出、无示例与栏尾重叠：
+
+| 视口 | 活跃面板 | 整体作品区（含手机切换条） | 最小示例可视高度 |
+| --- | --- | --- | --- |
+| 1440 × 1024 | 780px | 780px | 381px |
+| 1100 × 800 | 640px | 640px | 295px |
+| 1700 × 1200 | 956px | 956px | 546px |
+| 774 × 964 | 700px | 764px | 386px |
+| 390 × 844 | 580px | 644px | 306px |
+| 320 × 740 | 580px | 644px | 324px |
+
+- 320px 手机长评论：代码区由 `scrollTop=0` 滚动到 `143px`，标题 top=97px、栏尾 top=587px、页面 scrollY=188px 和作品区高 644px 均未改变。应用建议和重置正常。
+- 手机方向键、Home / End 切换并同步焦点；切回终端保留 Roboto 主题。桌面保持键盘无过渡、细指针悬停延迟；鼠标按住时不触发悬停切换。
+- 双语第三段同步选中，手机所选段落在 320 / 390px 下可见，原文／译文切换同步更新对应卡片。用 ResizeObserver 处理阅读区域尺寸变化。
+- 缓存两种路径逐步执行通过，首次完成显示 1 次、缓存命中显示 0 次。OCI / PyPI 切换更新命令并重置到第一步；所有结果都是本地说明，无网络请求或虚构耗时。
+- 作品档案正常打开，Escape 关闭后焦点回到原来的「作品档案」链接。
+- 最终开发浏览器验收地址：`http://127.0.0.1:3000/archive`。本轮完成生产构建，没有将开发页面检查写成生产浏览器验收。
+- 尺寸和交互记录：`output/design/playground-refined-layout.json`。本轮截图为 `playground-refined-desktop.jpg`、`playground-refined-mobile.jpg`、`playground-refined-bilingual.jpg`，均在 `output/design/`；手机图定位到作品区，普通视口截图不使用全页拼接。开发浏览器控制台 warn / error 为空。
+- 工程检查：lint、TypeScript、30 / 30 测试、最终生产构建及 `git diff --check` 均通过。
+- 保留已有 reduced-motion 规则，未声称模拟操作系统媒体偏好。未提交 Git、未部署。
+
+## 高度稳定性回归（2026-09-05，历史）
+
+| Before | After | Why |
+| --- | --- | --- |
+| 桌面四个作品高度分别约为 790 / 815 / 781 / 818px；当前 774px 窗口为 793 / 782 / 888 / 804px。 | 横向橱窗统一使用视口决定的高度，纵向布局统一展开高度与折叠标题高度。 | 切换只改变所选作品，不再推动底部编号、切换栏和手记。 |
+| 内容与底部编号在同一个自然高度容器内，展开评论继续撑高作品区。 | 内容在独立区域内滚动，编号留在固定栏尾；内容区可用键盘操作，重新选择时回到顶部。 | 长内容完整可达，面板高度保持稳定。 |
+
+实测同一视口下四个作品的尺寸完全相同：
+
+| 视口 | 展开面板 | 整体作品区 | 手记起点（文档坐标） |
+| --- | --- | --- | --- |
+| 1440 × 1024 | 840px | 840px | 1084px |
+| 1100 × 800 | 840px | 840px | 1084px |
+| 1700 × 1200 | 956px | 956px | 1200px |
+| 774 × 964 | 900px | 1242px | 1490px |
+| 390 × 844 | 900px | 1206px | 1472px |
+| 320 × 740 | 900px | 1206px | 1472px |
+
+- 六种视口、24 个默认作品状态均无页面横向溢出，默认内容无需在面板内部滚动。
+- 鼠标切换 DocBabel 期间采样 16 次，展开宽度从约 305px 增至 563px，高度始终为 840px，手记位置始终为 1084px。
+- 桌面展开审查意见后，内容高度可超过可视区域，但作品区仍为 840px；实际使用 End 滚动后，完整档案按钮进入可视区域，应用建议仍正常。
+- DOM 尺寸记录：`output/design/playground-height-stability.json`；这是本机浏览器回归证据，旧的下列截图记录的是此前视觉验收。
+- 本次工程检查：lint、TypeScript、29 / 29 测试通过；生产构建通过。
+
+## 比较目标与证据
+
+- Source visual truth：`/Users/ccsert/Documents/ChatGPT/myblog/output/design/playground-reference.png`。
+- 原始选中图：`/Users/ccsert/.codex/generated_images/01a06fea-1ca2-74e2-87b7-16113e307cbe/exec-faed20ee-7b32-41f0-a906-452600ef43ae.png`。
+- Implementation：`http://127.0.0.1:3001/archive`，最终生产构建；工作地址为 `http://127.0.0.1:3000/archive`。
+- 最终桌面截图：`output/design/playground-desktop-final.png`。
+- 全视图并排对照：`output/design/playground-comparison-final.png`，左侧参考、右侧实现。
+- 终端与主题控件局部对照：`output/design/playground-detail-comparison.png`，左侧参考、右侧实现。
+- 滚动后的手记与页尾：`output/design/playground-notes-final.png`。
+- 手机生产截图：`output/design/playground-mobile-final.png`。
+- 其他状态：`playground-doc-mobile.png`、`playground-reader-320.png`、`playground-tablet-960.png`，均位于 `output/design/`。
+
+Viewport：桌面 CSS 1440 × 1024，devicePixelRatio 1。参考图为 1487 × 1058；浏览器工具返回 1432 × 1018 图像。比较板将两者归一化到 720 × 512，局部比较先归一化至 1440 × 1024，再截取相同区域。比例差异低于 0.2%，不据此判断像素级偏差。浏览器原始导出采用 JPEG，因此小字边缘压缩不归因于网页字体；保存文件已转为 PNG。
+
+State：默认展开 omz-pm，Agnoster 主题，无阅读抽屉、无键盘焦点框。图稿勾选 Pure，但画的是 Agnoster 风格提示符；实现修正了标签与示例的一致性。
+
+完整页面通过首屏和实际滚动到页尾的截图检查。浏览器工具的 `fullPage` 拼图出现比例异常，已舍弃该工具产物；页面本身宽度和滚动范围经 DOM 尺寸及普通截图复验正常。
+
+## 对照历史与修复
+
+1. **[P2，已修复] 首版主标题上方间距与档案按钮位置。**
+   `playground-desktop-v1.png` 中 omz-pm 大字偏低，按钮紧贴终端下边缘。缩小标题的顶部空间，将档案按钮改为参与内容布局的操作行，保留足够间距。`playground-desktop-v2.png` 与最终并排图确认改正。
+2. **[P2，已修复] 双语揭示裁切了完整语句。**
+   首次展开采用覆盖裁切，导致中英文在滑块处断开。改为两栏各自排版，滑块调整 30%～70% 阅读空间；真实拖动验证到 65% 中文，Home / End 边界验证到 30% / 70%。手机改用语言切换，避免过窄的双栏。
+3. **[P1，已修复] 手机 omz-pm 标题换行。**
+   `playground-mobile-390.png` 显示按钮的箭头预留宽度挤压了标题。展开时取消该预留，限制大字单行。`playground-mobile-390-v2.png` 和生产版 `playground-mobile-final.png` 确认标题完整。
+4. **[P2，已修复] 手机选择作品后定位不稳定。**
+   折叠前的布局可能影响滚动计算。改为 DOM 提交后的 layout effect 定位；复验选择 OpenCode 时顶部位于 79.8px（保留页面 scroll padding），后续控件正常可达。
+5. **[P2，已修复] 展开示例的空间与可读性。**
+   此前允许作品区根据内容增长；用户反馈切换高度不一致后，本次改为稳定展示高度与内容内部滚动。审查代码仍为桌面 15px、手机 11px。
+
+最后一轮对照未触发新的视觉修改。
+
+## 五项必查表面
+
+| 表面 | 验收结论 |
+| --- | --- |
+| 字体与排版 | 保留紧凑黑色标题、大字项目名称、等宽终端与四栏层级。Inter / JetBrains Mono 本地加载完成。omz-pm 使用 Arial Black / Inter 回退；其字形与生成图不逐像素一致，属于 P3 光学差异。手机标题、代码与阅读正文无不可达的截断。 |
+| 间距与布局 | 页眉 73px、引导 112px；默认栏宽约 47 / 16 / 16 / 21。底部编号与方向按钮对齐，示例与档案操作无重叠。960px 采用纵向展开，390 / 320px 无页面横向溢出。本次修复后，同一视口下四个展开状态等高，超长内容在面板内部滚动。 |
+| 颜色与视觉变量 | 黄绿、淡紫、暖白、橙红四个独立色块，黑色文本与终端；固定本页配色不受主页主题改变。保留图稿的高对比与色彩识别。图稿的细微生成纹理未加入网页，采用清晰的实色表面。 |
+| 图像与图标 | 参考的主体是终端、文档、代码及协议文字，没有独立照片或插画被占位替换。内容是实际 HTML UI；标准箭头、分支、勾选与评论图标来自现有 Lucide 集，没有自制装饰性 SVG 或 3D。页面 canvas 数量为 0。 |
+| 文案与内容 | 主标题与作品命名保留选中方向。项目事实来自 portfolio.ts，编号与橱窗顺序一致。示例明确标注；样例域名为 .example，未伪装真实翻译、网络请求或 AI 执行。公开事实日期仍为 2026-08-30。 |
+
+## 主要交互与可访问性
+
+- 桌面真实指针移动至另一个色块后可展开；180ms 意图延迟和宽度过渡正常。
+- 方向键切换作品，焦点随选择移动，键盘状态下计算得到 transition-duration 为 0s。
+- 主题切换更新提示符和选中态，折叠后再次展开保留主题选择。
+- 双语滑块真实拖动、键盘边界，以及手机原文／译文切换通过。
+- npm / OCI / PyPI 示例与三步路径可切换，说明同步更新。
+- 行级评论可展开、应用建议、重置；手机 320px 操作通过。
+- 作品档案、相关手记、浏览器返回、Escape、关闭后焦点恢复通过。
+- `#read=DocBabel` 刷新后自动打开正确档案，焦点落在标题。
+- 「在终端中继续」打开主页 `~/projects/DocBabel.md` 文件预览，主页入口可返回实验场。
+- 生产控制台 warn / error 为空。
+- 已检查已加载样式中的 reduced-motion 规则和全局禁用平滑滚动规则。本浏览器工具不提供媒体偏好模拟，因此未声称完成操作系统减弱动态效果设置切换；无自动轮播或无限循环动效。
+
+## 工程检查
+
+- `pnpm lint`：通过。
+- `pnpm exec tsc --noEmit`：通过；最终构建也完成 TypeScript 检查。
+- `pnpm test`：29 / 29 通过。
+- `pnpm build`：最终内容生产构建通过，`/` 与 `/archive` 静态生成。
+- `git diff --check`：通过。
+
+## 后续微调与边界
+
+- P3：如需更接近生成图的大字字形，可后续加入经选择的展示字体；本轮没有为此增加远程字体依赖。
+- 未部署、未提交 Git；验收范围为本地实现与本机生产预览。
+- 原始项目源码与真实后台不属于此页试玩范围；示例用于让访问者理解项目，再进入档案和公开来源。
+
+Implementation checklist：已完成；没有未处理的 P0 / P1 / P2。

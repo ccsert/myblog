@@ -5,10 +5,11 @@ import Skills from '@/app/components/sections/Skills';
 import Blog from '@/app/components/sections/Blog';
 import Contact from '@/app/components/sections/Contact';
 import MissionLog from '@/app/components/sections/mission/MissionLog';
+import HomeExperience from '@/app/components/HomeExperience';
 
 export default function Home() {
   return (
-    <main className="min-h-screen">
+    <HomeExperience>
       <Hero />
       <MissionLog>
         <Projects />
@@ -17,6 +18,6 @@ export default function Home() {
         <Blog />
         <Contact />
       </MissionLog>
-    </main>
+    </HomeExperience>
   );
 }

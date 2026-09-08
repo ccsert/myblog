@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import {
   BookOpen,
   Circle,
@@ -13,7 +13,7 @@ import CommandPalette, { PaletteAction } from '@/app/components/terminal/Command
 import PreviewPane from '@/app/components/terminal/PreviewPane';
 import WorkspaceTree from '@/app/components/terminal/WorkspaceTree';
 import { useSiteTheme } from '@/app/components/theme/SiteThemeProvider';
-import { KNOWLEDGE_SIGNALS, PORTFOLIO_PROJECTS } from '@/app/lib/content/portfolio';
+import { KNOWLEDGE_SIGNALS, PORTFOLIO_PROJECTS, SITE_CONFIG } from '@/app/lib/content/portfolio';
 import {
   BUILTIN_COMMAND_NAMES,
   BUILTIN_COMMAND_DESCRIPTIONS,
@@ -30,6 +30,7 @@ import {
 } from '@/app/lib/terminal/shell';
 import { TerminalLine, TerminalProps } from '@/app/types/terminal';
 import styles from './TerminalWorkbench.module.css';
+import { scrollToHomeSection } from '@/app/lib/home-navigation';
 
 type TerminalView = 'shell' | 'docs';
 type MobilePane = 'terminal' | 'files' | 'preview';
@@ -103,7 +104,7 @@ function parseTerminalSession(raw: string | null): PersistedTerminalSession | nu
 
 const QUICK_COMMANDS = [
   { command: 'help', description: 'Show every available command' },
-  { command: 'archive', description: 'Enter the playable Signal Archive' },
+  { command: 'archive', description: 'Explore the questions behind the projects' },
   { command: `open projects/${PORTFOLIO_PROJECTS[0].slug}.md`, description: 'Open a verified public project' },
   { command: 'search protocol', description: 'Search projects and knowledge signals' },
   { command: 'tree', description: 'Inspect the virtual workspace' },
@@ -113,7 +114,7 @@ const QUICK_COMMANDS = [
 ] as const;
 
 const PALETTE_ACTIONS: PaletteAction[] = [
-  { command: 'archive', label: 'Enter Signal Archive', description: 'Explore the playable archive room' },
+  { command: 'archive', label: 'Enter Signal Archive', description: 'Follow a question into projects and field notes' },
   ...PORTFOLIO_PROJECTS.map(project => ({
     command: `open projects/${project.slug}.md`,
     label: `Open ${project.title}`,
@@ -129,7 +130,7 @@ const PALETTE_ACTIONS: PaletteAction[] = [
   { command: 'tree', label: 'Show workspace tree', description: 'Print every indexed document' },
   { command: 'status', label: 'System status', description: 'Inspect shell and workspace health' },
   { command: 'neofetch', label: 'Profile summary', description: 'Show identity and environment information' },
-  { command: 'theme green', label: 'Theme: Signal green', description: 'Restore the full ccsert.dev system theme' },
+  { command: 'theme green', label: 'Theme: Signal green', description: `Restore the full ${SITE_CONFIG.domain} system theme` },
   { command: 'theme cyan', label: 'Theme: Cyan', description: 'Switch the full interface to cyan telemetry' },
   { command: 'theme amber', label: 'Theme: Amber', description: 'Switch the full interface to warm operations mode' },
   { command: 'theme light', label: 'Theme: Paper light', description: 'Switch the full interface to a bright paper console' },
@@ -214,9 +215,10 @@ function getCompletionOptions(
 }
 
 export default function Terminal({
+  ref,
   commands,
   welcomeMessage = [],
-  promptPrefix = 'visitor@ccsert',
+  promptPrefix = `visitor@${SITE_CONFIG.domain}`,
   onCommand,
 }: TerminalProps) {
   const [lines, setLines] = useState<TerminalLine[]>(() =>
@@ -349,11 +351,18 @@ export default function Terminal({
         setMobilePane('terminal');
         setLiveAnnouncement(handoffMessage);
       }
+      const requestedDocument = new URLSearchParams(window.location.search).get('open');
+      const linkedDocument = requestedDocument ? getPreviewDocument(requestedDocument) : null;
+      if (linkedDocument) {
+        setPreviewPath(linkedDocument.path);
+        setMobilePane('preview');
+        setLiveAnnouncement(`已打开 ${displayPath(linkedDocument.path)}`);
+      }
       setSessionReady(true);
-      if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
-        focusInput();
-      } else {
+      if (linkedDocument) {
         workbenchRef.current?.focus({ preventScroll: true });
+      } else if (!window.location.hash && window.scrollY < 80 && document.activeElement === document.body && window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+        focusInput();
       }
     });
     return () => window.cancelAnimationFrame(frame);
@@ -478,7 +487,10 @@ export default function Terminal({
 
     const focusable = Array.from(workbench.querySelectorAll<HTMLElement>(
       'a[href], button:not(:disabled), input:not(:disabled), [tabindex]:not([tabindex="-1"])',
-    )).filter(element => element.getClientRects().length > 0);
+    )).filter(element => (
+      element.getClientRects().length > 0
+      && window.getComputedStyle(element).visibility === 'visible'
+    ));
     const currentIndex = focusable.indexOf(inputElement);
     if (currentIndex < 0 || focusable.length < 2) return;
     const nextIndex = (currentIndex + (backward ? -1 : 1) + focusable.length) % focusable.length;
@@ -578,8 +590,18 @@ export default function Terminal({
     setMobilePane('preview');
   };
 
+  useImperativeHandle(ref, () => ({
+    openDocument(path: string) {
+      if (!getPreviewDocument(path)) return;
+      setPreviewPath(path);
+      setMobilePane('preview');
+      setLiveAnnouncement(`已打开 ${displayPath(path)}`);
+      workbenchRef.current?.focus({ preventScroll: true });
+    },
+  }), []);
+
   const openSection = (sectionId: string) => {
-    document.getElementById(sectionId)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    scrollToHomeSection(sectionId);
   };
 
   return (
@@ -588,7 +610,7 @@ export default function Terminal({
       className={styles.workbench}
       data-theme={theme}
       role="region"
-      aria-label="ccsert.dev 终端工作台"
+      aria-label={`${SITE_CONFIG.domain} 终端工作台`}
       tabIndex={-1}
     >
       <header className={styles.topbar}>

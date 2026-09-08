@@ -28,7 +28,7 @@ export default function MissionSection({
   const headingId = `${id}-mission-heading`;
 
   return (
-    <section id={id} className={styles.section} aria-labelledby={headingId} data-mission-section>
+    <section id={id} className={styles.section} aria-labelledby={headingId} data-mission-section tabIndex={-1}>
       <aside className={styles.chapterRail} aria-hidden="true">
         <Circle className={styles.chapterMarker} size={18} />
         <span className={styles.chapterNumber}>{number}</span>
@@ -37,7 +37,7 @@ export default function MissionSection({
       </aside>
 
       <div className={styles.panel}>
-        <header className={styles.sectionHeader}>
+        <header className={styles.sectionHeader} data-chapter-header>
           <div>
             <div className={styles.eyebrow}>{eyebrow}</div>
             <h2 id={headingId} className={styles.sectionTitle}>

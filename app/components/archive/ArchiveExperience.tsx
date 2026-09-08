@@ -50,6 +50,7 @@ import {
   type ArchiveState,
 } from '@/app/lib/archive/state';
 import type { ArchiveBootService, ArchivePuzzleId } from '@/app/lib/archive/types';
+import { SITE_CONFIG } from '@/app/lib/content/portfolio';
 import { getNextSiteTheme, SITE_THEMES } from '@/app/lib/theme';
 import styles from './ArchiveExperience.module.css';
 
@@ -185,6 +186,7 @@ function getUnlockedEchoIds(state: ArchiveState): string[] {
 }
 
 export default function ArchiveExperience() {
+  const [brandPrefix, ...brandSuffix] = SITE_CONFIG.domain.split(/(?=\.)/);
   const router = useRouter();
   const { theme, changeTheme } = useSiteTheme();
   const [archiveState, setArchiveState] = useState<ArchiveState>(() => createInitialArchiveState());
@@ -917,7 +919,7 @@ export default function ArchiveExperience() {
 
       <header className={styles.archiveHeader} inert={backgroundInert}>
         <div className={styles.brandBlock}>
-          <Link href="/" className={styles.brand}>ccsert<span>.dev</span></Link>
+          <Link href="/" className={styles.brand}>{brandPrefix}<span>{brandSuffix.join('')}</span></Link>
           <span className={styles.archiveTitle}>THE SIGNAL ARCHIVE</span>
         </div>
 

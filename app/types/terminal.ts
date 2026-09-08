@@ -1,3 +1,5 @@
+import type { Ref } from 'react';
+
 export interface Command {
   name: string;
   description: string;
@@ -12,8 +14,13 @@ export interface TerminalLine {
 }
 
 export interface TerminalProps {
+  ref?: Ref<TerminalHandle>;
   commands: Command[];
   welcomeMessage?: string[];
   promptPrefix?: string;
   onCommand?: (command: string) => void;
+}
+
+export interface TerminalHandle {
+  openDocument: (path: string) => void;
 }

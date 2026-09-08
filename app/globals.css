@@ -209,7 +209,7 @@ html[data-theme='light'] {
 
 html {
   scroll-behavior: smooth;
-  scroll-padding-top: 80px;
+  scroll-padding-top: 88px;
 }
 
 body {
@@ -251,6 +251,13 @@ body {
 }
 
 /* 蓝图网格 */
+body:has([data-signal-index], [data-playground])::before,
+body:has([data-signal-index], [data-playground])::after {
+  display: none;
+}
+
+body:has([data-signal-index] dialog[open], [data-playground] dialog[open]) { overflow: hidden; }
+
 .blueprint-grid {
   background-image:
     linear-gradient(var(--color-grid) 1px, transparent 1px),
@@ -575,3 +582,19 @@ html[data-theme-overlay-suppressed='true'] .theme-transition-overlay {
   --color-accent-5: rgba(0, 255, 0, 0.05);
   background: #000000;
 }
+
+/* Homepage controls share a single scroll offset and project identity. */
+html[data-home-input='keyboard'] { scroll-behavior: auto; }
+html[data-home-input='keyboard'] .home-navigation,
+html[data-home-input='keyboard'] [data-home-experience] *,
+html[data-home-input='keyboard'] [data-home-experience] *::before,
+html[data-home-input='keyboard'] [data-home-experience] *::after { transition-duration: 0s !important; animation-duration: 0s !important; }
+.playground-colors { display: inline-flex; gap: 2px; align-items: center; margin-right: 6px; vertical-align: middle; }
+.playground-colors i { width: 4px; height: 12px; background: #dfff63; }
+.playground-colors i:nth-child(2) { background: #c7baf1; }
+.playground-colors i:nth-child(3) { background: #f4f1e9; border: 1px solid #11131220; }
+.playground-colors i:nth-child(4) { background: #ff5834; }
+.home-navigation { transition-timing-function: cubic-bezier(.22,.8,.2,1); }
+body.scanlines:has([data-home-experience])::after { opacity: calc(var(--scanline-opacity) * .35); }
+body.grain:has([data-home-experience])::before { opacity: calc(var(--grain-opacity) * .5); }
+.home-navigation a:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 4px; }

@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start --hostname 0.0.0.0",
     "lint": "eslint",
-    "test": "node --test app/components/cursor/position.test.mjs app/components/theme/fader.test.mjs app/lib/archive/state.test.mjs app/lib/content/portfolio.test.mjs next.config.test.mjs"
+    "test": "node --test app/components/cursor/position.test.mjs app/components/theme/fader.test.mjs app/lib/archive/state.test.mjs app/lib/archive/catalog.test.mjs app/lib/content/portfolio.test.mjs next.config.test.mjs"
   },
   "dependencies": {
     "@react-three/drei": "^10.7.8",

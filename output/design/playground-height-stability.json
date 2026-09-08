@@ -1,0 +1,545 @@
+{
+  "url": "http://127.0.0.1:3000/archive",
+  "date": "2026-09-05",
+  "matrix": [
+    {
+      "body": 753,
+      "collapsed": [
+        840,
+        840,
+        840
+      ],
+      "content": 753,
+      "footerBottom": 822,
+      "gallery": 840,
+      "notes": 1084,
+      "pageOverflow": false,
+      "panel": 840,
+      "project": "omz-pm",
+      "viewport": [
+        1440,
+        1024
+      ]
+    },
+    {
+      "body": 753,
+      "collapsed": [
+        840,
+        840,
+        840
+      ],
+      "content": 753,
+      "footerBottom": 822,
+      "gallery": 840,
+      "notes": 1084,
+      "pageOverflow": false,
+      "panel": 840,
+      "project": "DocBabel",
+      "viewport": [
+        1440,
+        1024
+      ]
+    },
+    {
+      "body": 753,
+      "collapsed": [
+        840,
+        840,
+        840
+      ],
+      "content": 753,
+      "footerBottom": 822,
+      "gallery": 840,
+      "notes": 1084,
+      "pageOverflow": false,
+      "panel": 840,
+      "project": "artifact-gateway",
+      "viewport": [
+        1440,
+        1024
+      ]
+    },
+    {
+      "body": 753,
+      "collapsed": [
+        840,
+        840,
+        840
+      ],
+      "content": 753,
+      "footerBottom": 822,
+      "gallery": 840,
+      "notes": 1084,
+      "pageOverflow": false,
+      "panel": 840,
+      "project": "opencode-review-gitea",
+      "viewport": [
+        1440,
+        1024
+      ]
+    },
+    {
+      "body": 753,
+      "collapsed": [
+        840,
+        840,
+        840
+      ],
+      "content": 753,
+      "footerBottom": 822,
+      "gallery": 840,
+      "notes": 1084,
+      "pageOverflow": false,
+      "panel": 840,
+      "project": "omz-pm",
+      "viewport": [
+        1100,
+        800
+      ]
+    },
+    {
+      "body": 753,
+      "collapsed": [
+        840,
+        840,
+        840
+      ],
+      "content": 753,
+      "footerBottom": 822,
+      "gallery": 840,
+      "notes": 1084,
+      "pageOverflow": false,
+      "panel": 840,
+      "project": "DocBabel",
+      "viewport": [
+        1100,
+        800
+      ]
+    },
+    {
+      "body": 753,
+      "collapsed": [
+        840,
+        840,
+        840
+      ],
+      "content": 753,
+      "footerBottom": 822,
+      "gallery": 840,
+      "notes": 1084,
+      "pageOverflow": false,
+      "panel": 840,
+      "project": "artifact-gateway",
+      "viewport": [
+        1100,
+        800
+      ]
+    },
+    {
+      "body": 753,
+      "collapsed": [
+        840,
+        840,
+        840
+      ],
+      "content": 753,
+      "footerBottom": 822,
+      "gallery": 840,
+      "notes": 1084,
+      "pageOverflow": false,
+      "panel": 840,
+      "project": "opencode-review-gitea",
+      "viewport": [
+        1100,
+        800
+      ]
+    },
+    {
+      "body": 869,
+      "collapsed": [
+        956,
+        956,
+        956
+      ],
+      "content": 869,
+      "footerBottom": 938,
+      "gallery": 956,
+      "notes": 1200,
+      "pageOverflow": false,
+      "panel": 956,
+      "project": "omz-pm",
+      "viewport": [
+        1700,
+        1200
+      ]
+    },
+    {
+      "body": 869,
+      "collapsed": [
+        956,
+        956,
+        956
+      ],
+      "content": 869,
+      "footerBottom": 938,
+      "gallery": 956,
+      "notes": 1200,
+      "pageOverflow": false,
+      "panel": 956,
+      "project": "DocBabel",
+      "viewport": [
+        1700,
+        1200
+      ]
+    },
+    {
+      "body": 869,
+      "collapsed": [
+        956,
+        956,
+        956
+      ],
+      "content": 869,
+      "footerBottom": 938,
+      "gallery": 956,
+      "notes": 1200,
+      "pageOverflow": false,
+      "panel": 956,
+      "project": "artifact-gateway",
+      "viewport": [
+        1700,
+        1200
+      ]
+    },
+    {
+      "body": 869,
+      "collapsed": [
+        956,
+        956,
+        956
+      ],
+      "content": 869,
+      "footerBottom": 938,
+      "gallery": 956,
+      "notes": 1200,
+      "pageOverflow": false,
+      "panel": 956,
+      "project": "opencode-review-gitea",
+      "viewport": [
+        1700,
+        1200
+      ]
+    },
+    {
+      "body": 817,
+      "collapsed": [
+        114,
+        114,
+        114
+      ],
+      "content": 817,
+      "footerBottom": 875,
+      "gallery": 1242,
+      "notes": 1490,
+      "pageOverflow": false,
+      "panel": 900,
+      "project": "omz-pm",
+      "viewport": [
+        774,
+        964
+      ]
+    },
+    {
+      "body": 817,
+      "collapsed": [
+        114,
+        114,
+        114
+      ],
+      "content": 817,
+      "footerBottom": 875,
+      "gallery": 1242,
+      "notes": 1490,
+      "pageOverflow": false,
+      "panel": 900,
+      "project": "DocBabel",
+      "viewport": [
+        774,
+        964
+      ]
+    },
+    {
+      "body": 817,
+      "collapsed": [
+        114,
+        114,
+        114
+      ],
+      "content": 817,
+      "footerBottom": 875,
+      "gallery": 1242,
+      "notes": 1490,
+      "pageOverflow": false,
+      "panel": 900,
+      "project": "artifact-gateway",
+      "viewport": [
+        774,
+        964
+      ]
+    },
+    {
+      "body": 817,
+      "collapsed": [
+        114,
+        114,
+        114
+      ],
+      "content": 817,
+      "footerBottom": 875,
+      "gallery": 1242,
+      "notes": 1490,
+      "pageOverflow": false,
+      "panel": 900,
+      "project": "opencode-review-gitea",
+      "viewport": [
+        774,
+        964
+      ]
+    },
+    {
+      "body": 821,
+      "collapsed": [
+        102,
+        102,
+        102
+      ],
+      "content": 821,
+      "footerBottom": 880,
+      "gallery": 1206,
+      "notes": 1472,
+      "pageOverflow": false,
+      "panel": 900,
+      "project": "omz-pm",
+      "viewport": [
+        390,
+        844
+      ]
+    },
+    {
+      "body": 821,
+      "collapsed": [
+        102,
+        102,
+        102
+      ],
+      "content": 821,
+      "footerBottom": 880,
+      "gallery": 1206,
+      "notes": 1472,
+      "pageOverflow": false,
+      "panel": 900,
+      "project": "DocBabel",
+      "viewport": [
+        390,
+        844
+      ]
+    },
+    {
+      "body": 821,
+      "collapsed": [
+        102,
+        102,
+        102
+      ],
+      "content": 821,
+      "footerBottom": 880,
+      "gallery": 1206,
+      "notes": 1472,
+      "pageOverflow": false,
+      "panel": 900,
+      "project": "artifact-gateway",
+      "viewport": [
+        390,
+        844
+      ]
+    },
+    {
+      "body": 821,
+      "collapsed": [
+        102,
+        102,
+        102
+      ],
+      "content": 821,
+      "footerBottom": 880,
+      "gallery": 1206,
+      "notes": 1472,
+      "pageOverflow": false,
+      "panel": 900,
+      "project": "opencode-review-gitea",
+      "viewport": [
+        390,
+        844
+      ]
+    },
+    {
+      "body": 821,
+      "collapsed": [
+        102,
+        102,
+        102
+      ],
+      "content": 821,
+      "footerBottom": 880,
+      "gallery": 1206,
+      "notes": 1472,
+      "pageOverflow": false,
+      "panel": 900,
+      "project": "omz-pm",
+      "viewport": [
+        320,
+        740
+      ]
+    },
+    {
+      "body": 821,
+      "collapsed": [
+        102,
+        102,
+        102
+      ],
+      "content": 821,
+      "footerBottom": 880,
+      "gallery": 1206,
+      "notes": 1472,
+      "pageOverflow": false,
+      "panel": 900,
+      "project": "DocBabel",
+      "viewport": [
+        320,
+        740
+      ]
+    },
+    {
+      "body": 821,
+      "collapsed": [
+        102,
+        102,
+        102
+      ],
+      "content": 821,
+      "footerBottom": 880,
+      "gallery": 1206,
+      "notes": 1472,
+      "pageOverflow": false,
+      "panel": 900,
+      "project": "artifact-gateway",
+      "viewport": [
+        320,
+        740
+      ]
+    },
+    {
+      "body": 821,
+      "collapsed": [
+        102,
+        102,
+        102
+      ],
+      "content": 821,
+      "footerBottom": 880,
+      "gallery": 1206,
+      "notes": 1472,
+      "pageOverflow": false,
+      "panel": 900,
+      "project": "opencode-review-gitea",
+      "viewport": [
+        320,
+        740
+      ]
+    }
+  ],
+  "transition": [
+    {
+      "height": 840,
+      "notes": 1084,
+      "width": 305.21875
+    },
+    {
+      "height": 840,
+      "notes": 1084,
+      "width": 337.6328125
+    },
+    {
+      "height": 840,
+      "notes": 1084,
+      "width": 353.921875
+    },
+    {
+      "height": 840,
+      "notes": 1084,
+      "width": 384.484375
+    },
+    {
+      "height": 840,
+      "notes": 1084,
+      "width": 399.75
+    },
+    {
+      "height": 840,
+      "notes": 1084,
+      "width": 429.140625
+    },
+    {
+      "height": 840,
+      "notes": 1084,
+      "width": 443.1171875
+    },
+    {
+      "height": 840,
+      "notes": 1084,
+      "width": 456.2421875
+    },
+    {
+      "height": 840,
+      "notes": 1084,
+      "width": 481.0390625
+    },
+    {
+      "height": 840,
+      "notes": 1084,
+      "width": 492.640625
+    },
+    {
+      "height": 840,
+      "notes": 1084,
+      "width": 513.6640625
+    },
+    {
+      "height": 840,
+      "notes": 1084,
+      "width": 523.359375
+    },
+    {
+      "height": 840,
+      "notes": 1084,
+      "width": 532.4453125
+    },
+    {
+      "height": 840,
+      "notes": 1084,
+      "width": 548.71875
+    },
+    {
+      "height": 840,
+      "notes": 1084,
+      "width": 556.171875
+    },
+    {
+      "height": 840,
+      "notes": 1084,
+      "width": 562.96875
+    }
+  ],
+  "assertions": "passed"
+}

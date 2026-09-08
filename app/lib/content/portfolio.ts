@@ -7,10 +7,16 @@
 
 export const PUBLIC_EVIDENCE_CHECKED_AT = '2026-08-30';
 
+export const SITE_CONFIG = {
+  domain: 'me.ccsert.top',
+  url: 'https://me.ccsert.top',
+  email: 'ccsert@foxmail.com',
+} as const;
+
 export const PORTFOLIO_PROFILE = {
   headline: 'Turning complex engineering work into tools people can actually use.',
   metadata: {
-    title: 'ccsert.dev｜开发者工具、AI 辅助工程与自托管系统',
+    title: `${SITE_CONFIG.domain}｜开发者工具、AI 辅助工程与自托管系统`,
     description: 'ccsert 的交互式个人站：探索开发者工具、AI 辅助工程、自托管基础设施，以及可公开的技术知识脉络。',
   },
   domains: ['Developer tools', 'AI-assisted engineering', 'Self-hosted infrastructure'],

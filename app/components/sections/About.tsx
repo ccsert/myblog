@@ -1,6 +1,6 @@
 import { Circle } from 'lucide-react';
 import MissionSection from '@/app/components/sections/mission/MissionSection';
-import { PORTFOLIO_PROFILE } from '@/app/lib/content/portfolio';
+import { PORTFOLIO_PROFILE, SITE_CONFIG } from '@/app/lib/content/portfolio';
 import styles from '@/app/components/sections/mission/MissionLog.module.css';
 
 const VALUES = [
@@ -41,7 +41,7 @@ export default function About() {
         </div>
 
         <div className={styles.operatorCard} aria-label="Operator profile summary">
-          <div className={styles.operatorRow}><span>Operator ID</span><strong>ccsert.dev</strong></div>
+          <div className={styles.operatorRow}><span>Operator ID</span><strong>{SITE_CONFIG.domain}</strong></div>
           <div className={styles.operatorRow}><span>Builds</span><strong>Developer tools</strong></div>
           <div className={styles.operatorRow}><span>Focus</span><strong>AI · Self-hosted systems</strong></div>
           <div className={styles.operatorRow}><span>Loop</span><strong data-accent="true">Build → Verify → Ship</strong></div>

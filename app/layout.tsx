@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import ClientLayout from "./client-layout";
-import { PORTFOLIO_PROFILE } from "./lib/content/portfolio";
+import { PORTFOLIO_PROFILE, SITE_CONFIG } from "./lib/content/portfolio";
 
 const inter = localFont({
   src: [
@@ -35,8 +35,33 @@ const sourceSerif = localFont({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_CONFIG.url),
   title: PORTFOLIO_PROFILE.metadata.title,
   description: PORTFOLIO_PROFILE.metadata.description,
+  alternates: {
+    canonical: '/',
+  },
+  applicationName: SITE_CONFIG.domain,
+  authors: [{ name: 'ccsert', url: SITE_CONFIG.url }],
+  creator: 'ccsert',
+  openGraph: {
+    title: PORTFOLIO_PROFILE.metadata.title,
+    description: PORTFOLIO_PROFILE.metadata.description,
+    url: SITE_CONFIG.url,
+    siteName: SITE_CONFIG.domain,
+    locale: 'zh_CN',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: PORTFOLIO_PROFILE.metadata.title,
+    description: PORTFOLIO_PROFILE.metadata.description,
+  },
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
