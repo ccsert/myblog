@@ -94,7 +94,7 @@ export default function Hero() {
     '  archive — explore the questions behind the projects',
     '  theme <name> — green · cyan · amber · light',
     '',
-    'Tip: type “o” to inspect matches, then press Tab to complete.',
+    'Tip: → accepts the gray suggestion · Tab completes · ↑/↓ recalls history.',
     'Press ⌘K to browse every action.',
     '',
   ];

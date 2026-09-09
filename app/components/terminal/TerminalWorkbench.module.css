@@ -174,22 +174,57 @@
   padding-top: 4px;
   color: var(--terminal-accent);
   font-size: 13px;
+  line-height: 1.55;
 }
 
 .prompt {
-  flex: none;
+  flex: 0 1 auto;
+  min-width: 0;
+  max-width: 65%;
+  overflow: hidden;
+  text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.terminalInput {
-  min-width: 0;
+.inputArea {
+  position: relative;
   flex: 1;
+  min-width: 0;
+}
+
+.terminalInput {
+  display: block;
+  position: relative;
+  width: 100%;
+  min-width: 0;
+  padding: 0;
+  margin: 0;
   color: var(--color-text-primary);
   background: transparent;
   border: 0;
+  border-radius: 0;
   outline: none;
   caret-color: var(--terminal-accent);
   font: inherit;
+}
+
+.inputGhost {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  color: var(--color-text-dim);
+  white-space: pre;
+  pointer-events: none;
+  user-select: none;
+  font: inherit;
+}
+
+.ghostPrefix {
+  color: transparent;
+}
+
+.touchComplete {
+  display: none;
 }
 
 .handoffActions {
@@ -230,121 +265,73 @@
   outline: none;
 }
 
-.completionPanel,
-.completionEmpty {
-  margin: 10px 0 2px;
-  overflow: hidden;
-  background: var(--color-elevated);
-  border: 1px solid var(--terminal-accent-muted);
-  border-radius: 7px;
-  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.24);
-}
-
-.completionHeader {
-  display: flex;
-  min-height: 31px;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 0 10px;
-  color: var(--color-text-secondary);
-  background: var(--color-control);
-  border-bottom: 1px solid var(--color-border);
-  font-size: 9px;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-}
-
-.completionHeader > span:last-child {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-}
-
-.completionHeader .kbd {
-  height: 17px;
-  min-width: 18px;
-  padding-inline: 4px;
-  font-size: 8px;
-}
-
 .completionList {
-  display: grid;
-  gap: 2px;
-  padding: 4px;
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: 2ch;
+  margin: 6px 0 0;
+  font: 13px / 1.65 var(--font-mono);
+}
+
+.completionList[data-commands='true'] {
+  flex-direction: column;
+  align-items: flex-start;
 }
 
 .completionOption {
-  display: grid;
-  width: 100%;
-  grid-template-columns: minmax(130px, 0.62fr) minmax(0, 1fr);
-  align-items: center;
-  gap: 12px;
-  padding: 8px;
-  color: var(--color-text-secondary);
+  max-width: 100%;
+  padding: 0 0.25ch;
+  color: var(--color-text-primary);
   background: transparent;
   border: 0;
-  border-radius: 5px;
+  border-radius: 0;
   text-align: left;
   cursor: pointer;
+  overflow-wrap: anywhere;
   font: inherit;
+}
+
+.completionName[data-kind='folder'] {
+  color: var(--terminal-accent);
+}
+
+.completionDetail {
+  color: var(--color-text-dim);
 }
 
 .completionOption:hover,
 .completionOption:focus-visible,
 .completionOption[data-active='true'] {
-  color: var(--color-text-primary);
-  background: var(--terminal-accent-soft);
+  color: var(--color-terminal);
+  background: var(--terminal-accent);
   outline: none;
 }
 
-.completionIdentity {
-  display: flex;
-  min-width: 0;
-  align-items: center;
-  gap: 7px;
+.completionOption:is(:hover, :focus-visible, [data-active='true']) :is(.completionName, .completionDetail) {
+  color: inherit;
 }
 
-.completionIdentity code {
-  overflow: hidden;
-  color: var(--terminal-accent);
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  font-size: 11px;
-}
+@media (pointer: coarse) {
+  .touchComplete {
+    display: block;
+    flex: none;
+    min-width: 44px;
+    min-height: 44px;
+    margin-block: -10px;
+    padding: 0;
+    color: var(--terminal-accent);
+    background: transparent;
+    border: 0;
+    font: 18px var(--font-mono);
+  }
 
-.completionKind {
-  flex: none;
-  min-width: 44px;
-  padding: 2px 4px;
-  color: var(--color-text-secondary);
-  background: var(--color-control);
-  border: 1px solid var(--color-border);
-  border-radius: 3px;
-  text-align: center;
-  font-size: 7px;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-}
+  .touchComplete:disabled {
+    color: var(--color-text-dim);
+  }
 
-.completionDetail {
-  overflow: hidden;
-  color: var(--color-text-secondary);
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  font-size: 9px;
-}
-
-.completionEmpty {
-  padding: 10px 12px;
-  color: var(--color-text-dim);
-  border-color: var(--color-border);
-  font-size: 10px;
-}
-
-.completionEmpty .kbd {
-  height: 18px;
-  font-size: 8px;
+  .completionOption {
+    min-height: 44px;
+  }
 }
 
 .docsPanel {
@@ -796,14 +783,6 @@
 
   .docsPanel {
     padding: 18px 16px;
-  }
-
-  .completionOption {
-    grid-template-columns: minmax(118px, 0.78fr) minmax(0, 1fr);
-  }
-
-  .completionHeader > span:last-child {
-    display: none;
   }
 
   .previewBody {

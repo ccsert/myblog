@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useImperativeHandle, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import {
   BookOpen,
   Circle,
@@ -29,22 +29,16 @@ import {
   registerArchiveSession,
 } from '@/app/lib/terminal/shell';
 import { TerminalLine, TerminalProps } from '@/app/types/terminal';
+import { completeToken, CompletionOption, getAutosuggestion, getCommonPrefix } from '@/app/lib/terminal/completion';
 import styles from './TerminalWorkbench.module.css';
 import { scrollToHomeSection } from '@/app/lib/home-navigation';
 
 type TerminalView = 'shell' | 'docs';
 type MobilePane = 'terminal' | 'files' | 'preview';
 
-interface CompletionOption {
-  id: string;
-  value: string;
-  label: string;
-  detail: string;
-  kind: 'command' | 'file' | 'folder' | 'value';
-}
-
 interface CompletionSession {
   options: CompletionOption[];
+  originalInput: string;
 }
 
 interface PersistedTerminalSession {
@@ -159,7 +153,6 @@ function getCompletionOptions(
 
     return commands
       .filter(command => command.name.startsWith(fragment))
-      .slice(0, 7)
       .map(command => ({
         id: `command-${command.name}`,
         value: command.name,
@@ -172,7 +165,6 @@ function getCompletionOptions(
   const pathMatch = value.match(/^(cd|cat|open|ls|grep|head|tail|find)\s+(\S*)$/);
   if (pathMatch) {
     return getPathCompletions(pathMatch[2], cwd, pathMatch[1] === 'cd')
-      .slice(0, 7)
       .map(path => {
         const folder = path.endsWith('/');
         return {
@@ -233,8 +225,16 @@ export default function Terminal({
   const [terminalView, setTerminalView] = useState<TerminalView>('shell');
   const [mobilePane, setMobilePane] = useState<MobilePane>('terminal');
   const [paletteOpen, setPaletteOpen] = useState(false);
-  const [completionIndex, setCompletionIndex] = useState(0);
+  const [completionIndex, setCompletionIndex] = useState(-1);
   const [completionSession, setCompletionSession] = useState<CompletionSession | null>(null);
+  const [suggestionsDismissed, setSuggestionsDismissed] = useState(false);
+  const [inputFocused, setInputFocused] = useState(false);
+  const [cursorAtEnd, setCursorAtEnd] = useState(true);
+  const [composing, setComposing] = useState(false);
+  const composingRef = useRef(false);
+  const historyDraftRef = useRef('');
+  const ghostRef = useRef<HTMLDivElement>(null);
+  const pendingInputRef = useRef<string | null>(null);
   const [sessionReady, setSessionReady] = useState(false);
   const [handoffActionsVisible, setHandoffActionsVisible] = useState(false);
   const [liveAnnouncement, setLiveAnnouncement] = useState('');
@@ -256,8 +256,11 @@ export default function Terminal({
     () => getCompletionOptions(input, cwd, commandSummaries),
     [commandSummaries, cwd, input],
   );
-  const completionOptions = completionSession?.options ?? suggestedCompletions;
-  const activeCompletion = completionOptions[completionIndex] ?? completionOptions[0];
+  const completionOptions = completionSession?.options ?? [];
+  const activeCompletion = completionOptions[completionIndex];
+  const autosuggestion = inputFocused && cursorAtEnd && !composing && !suggestionsDismissed && !completionSession
+    ? getAutosuggestion(input, history, suggestedCompletions)
+    : '';
   const latestSpokenLine = useMemo(() => {
     for (let index = lines.length - 1; index >= 0; index -= 1) {
       if (lines[index].content.trim()) return lines[index].content;
@@ -268,6 +271,35 @@ export default function Terminal({
   const focusInput = useCallback(() => {
     window.requestAnimationFrame(() => inputRef.current?.focus({ preventScroll: true }));
   }, []);
+
+  const syncInputPosition = () => {
+    const element = inputRef.current;
+    if (!element) return;
+    setCursorAtEnd(element.selectionStart === element.value.length && element.selectionEnd === element.value.length);
+    if (ghostRef.current) ghostRef.current.scrollLeft = element.scrollLeft;
+  };
+
+  const replaceInput = useCallback((value: string) => {
+    const element = inputRef.current;
+    if (element?.value === value) {
+      pendingInputRef.current = null;
+      element.setSelectionRange(value.length, value.length);
+      if (ghostRef.current) ghostRef.current.scrollLeft = element.scrollLeft;
+    } else {
+      pendingInputRef.current = value;
+    }
+    setInput(value);
+    setCursorAtEnd(true);
+  }, []);
+
+  useLayoutEffect(() => {
+    const element = inputRef.current;
+    if (!element || pendingInputRef.current !== input) return;
+    pendingInputRef.current = null;
+    element.setSelectionRange(input.length, input.length);
+    // Synchronize before the next keystroke, without a deferred caret jump.
+    if (ghostRef.current) ghostRef.current.scrollLeft = element.scrollLeft;
+  }, [input]);
 
   const writeLine = useCallback((text: string, type: TerminalLine['type'] = 'output') => {
     setLines(previousLines => [...previousLines, { type, content: text, timestamp: new Date() }]);
@@ -399,7 +431,9 @@ export default function Terminal({
     setLiveAnnouncement('');
     setTerminalView('shell');
     setCompletionSession(null);
-    setCompletionIndex(0);
+    setCompletionIndex(-1);
+    setSuggestionsDismissed(false);
+    historyDraftRef.current = '';
 
     if (!trimmedCommand) {
       setLines(previousLines => [...previousLines, {
@@ -480,73 +514,90 @@ export default function Terminal({
     void handleCommand(command);
   }, [handleCommand]);
 
-  const moveFocusFromInput = useCallback((backward: boolean) => {
-    const workbench = workbenchRef.current;
-    const inputElement = inputRef.current;
-    if (!workbench || !inputElement) return;
+  const applyCompletion = (option: CompletionOption) => {
+    replaceInput(completeToken(option));
+    setCompletionSession(null);
+    setCompletionIndex(-1);
+    setSuggestionsDismissed(false);
+    setHistoryIndex(-1);
+    focusInput();
+  };
 
-    const focusable = Array.from(workbench.querySelectorAll<HTMLElement>(
-      'a[href], button:not(:disabled), input:not(:disabled), [tabindex]:not([tabindex="-1"])',
-    )).filter(element => (
-      element.getClientRects().length > 0
-      && window.getComputedStyle(element).visibility === 'visible'
-    ));
-    const currentIndex = focusable.indexOf(inputElement);
-    if (currentIndex < 0 || focusable.length < 2) return;
-    const nextIndex = (currentIndex + (backward ? -1 : 1) + focusable.length) % focusable.length;
-    focusable[nextIndex]?.focus({ preventScroll: true });
-  }, []);
+  const cycleCompletion = (direction: number) => {
+    if (!completionSession) return;
+    const nextIndex = completionIndex < 0
+      ? (direction > 0 ? 0 : completionOptions.length - 1)
+      : (completionIndex + direction + completionOptions.length) % completionOptions.length;
+    setCompletionIndex(nextIndex);
+    replaceInput(completionOptions[nextIndex].value);
+  };
 
-  const handleInputKeyDown = useCallback((event: React.KeyboardEvent<HTMLInputElement>) => {
+  const requestCompletion = (backward = false) => {
+    if (completionSession) {
+      cycleCompletion(backward ? -1 : 1);
+      return;
+    }
+    setSuggestionsDismissed(false);
+    if (suggestedCompletions.length === 1) {
+      applyCompletion(suggestedCompletions[0]);
+    } else if (suggestedCompletions.length > 1) {
+      const prefix = getCommonPrefix(suggestedCompletions);
+      setCompletionSession({ options: suggestedCompletions, originalInput: input });
+      setCompletionIndex(-1);
+      if (prefix.length > input.length) replaceInput(prefix);
+    } else {
+      setLiveAnnouncement('没有匹配的补全项。');
+    }
+  };
+
+  const handleInputKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (composingRef.current || event.nativeEvent.isComposing || event.keyCode === 229) return;
+    const element = event.currentTarget;
+    const atEnd = element.selectionStart === input.length && element.selectionEnd === input.length;
+    const plainKey = !event.altKey && !event.ctrlKey && !event.metaKey && !event.shiftKey;
+
     if (event.key === 'Enter') {
       event.preventDefault();
-      void handleCommand(input);
-      setInput('');
-    } else if (event.key === 'ArrowUp') {
-      event.preventDefault();
-      if (completionOptions.length > 0) {
-        setCompletionIndex(index => (index - 1 + completionOptions.length) % completionOptions.length);
-      } else if (history.length > 0) {
-        const nextIndex = historyIndex === -1 ? history.length - 1 : Math.max(0, historyIndex - 1);
-        setHistoryIndex(nextIndex);
-        setInput(history[nextIndex]);
-        setCompletionSession(null);
-      }
-    } else if (event.key === 'ArrowDown') {
-      event.preventDefault();
-      if (completionOptions.length > 0) {
-        setCompletionIndex(index => (index + 1) % completionOptions.length);
-      } else if (historyIndex !== -1) {
-        const nextIndex = historyIndex + 1;
-        if (nextIndex >= history.length) {
-          setHistoryIndex(-1);
-          setInput('');
-        } else {
-          setHistoryIndex(nextIndex);
-          setInput(history[nextIndex]);
-        }
-        setCompletionSession(null);
-      }
-    } else if (event.key === 'Tab') {
-      event.preventDefault();
-      const shouldApplyCompletion = !event.shiftKey
-        && completionOptions.length > 0
-        && activeCompletion?.value !== input;
-      if (!shouldApplyCompletion) {
-        moveFocusFromInput(event.shiftKey);
+      if (activeCompletion) {
+        applyCompletion(activeCompletion);
         return;
       }
-      const nextIndex = completionSession
-        ? (completionIndex + 1) % completionOptions.length
-        : completionIndex;
-      const nextOption = completionOptions[nextIndex];
-      const continueIntoFolder = completionOptions.length === 1 && nextOption.kind === 'folder';
-      setCompletionSession(continueIntoFolder ? null : { options: completionOptions });
-      setCompletionIndex(continueIntoFolder ? 0 : nextIndex);
-      setInput(nextOption.value);
+      void handleCommand(input);
+      replaceInput('');
+    } else if ((event.key === 'ArrowRight' || event.key === 'End') && plainKey && atEnd && autosuggestion) {
+      event.preventDefault();
+      replaceInput(autosuggestion);
+      setHistoryIndex(-1);
+    } else if ((event.key === 'ArrowUp' || event.key === 'ArrowDown') && plainKey) {
+      event.preventDefault();
+      const direction = event.key === 'ArrowUp' ? -1 : 1;
+      if (completionSession) {
+        cycleCompletion(direction);
+      } else if (history.length > 0) {
+        if (historyIndex === -1) {
+          if (direction > 0) return;
+          historyDraftRef.current = input;
+        }
+        const nextIndex = historyIndex === -1 ? history.length - 1 : Math.max(0, historyIndex + direction);
+        if (nextIndex >= history.length) {
+          setHistoryIndex(-1);
+          replaceInput(historyDraftRef.current);
+        } else {
+          setHistoryIndex(nextIndex);
+          replaceInput(history[nextIndex]);
+        }
+        setSuggestionsDismissed(false);
+      }
+    } else if (event.key === 'Tab' && !event.ctrlKey && !event.metaKey && !event.altKey) {
+      // Empty input, Shift+Tab, or Esc then Tab keep normal page navigation available.
+      if (!completionSession && (event.shiftKey || !input || suggestionsDismissed || !atEnd)) return;
+      event.preventDefault();
+      requestCompletion(event.shiftKey);
     } else if (event.key.toLowerCase() === 'l' && event.ctrlKey) {
       event.preventDefault();
       setLines([]);
+      setCompletionSession(null);
+      setCompletionIndex(-1);
     } else if (event.key.toLowerCase() === 'c' && event.ctrlKey) {
       event.preventDefault();
       setLines(previousLines => [...previousLines, {
@@ -554,35 +605,39 @@ export default function Terminal({
         content: `${currentPrompt}${input ? ` ${input}` : ''}^C`,
         timestamp: new Date(),
       }]);
-      setInput('');
+      replaceInput('');
       setHistoryIndex(-1);
       setCompletionSession(null);
-      setCompletionIndex(0);
+      setCompletionIndex(-1);
+      setSuggestionsDismissed(false);
     } else if (event.key.toLowerCase() === 'u' && event.ctrlKey) {
       event.preventDefault();
-      setInput('');
-      setCompletionSession(null);
-      setCompletionIndex(0);
-    } else if (event.key === 'Escape') {
-      setInput('');
+      replaceInput('');
       setHistoryIndex(-1);
       setCompletionSession(null);
-      setCompletionIndex(0);
+      setCompletionIndex(-1);
+      setSuggestionsDismissed(false);
+    } else if (event.key === 'Escape') {
+      event.preventDefault();
+      if (completionSession) replaceInput(completionSession.originalInput);
+      setCompletionSession(null);
+      setCompletionIndex(-1);
+      setSuggestionsDismissed(true);
+    } else if (['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) {
+      // Cursor movement commits the current menu value and resumes native editing.
+      setCompletionSession(null);
+      setCompletionIndex(-1);
     }
-  }, [activeCompletion?.value, completionIndex, completionOptions, completionSession, currentPrompt, handleCommand, history, historyIndex, input, moveFocusFromInput]);
-
-  const handleInputChange = (value: string) => {
-    setInput(value);
-    setCompletionSession(null);
-    setCompletionIndex(0);
-    setHistoryIndex(-1);
   };
 
-  const applyCompletion = (option: CompletionOption) => {
-    setInput(option.value);
+  const handleInputChange = (value: string) => {
+    pendingInputRef.current = null;
+    setInput(value);
     setCompletionSession(null);
-    setCompletionIndex(0);
-    focusInput();
+    setCompletionIndex(-1);
+    setSuggestionsDismissed(false);
+    setHistoryIndex(-1);
+    syncInputPosition();
   };
 
   const selectPreview = (path: string) => {
@@ -674,24 +729,72 @@ export default function Terminal({
               ))}
               <div className={styles.promptRow}>
                 <span className={styles.prompt}>{currentPrompt}</span>
-                <input
-                  ref={inputRef}
-                  className={styles.terminalInput}
-                  type="text"
-                  role="combobox"
-                  value={input}
-                  onChange={event => handleInputChange(event.target.value)}
-                  onKeyDown={handleInputKeyDown}
-                  aria-label="输入终端命令"
-                  aria-autocomplete="list"
-                  aria-controls={completionOptions.length > 0 ? 'terminal-completions' : undefined}
-                  aria-expanded={completionOptions.length > 0}
-                  aria-activedescendant={activeCompletion ? `completion-${activeCompletion.id}` : undefined}
-                  autoCapitalize="none"
-                  autoComplete="off"
-                  spellCheck={false}
-                />
+                <div className={styles.inputArea}>
+                  <div ref={ghostRef} className={styles.inputGhost} aria-hidden="true">
+                    <span className={styles.ghostPrefix}>{input}</span>
+                    <span>{autosuggestion.slice(input.length)}</span>
+                  </div>
+                  <input
+                    ref={inputRef}
+                    className={styles.terminalInput}
+                    type="text"
+                    role="combobox"
+                    value={input}
+                    onChange={event => handleInputChange(event.target.value)}
+                    onKeyDown={handleInputKeyDown}
+                    onKeyUp={syncInputPosition}
+                    onSelect={syncInputPosition}
+                    onScroll={syncInputPosition}
+                    onFocus={() => {
+                      setInputFocused(true);
+                      syncInputPosition();
+                    }}
+                    onBlur={() => {
+                      setInputFocused(false);
+                      setCompletionSession(null);
+                      setCompletionIndex(-1);
+                    }}
+                    onCompositionStart={() => {
+                      composingRef.current = true;
+                      setComposing(true);
+                      setCompletionSession(null);
+                      setCompletionIndex(-1);
+                    }}
+                    onCompositionEnd={() => {
+                      composingRef.current = false;
+                      setComposing(false);
+                      syncInputPosition();
+                    }}
+                    aria-label="输入终端命令"
+                    aria-autocomplete="both"
+                    aria-describedby="terminal-input-help terminal-autosuggestion"
+                    aria-controls={completionOptions.length > 0 ? 'terminal-completions' : undefined}
+                    aria-expanded={completionOptions.length > 0}
+                    aria-activedescendant={activeCompletion ? `completion-${activeCompletion.id}` : undefined}
+                    autoCapitalize="none"
+                    autoComplete="off"
+                    spellCheck={false}
+                  />
+                </div>
+                <button
+                  type="button"
+                  className={styles.touchComplete}
+                  aria-label="补全命令"
+                  disabled={!input || composing}
+                  onMouseDown={event => event.preventDefault()}
+                  onClick={() => {
+                    requestCompletion();
+                    focusInput();
+                  }}
+                >⇥</button>
               </div>
+              <span id="terminal-input-help" className="sr-only">
+                右方向键在行尾接受建议，Tab 补全，补全列表中 Tab 或方向键切换、Enter 确认。
+                上下方向键浏览历史。Esc 关闭提示，再按 Tab 可离开输入框。
+              </span>
+              <span id="terminal-autosuggestion" className="sr-only">
+                {autosuggestion ? `建议：${autosuggestion}` : ''}
+              </span>
               {handoffActionsVisible ? (
                 <div className={styles.handoffActions} role="group" aria-label="档案室交接建议">
                   <span>Archive handoff ready</span>
@@ -712,36 +815,30 @@ export default function Terminal({
                 </div>
               ) : null}
               {completionOptions.length > 0 ? (
-                <div id="terminal-completions" className={styles.completionPanel} role="listbox" aria-label="命令补全候选">
-                  <div className={styles.completionHeader}>
-                    <span>{completionOptions.length} suggestions</span>
-                    <span><span className={styles.kbd}>↑↓</span> choose · <span className={styles.kbd}>Tab</span> complete</span>
-                  </div>
-                  <div className={styles.completionList}>
-                    {completionOptions.map((option, index) => (
-                      <button
-                        key={option.id}
-                        id={`completion-${option.id}`}
-                        type="button"
-                        role="option"
-                        aria-selected={index === completionIndex}
-                        className={styles.completionOption}
-                        data-active={index === completionIndex}
-                        onMouseDown={event => event.preventDefault()}
-                        onClick={() => applyCompletion(option)}
-                      >
-                        <span className={styles.completionIdentity}>
-                          <span className={styles.completionKind}>{option.kind}</span>
-                          <code>{option.label}</code>
-                        </span>
-                        <span className={styles.completionDetail}>{option.detail}</span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              ) : input ? (
-                <div className={styles.completionEmpty} role="status">
-                  No match yet. Keep typing or press <span className={styles.kbd}>⌘K</span> to browse every action.
+                <div
+                  id="terminal-completions"
+                  className={styles.completionList}
+                  data-commands={completionOptions[0]?.kind === 'command'}
+                  role="listbox"
+                  aria-label="命令补全候选"
+                >
+                  {completionOptions.map((option, index) => (
+                    <button
+                      key={option.id}
+                      id={`completion-${option.id}`}
+                      type="button"
+                      tabIndex={-1}
+                      role="option"
+                      aria-selected={index === completionIndex}
+                      className={styles.completionOption}
+                      data-active={index === completionIndex}
+                      onMouseDown={event => event.preventDefault()}
+                      onClick={() => applyCompletion(option)}
+                    >
+                      <span className={styles.completionName} data-kind={option.kind}>{option.label}</span>
+                      {option.kind === 'command' ? <span className={styles.completionDetail}> — {option.detail}</span> : null}
+                    </button>
+                  ))}
                 </div>
               ) : null}
             </div>
@@ -753,7 +850,8 @@ export default function Terminal({
               aria-labelledby="workbench-docs-tab"
             >
               <p className={styles.docsIntro}>
-                The workbench is keyboard-first. Run a command below, use Tab to inspect and complete matches,
+                Suggestions appear after the cursor. Press → to accept, Tab to complete, or ↑/↓ to recall history.
+                Use Esc to dismiss suggestions without clearing your command,
                 or press <span className={styles.kbd}>⌘K</span> anywhere to search actions.
               </p>
               <div className={styles.commandList}>
@@ -779,8 +877,9 @@ export default function Terminal({
 
       <footer className={styles.statusbar}>
         <div className={styles.keyHints}>
-          <span><span className={styles.kbd}>↑↓</span> History / choose</span>
-          <span><span className={styles.kbd}>Tab</span> Suggest</span>
+          <span><span className={styles.kbd}>→</span> Accept</span>
+          <span><span className={styles.kbd}>Tab</span> Complete</span>
+          <span><span className={styles.kbd}>↑↓</span> History</span>
           <span><span className={styles.kbd}>Enter</span> Run</span>
           <span><span className={styles.kbd}>Ctrl L</span> Clear</span>
           <span><span className={styles.kbd}>⌘K</span> Palette</span>

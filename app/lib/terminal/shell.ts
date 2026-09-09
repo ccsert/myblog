@@ -801,7 +801,11 @@ function formatHelp(siteCommands: SiteCommandSummary[]): string {
     rows.push(...siteCommands.map(command => `  ${command.name.padEnd(18)} ${command.description}`));
   }
 
-  rows.push('', 'Keyboard: ↑/↓ history · Tab complete · Ctrl+K palette · Ctrl+L clear · Ctrl+C cancel');
+  rows.push(
+    '',
+    'Keyboard: → accept suggestion · Tab complete / cycle · ↑/↓ history · Esc dismiss',
+    '          Ctrl+K palette · Ctrl+L clear · Ctrl+C cancel · Ctrl+U clear input',
+  );
   return `Shell commands:\n${rows.join('\n')}`;
 }
 
