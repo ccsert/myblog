@@ -4,11 +4,14 @@ import { useSessionSelection } from './useSessionSelection';
 import { Circle, ExternalLink, Minus, Plus } from 'lucide-react';
 import MissionSection from '@/app/components/sections/mission/MissionSection';
 import { PORTFOLIO_PROJECTS } from '@/app/lib/content/portfolio';
+
+// Newest first, so the list order matches the "updated" dates shown on each card.
+const PROJECTS_BY_UPDATE = [...PORTFOLIO_PROJECTS].sort((a, b) => b.updated.localeCompare(a.updated));
 import styles from '@/app/components/sections/mission/MissionLog.module.css';
 import { ArchiveLink } from '@/app/components/ArchiveLink';
 
 export default function Projects() {
-  const [openProjectId, setOpenProjectId] = useSessionSelection('home-open-project', PORTFOLIO_PROJECTS[0].id, ['', ...PORTFOLIO_PROJECTS.map(project => project.id)]);
+  const [openProjectId, setOpenProjectId] = useSessionSelection('home-open-project', PROJECTS_BY_UPDATE[0].id, ['', ...PORTFOLIO_PROJECTS.map(project => project.id)]);
 
   return (
     <MissionSection
@@ -33,7 +36,7 @@ export default function Projects() {
       )}
     >
       <div className={styles.projectList}>
-        {PORTFOLIO_PROJECTS.map(project => {
+        {PROJECTS_BY_UPDATE.map(project => {
           const isOpen = openProjectId === project.id;
           const contentId = `${project.id.toLowerCase()}-details`;
 

@@ -3,6 +3,7 @@
 import { useEffect, useRef, type ReactNode } from 'react';
 import { ChevronDown, CornerDownRight } from 'lucide-react';
 import { scrollToHomeSection } from '@/app/lib/home-navigation';
+import { PUBLIC_EVIDENCE_CHECKED_AT, SITE_CONFIG } from '@/app/lib/content/portfolio';
 import styles from './MissionLog.module.css';
 
 const CHAPTERS = [
@@ -114,6 +115,15 @@ export default function MissionLog({ children }: { children: ReactNode }) {
       </aside>
       <div className={styles.journey}>{children}</div>
     </div>
-    <footer className={styles.missionFooter}><span><CornerDownRight size={12} aria-hidden="true" />保持好奇，继续动手。</span><span>Developer tools · AI engineering · Self-hosted systems</span><a href="#home">回到开头 ↑</a></footer>
+    <footer className={styles.missionFooter}>
+      <span><CornerDownRight size={12} aria-hidden="true" />保持好奇，继续动手。</span>
+      <nav className={styles.footerLinks} aria-label="站点链接">
+        <a href="https://github.com/ccsert" target="_blank" rel="noopener noreferrer">GitHub</a>
+        <a href="https://github.com/ccsert/myblog" target="_blank" rel="noopener noreferrer">本站源码</a>
+        <a href={`mailto:${SITE_CONFIG.email}`}>邮件</a>
+        <span>内容核验于 {PUBLIC_EVIDENCE_CHECKED_AT}</span>
+      </nav>
+      <a href="#home">回到开头 ↑</a>
+    </footer>
   </div>;
 }

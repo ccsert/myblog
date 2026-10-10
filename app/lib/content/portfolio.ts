@@ -15,6 +15,7 @@ export const SITE_CONFIG = {
 
 export const PORTFOLIO_PROFILE = {
   headline: 'Turning complex engineering work into tools people can actually use.',
+  intro: '我是 ccsert，独立开发者，做开发者工具、AI 辅助工程和自托管系统。公开作品都在 GitHub 上，可以读代码，也可以在这里直接动手试。',
   metadata: {
     title: `${SITE_CONFIG.domain}｜开发者工具、AI 辅助工程与自托管系统`,
     description: 'ccsert 的交互式个人站：探索开发者工具、AI 辅助工程、自托管基础设施，以及可公开的技术知识脉络。',

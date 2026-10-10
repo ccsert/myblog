@@ -95,7 +95,8 @@ export interface PreviewDocument {
   sectionId?: string;
 }
 
-export const DEFAULT_PREVIEW_PATH = `${HOME_DIRECTORY}/projects/${PORTFOLIO_PROJECTS[0].slug}.md`;
+// Open the same project the hero features, so the first screen tells one story.
+export const DEFAULT_PREVIEW_PATH = `${HOME_DIRECTORY}/projects/artifact-gateway.md`;
 
 const PROJECT_FILE_ENTRIES = Object.fromEntries(PORTFOLIO_PROJECTS.map(project => [
   `${HOME_DIRECTORY}/projects/${project.slug}.md`,

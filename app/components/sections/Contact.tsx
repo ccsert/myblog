@@ -1,13 +1,24 @@
 'use client';
 
 import { FormEvent, useState } from 'react';
-import { GitBranch, Mail, MessageSquareText, Send } from 'lucide-react';
+import { Check, Copy, GitBranch, Mail, MessageSquareText, Send } from 'lucide-react';
 import MissionSection from '@/app/components/sections/mission/MissionSection';
 import { SITE_CONFIG } from '@/app/lib/content/portfolio';
 import styles from '@/app/components/sections/mission/MissionLog.module.css';
 
 export default function Contact() {
   const [formStatus, setFormStatus] = useState('');
+  const [copied, setCopied] = useState(false);
+
+  const copyEmail = async () => {
+    try {
+      await navigator.clipboard.writeText(SITE_CONFIG.email);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 2000);
+    } catch {
+      setFormStatus(`复制失败，请手动复制：${SITE_CONFIG.email}`);
+    }
+  };
 
   const openEmailDraft = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -30,15 +41,21 @@ export default function Contact() {
       railTitle="Contact"
       railSubtitle="Open channel"
       eyebrow="// Open channel"
-      title="Contact"
-      subtitle="Start with the problem, its constraints, and the outcome you need"
+      title="联系我"
+      subtitle="从问题本身说起：背景、约束，以及你期待的结果。"
     >
       <div className={styles.contactGrid}>
         <div className={styles.directPanel}>
           <div className={styles.directBlock}>
             <h3 className={styles.subpanelTitle}>Direct links</h3>
             <div className={styles.directLinks}>
-              <a href={`mailto:${SITE_CONFIG.email}`}><Mail size={14} aria-hidden="true" />{SITE_CONFIG.email}</a>
+              <div className={styles.emailRow}>
+                <a href={`mailto:${SITE_CONFIG.email}`}><Mail size={14} aria-hidden="true" />{SITE_CONFIG.email}</a>
+                <button type="button" className={styles.copyButton} onClick={copyEmail} aria-label="复制邮箱地址">
+                  {copied ? <Check size={13} aria-hidden="true" /> : <Copy size={13} aria-hidden="true" />}
+                  {copied ? '已复制' : '复制'}
+                </button>
+              </div>
               <a href="https://github.com/ccsert" target="_blank" rel="noopener noreferrer"><GitBranch size={14} aria-hidden="true" />github.com/ccsert</a>
             </div>
           </div>

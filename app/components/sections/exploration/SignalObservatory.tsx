@@ -9,7 +9,7 @@ import styles from './SignalObservatory.module.css';
 const project = PORTFOLIO_PROJECTS.find(item => item.slug === 'artifact-gateway')!;
 const note = KNOWLEDGE_SIGNALS[0];
 const SIGNALS = [
-  { label: '构建', code: 'BUILD', title: project.title, hint: '一个入口，连接原生协议与不可变字节。', path: `/home/visitor/projects/${project.slug}.md` },
+  { label: '构建', code: 'BUILD', title: project.title, hint: '兼容 OCI、npm、Maven 等原生协议的轻量制品仓库。', path: `/home/visitor/projects/${project.slug}.md` },
   { label: '思考', code: 'THINK', title: note.title, hint: '如果知识可以像代码一样持续演进？', path: `/home/visitor/knowledge/${note.slug}.md` },
   { label: '探索', code: 'READ', title: 'Signal Archive', hint: '从一个问题，进入作品与研究背后的选择。', path: null },
 ] as const;
