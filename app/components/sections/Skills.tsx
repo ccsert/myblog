@@ -11,8 +11,8 @@ export default function Skills() {
       railTitle="Skills"
       railSubtitle="Evidence map"
       eyebrow="// Capability evidence"
-      title="Toolbox"
-      subtitle="按公开构建、核心工具与研究方向组织，而不是给自己打分"
+      title="工具箱"
+      subtitle="按公开构建、核心工具与研究方向组织，而不是给自己打分。"
       headerAside={(
         <div className={styles.legend} aria-label="能力状态图例">
           <span><Circle size={7} fill="currentColor" data-state="public" aria-hidden="true" />Public build</span>

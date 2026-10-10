@@ -26,7 +26,7 @@
 .eyebrow {
   color: var(--color-text-dim);
   font-family: var(--font-mono);
-  font-size: 7px;
+  font-size: 10px;
   letter-spacing: 0.16em;
 }
 
@@ -34,7 +34,7 @@
   overflow: hidden;
   color: var(--color-accent);
   font-family: var(--font-mono);
-  font-size: 9px;
+  font-size: 11px;
   letter-spacing: 0.04em;
   text-overflow: ellipsis;
   text-transform: uppercase;

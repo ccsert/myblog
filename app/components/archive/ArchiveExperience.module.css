@@ -91,7 +91,7 @@
 .archiveTitle {
   margin-top: 7px;
   color: #92998d;
-  font-size: 10px;
+  font-size: 12px;
   letter-spacing: 0.12em;
 }
 
@@ -103,7 +103,7 @@
   padding: 0;
   color: #8e958a;
   list-style: none;
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .phaseRail li {
@@ -176,7 +176,7 @@
   background: rgba(9, 11, 9, 0.72);
   border: 1px solid rgba(188, 203, 180, 0.18);
   border-radius: 4px;
-  font-size: 11px;
+  font-size: 12px;
   text-decoration: none;
 }
 
@@ -368,7 +368,7 @@
   transition: opacity 130ms ease-out, transform 130ms ease-out;
   white-space: nowrap;
   pointer-events: none;
-  font-size: 10px;
+  font-size: 12px;
   text-overflow: ellipsis;
 }
 
@@ -429,7 +429,7 @@
 .storyHeader span,
 .helpCard > span {
   color: var(--archive-accent);
-  font-size: 9px;
+  font-size: 11px;
   letter-spacing: 0.1em;
   text-transform: uppercase;
 }
@@ -475,7 +475,7 @@
   background: rgba(196, 150, 84, 0.08);
   border: 1px solid rgba(196, 150, 84, 0.24);
   border-radius: 3px;
-  font-size: 9px;
+  font-size: 11px;
   letter-spacing: 0.08em;
 }
 
@@ -508,7 +508,7 @@
   border-radius: 3px;
   cursor: pointer;
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: 12px;
   text-decoration: none;
 }
 
@@ -588,7 +588,7 @@
   border: 1px dashed rgba(188, 203, 180, 0.25);
   border-radius: 3px;
   cursor: pointer;
-  font: 10px var(--font-mono);
+  font: 12px var(--font-mono);
 }
 
 .endpointButton[data-selected='true'] {
@@ -620,7 +620,7 @@
 
 .bootIndex {
   color: var(--archive-accent);
-  font-size: 10px;
+  font-size: 12px;
 }
 
 .bootToken strong,
@@ -630,14 +630,14 @@
 
 .bootToken strong {
   color: #d9ded4;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 600;
 }
 
 .bootToken small {
   margin-top: 1px;
   color: #899184;
-  font-size: 8px;
+  font-size: 11px;
 }
 
 .reorderActions {
@@ -689,7 +689,7 @@
   align-items: center;
   gap: 12px;
   color: #9aa295;
-  font-size: 9px;
+  font-size: 11px;
   letter-spacing: 0.04em;
 }
 
@@ -721,7 +721,7 @@
   gap: 4px;
   min-width: 100px;
   color: #aab2a5;
-  font-size: 10px;
+  font-size: 12px;
 }
 
 .restoreStatus strong {
@@ -773,7 +773,7 @@
 .autoHint strong {
   margin-top: 6px;
   color: var(--archive-accent);
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 500;
 }
 
@@ -839,7 +839,7 @@
   display: block;
   margin-top: 16px;
   color: #899184;
-  font-size: 9px;
+  font-size: 11px;
   line-height: 1.5;
 }
 
@@ -937,7 +937,7 @@
 .storyTitleRow span {
   flex: none;
   color: #929b8d;
-  font-size: 9px;
+  font-size: 11px;
   text-transform: uppercase;
 }
 
@@ -1036,7 +1036,7 @@
 
 .bootSequence > span {
   color: #9da897;
-  font-size: 10px;
+  font-size: 12px;
   letter-spacing: 0.12em;
 }
 
@@ -1060,7 +1060,7 @@
   align-items: center;
   gap: 8px;
   color: #cad1c4;
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .bootSequence li svg {
@@ -1090,7 +1090,7 @@
   border: 1px solid rgba(255, 184, 0, 0.4);
   border-radius: 3px;
   transform: translateX(-50%);
-  font-size: 11px;
+  font-size: 12px;
   text-align: center;
 }
 
@@ -1438,7 +1438,7 @@
   }
 
   .storyFooter .terminalLink {
-    font-size: 11px;
+    font-size: 12px;
   }
 }
 

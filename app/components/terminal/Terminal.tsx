@@ -1,5 +1,6 @@
 'use client';
 
+import { usePaletteShortcut } from '@/app/lib/platform';
 import { useCallback, useEffect, useImperativeHandle, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import {
   BookOpen,
@@ -213,6 +214,7 @@ export default function Terminal({
   promptPrefix = `visitor@${SITE_CONFIG.domain}`,
   onCommand,
 }: TerminalProps) {
+  const paletteShortcut = usePaletteShortcut();
   const [lines, setLines] = useState<TerminalLine[]>(() =>
     welcomeMessage.map(content => ({ type: 'output', content })),
   );
@@ -706,7 +708,7 @@ export default function Terminal({
           <button type="button" className={styles.paletteTrigger} onClick={() => setPaletteOpen(true)}>
             <CommandIcon size={14} aria-hidden="true" />
             <span>Command palette</span>
-            <span className={styles.kbd}>⌘K</span>
+            <span className={`${styles.kbd} ${styles.paletteKbd}`}>{paletteShortcut}</span>
           </button>
         </div>
       </header>
@@ -852,7 +854,7 @@ export default function Terminal({
               <p className={styles.docsIntro}>
                 Suggestions appear after the cursor. Press → to accept, Tab to complete, or ↑/↓ to recall history.
                 Use Esc to dismiss suggestions without clearing your command,
-                or press <span className={styles.kbd}>⌘K</span> anywhere to search actions.
+                or press <span className={styles.kbd}>{paletteShortcut}</span> anywhere to search actions.
               </p>
               <div className={styles.commandList}>
                 {QUICK_COMMANDS.map(item => (
@@ -882,7 +884,7 @@ export default function Terminal({
           <span><span className={styles.kbd}>↑↓</span> History</span>
           <span><span className={styles.kbd}>Enter</span> Run</span>
           <span><span className={styles.kbd}>Ctrl L</span> Clear</span>
-          <span><span className={styles.kbd}>⌘K</span> Palette</span>
+          <span className={styles.paletteHint}><span className={styles.kbd}>{paletteShortcut}</span> Palette</span>
         </div>
         <div className={styles.statusItems}>
           <span className={styles.statusOnline}>

@@ -3,7 +3,7 @@
 import Terminal from '@/app/components/terminal/Terminal';
 import SignalObservatory from './exploration/SignalObservatory';
 import DiscoveryDock from './exploration/DiscoveryDock';
-import { KNOWLEDGE_SIGNALS, PORTFOLIO_PROJECTS, SITE_CONFIG } from '@/app/lib/content/portfolio';
+import { KNOWLEDGE_SIGNALS, PORTFOLIO_PROFILE, PORTFOLIO_PROJECTS, SITE_CONFIG } from '@/app/lib/content/portfolio';
 import { Command, TerminalHandle } from '@/app/types/terminal';
 import { ArrowDownRight, ArrowUpRight, TerminalSquare } from 'lucide-react';
 import { useRouter } from 'next/navigation';
@@ -95,7 +95,7 @@ export default function Hero() {
     '  theme <name> — green · cyan · amber · light',
     '',
     'Tip: → accepts the gray suggestion · Tab completes · ↑/↓ recalls history.',
-    'Press ⌘K to browse every action.',
+    'Press ⌘K (Ctrl K on Windows/Linux) to browse every action.',
     '',
   ];
 
@@ -107,10 +107,10 @@ export default function Hero() {
             <div className={styles.eyebrow}>INDEPENDENT BUILDER / OPEN SYSTEMS</div>
             <h1 className={styles.heading}>{brandPrefix}<span>{brandSuffix.join('')}</span></h1>
             <p className={styles.invitation}>把复杂留给系统，把好奇心留给自己。</p>
-            <p className={styles.domains}>Developer tools · AI engineering · Self-hosted systems</p>
+            <p className={styles.bio}>{PORTFOLIO_PROFILE.intro}</p>
             <nav className={styles.shortcuts} aria-label="开始探索">
-              <a href="#projects"><b>{String(PORTFOLIO_PROJECTS.length).padStart(2, '0')}</b> 公开构建</a>
-              <a href="#blog"><b>{String(KNOWLEDGE_SIGNALS.length).padStart(2, '0')}</b> 思考线索</a>
+              <a href="#projects" className={styles.primaryShortcut}>看作品 <ArrowDownRight size={13} aria-hidden="true" /></a>
+              <a href="#contact">联系我</a>
               <ArchiveLink href="/archive" id="hero-playground"><span className="playground-colors" aria-hidden="true"><i /><i /><i /><i /></span> 个人实验场 <ArrowUpRight size={11} aria-hidden="true" /></ArchiveLink>
             </nav>
           </div>

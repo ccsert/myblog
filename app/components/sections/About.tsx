@@ -25,8 +25,8 @@ export default function About() {
       railTitle="About"
       railSubtitle="Operator profile"
       eyebrow="// Operator profile"
-      title="About"
-      subtitle="The through-line behind the repositories"
+      title="关于我"
+      subtitle="这些仓库背后，一以贯之的想法。"
     >
       <div className={styles.aboutIntro}>
         <div className={styles.aboutCopy}>

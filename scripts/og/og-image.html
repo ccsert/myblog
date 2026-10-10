@@ -1,0 +1,70 @@
+<!doctype html>
+<!--
+  Source for app/opengraph-image.png and app/twitter-image.png (1200x630).
+  Rendered with headless Chromium from the repo root; fonts load from public/fonts,
+  Chinese glyphs fall back to Noto Sans CJK SC.
+-->
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<style>
+  @font-face { font-family: Inter; src: url(../../public/fonts/Inter-SemiBold.woff2); font-weight: 600; }
+  @font-face { font-family: Inter; src: url(../../public/fonts/Inter-Regular.woff2); font-weight: 400; }
+  @font-face { font-family: JBM; src: url(../../public/fonts/JetBrainsMono-Regular.woff2); }
+  * { box-sizing: border-box; margin: 0; }
+  html, body { width: 1200px; height: 630px; }
+  body {
+    position: relative; overflow: hidden; color: #E4E4E7; background: #0A0A0B;
+    font-family: Inter, "Noto Sans CJK SC", sans-serif;
+  }
+  .grid {
+    position: absolute; inset: 0;
+    background-image: linear-gradient(rgba(0,255,136,.05) 1px, transparent 1px), linear-gradient(90deg, rgba(0,255,136,.05) 1px, transparent 1px);
+    background-size: 40px 40px;
+    mask-image: radial-gradient(ellipse at 70% 30%, #000 30%, transparent 80%);
+  }
+  .glow { position: absolute; inset: 0; background: radial-gradient(ellipse at 78% 20%, rgba(0,255,136,.14), transparent 55%); }
+  .content { position: absolute; left: 80px; top: 92px; right: 80px; }
+  .eyebrow { display: flex; align-items: center; gap: 14px; color: #A1A1AA; font: 20px JBM, monospace; letter-spacing: .14em; }
+  .eyebrow::before { content: ''; width: 36px; height: 2px; background: #00FF88; }
+  h1 { margin-top: 34px; font-size: 132px; font-weight: 600; letter-spacing: -.07em; line-height: .95; }
+  h1 span { color: #00FF88; }
+  .tagline { margin-top: 40px; font-size: 40px; font-weight: 400; letter-spacing: .02em; }
+  .footer {
+    position: absolute; left: 80px; right: 80px; bottom: 64px;
+    display: flex; justify-content: space-between; align-items: center;
+    padding-top: 26px; border-top: 1px solid #26262A;
+    color: #A1A1AA; font: 22px JBM, monospace;
+  }
+  .footer b { color: #00FF88; font-weight: 400; }
+  .globe { position: absolute; right: 44px; top: 70px; width: 236px; color: #00FF88; opacity: .9; }
+  .globe .s { stroke: currentColor; stroke-width: .8; opacity: .35; fill: none; }
+  .globe .o { stroke: currentColor; stroke-width: 1.6; fill: none; }
+</style>
+</head>
+<body>
+  <div class="grid"></div>
+  <div class="glow"></div>
+  <svg class="globe" viewBox="0 0 280 260" aria-hidden="true">
+    <g class="s">
+      <ellipse cx="140" cy="130" rx="26" ry="90"/><ellipse cx="140" cy="130" rx="51" ry="90"/>
+      <ellipse cx="140" cy="130" rx="73" ry="90"/><ellipse cx="140" cy="130" rx="88" ry="90"/>
+      <ellipse cx="140" cy="130" rx="90" ry="22"/><ellipse cx="140" cy="130" rx="90" ry="45"/>
+      <ellipse cx="140" cy="130" rx="90" ry="67"/><circle cx="140" cy="130" r="90"/>
+    </g>
+    <g transform="rotate(-28 140 130)">
+      <path class="o" d="M8 130a132 43 0 0 0 264 0"/>
+      <circle cx="272" cy="130" r="5" fill="currentColor"/>
+    </g>
+  </svg>
+  <div class="content">
+    <div class="eyebrow">INDEPENDENT BUILDER / OPEN SYSTEMS</div>
+    <h1>me<span>.ccsert.top</span></h1>
+    <p class="tagline">把复杂留给系统，把好奇心留给自己。</p>
+  </div>
+  <div class="footer">
+    <span>Developer tools · AI engineering · Self-hosted systems</span>
+    <span><b>●</b> github.com/ccsert</span>
+  </div>
+</body>
+</html>

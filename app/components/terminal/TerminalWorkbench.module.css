@@ -112,7 +112,7 @@
   background: var(--color-control);
   border: 1px solid var(--color-border);
   border-radius: 4px;
-  font-size: 10px;
+  font-size: 12px;
 }
 
 .layout {
@@ -236,7 +236,7 @@
   background: var(--terminal-accent-soft);
   border: 1px solid var(--terminal-accent-muted);
   border-radius: 7px;
-  font-size: 9px;
+  font-size: 11px;
   letter-spacing: 0.04em;
   text-transform: uppercase;
 }
@@ -255,7 +255,7 @@
   border: 1px solid var(--color-border);
   border-radius: 4px;
   cursor: pointer;
-  font: 10px var(--font-mono);
+  font: 12px var(--font-mono);
   text-transform: none;
 }
 
@@ -391,7 +391,7 @@
   gap: 8px;
   padding: 7px 10px 11px;
   color: var(--color-text-dim);
-  font-size: 11px;
+  font-size: 12px;
   text-transform: uppercase;
   letter-spacing: 0.08em;
 }
@@ -418,7 +418,7 @@
   text-align: left;
   border-radius: 4px;
   color: var(--color-text-secondary);
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .treeButton:hover,
@@ -472,17 +472,24 @@
   color: var(--color-text-secondary);
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-size: 11px;
+  font-size: 12px;
+}
+
+.previewPath > span:not(.previewBadge) {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .previewBadge {
+  flex: none;
   margin-left: 8px;
   padding: 2px 6px;
   color: var(--terminal-accent);
   background: var(--terminal-accent-soft);
   border: 1px solid var(--terminal-accent-muted);
   border-radius: 4px;
-  font-size: 9px;
+  font-size: 11px;
   letter-spacing: 0.06em;
 }
 
@@ -546,7 +553,7 @@
   background: var(--color-control);
   border: 1px solid var(--color-border);
   border-radius: 5px;
-  font-size: 10px;
+  font-size: 12px;
 }
 
 .metadataItem strong {
@@ -570,7 +577,7 @@
   max-width: 62ch;
   margin: 0;
   color: var(--color-text-secondary);
-  font-size: 11px;
+  font-size: 12px;
   line-height: 1.75;
 }
 
@@ -592,14 +599,14 @@
 .signalMetric span {
   display: block;
   color: var(--color-text-dim);
-  font-size: 9px;
+  font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 0.07em;
 }
 
 .signalMetric strong {
   color: var(--color-text-primary);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 500;
 }
 
@@ -613,7 +620,7 @@
   color: var(--color-text-dim);
   background: var(--color-statusbar);
   border-top: 1px solid var(--color-border);
-  font-size: 10px;
+  font-size: 12px;
 }
 
 .statusItems,
@@ -703,7 +710,7 @@
 
 .paletteItem code {
   color: var(--terminal-accent);
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .paletteLabel {
@@ -715,7 +722,7 @@
 .paletteDescription {
   display: block;
   color: var(--color-text-dim);
-  font-size: 10px;
+  font-size: 12px;
 }
 
 @media (max-width: 1100px) {
@@ -806,7 +813,7 @@
     align-items: center;
     justify-content: center;
     gap: 6px;
-    font-size: 10px;
+    font-size: 12px;
   }
 
   .mobileTab[data-active='true'] {
@@ -822,5 +829,13 @@
 @media (prefers-reduced-motion: reduce) {
   .workbench {
     transition: none;
+  }
+}
+
+/* Keyboard shortcuts mean nothing on a touch-only device. */
+@media (hover: none) and (pointer: coarse) {
+  .paletteKbd,
+  .paletteHint {
+    display: none;
   }
 }

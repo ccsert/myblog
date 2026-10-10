@@ -295,6 +295,7 @@ export default function ThemeSignalFader({ compact = false }: ThemeSignalFaderPr
       data-theme-control
       aria-label="主题信号推杆"
       role="group"
+      title={`界面主题：${currentTheme.label}（点选或拖动切换）`}
     >
       <span className={styles.readout} aria-hidden="true">
         <span className={styles.eyebrow}>THEME</span>
