@@ -1,10 +1,5 @@
 import { isSiteTheme, SiteTheme } from '@/app/lib/theme';
 import {
-  FIRST_ROOM_AMBIENT_INTERACTIONS,
-  FIRST_ROOM_CORE_NODES,
-  FIRST_ROOM_HIDDEN_ECHOES,
-} from '@/app/lib/archive/content';
-import {
   CAPABILITY_GROUPS,
   KNOWLEDGE_SIGNALS,
   PORTFOLIO_PROFILE,
@@ -14,7 +9,6 @@ import {
 } from '@/app/lib/content/portfolio';
 
 export const HOME_DIRECTORY = '/home/visitor';
-export const ARCHIVE_SESSION_PATH = `${HOME_DIRECTORY}/archive/session.log`;
 
 export const BUILTIN_COMMAND_NAMES = [
   'help',
@@ -287,38 +281,6 @@ const PREVIEW_DOCUMENTS: Record<string, PreviewDocument> = {
   },
 };
 
-export function registerArchiveSession(signalIds: readonly string[]): number {
-  const discoveredIds = new Set(signalIds);
-  const recoveredRecords = [
-    ...FIRST_ROOM_CORE_NODES.map(node => ({ id: node.id, title: node.title.zh, body: node.storyReveal.zh })),
-    ...FIRST_ROOM_AMBIENT_INTERACTIONS.map(node => ({ id: node.id, title: node.title.zh, body: node.feedback.zh })),
-    ...FIRST_ROOM_HIDDEN_ECHOES.map(node => ({ id: node.id, title: node.title.zh, body: node.reveal.zh })),
-  ].filter(record => discoveredIds.has(record.id));
-  const recoveryLines = recoveredRecords.length > 0
-    ? recoveredRecords.map(record => `- ${record.title}: ${record.body}`)
-    : ['- 本地节点已上线；本次交接没有附加故事记录。'];
-  const content = [
-    'Signal Archive · Recovered session',
-    '',
-    `Recovered signals: ${recoveredRecords.length}`,
-    ...recoveryLines,
-  ].join('\n');
-
-  VIRTUAL_FILE_SYSTEM[`${HOME_DIRECTORY}/archive`] = { type: 'directory' };
-  VIRTUAL_FILE_SYSTEM[ARCHIVE_SESSION_PATH] = { type: 'file', content };
-  PREVIEW_DOCUMENTS[ARCHIVE_SESSION_PATH] = {
-    path: ARCHIVE_SESSION_PATH,
-    title: 'Signal Archive Recovery Log',
-    description: `${recoveredRecords.length} 条已发现的首房记录已从游戏会话交接。`,
-    status: 'Online',
-    stage: 'Archive',
-    updated: 'Current session',
-    stack: [],
-    overview: recoveryLines.join(' '),
-  };
-  return recoveredRecords.length;
-}
-
 export interface SiteCommandSummary {
   name: string;
   description: string;
@@ -464,7 +426,7 @@ function descendants(path: string): Array<{ path: string; entry: VirtualEntry }>
 }
 
 export function getWorkspaceTree(): WorkspaceNode[] {
-  const workspaceOrder = ['archive', 'projects', 'knowledge', 'docs', 'skills', 'about.txt', 'contact.txt', 'README.md'];
+  const workspaceOrder = ['projects', 'knowledge', 'docs', 'skills', 'about.txt', 'contact.txt', 'README.md'];
   const buildNode = (path: string, entry: VirtualEntry): WorkspaceNode => ({
     name: basename(path),
     path,

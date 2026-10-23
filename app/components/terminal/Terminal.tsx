@@ -17,7 +17,6 @@ import { KNOWLEDGE_SIGNALS, PORTFOLIO_PROJECTS, SITE_CONFIG } from '@/app/lib/co
 import {
   BUILTIN_COMMAND_NAMES,
   BUILTIN_COMMAND_DESCRIPTIONS,
-  ARCHIVE_SESSION_PATH,
   DEFAULT_PREVIEW_PATH,
   displayPath,
   executeShellCommand,
@@ -26,7 +25,6 @@ import {
   getWorkspaceEntry,
   HOME_DIRECTORY,
   parseCommandLine,
-  registerArchiveSession,
 } from '@/app/lib/terminal/shell';
 import { TerminalLine, TerminalProps } from '@/app/types/terminal';
 import { completeToken, CompletionOption, getAutosuggestion, getCommonPrefix } from '@/app/lib/terminal/completion';
@@ -50,13 +48,10 @@ interface PersistedTerminalSession {
   previewPath: string;
   terminalView: TerminalView;
   mobilePane: MobilePane;
-  archiveStoryIds: string[];
 }
 
 const TERMINAL_SESSION_STORAGE_KEY = 'ccsert-terminal:session';
-const ARCHIVE_HANDOFF_STORAGE_KEY = 'signal-archive:handoff';
 const TERMINAL_LINE_TYPES = new Set<TerminalLine['type']>(['input', 'output', 'error', 'success', 'info']);
-const ARCHIVE_HANDOFF_ACTIONS = ['status', 'tree', `open ${ARCHIVE_SESSION_PATH}`] as const;
 
 function parseTerminalSession(raw: string | null): PersistedTerminalSession | null {
   if (!raw) return null;
@@ -71,10 +66,6 @@ function parseTerminalSession(raw: string | null): PersistedTerminalSession | nu
       && (line.timestamp === undefined || typeof line.timestamp === 'string')
     ));
     if (!validLines || !value.history.every(item => typeof item === 'string')) return null;
-    const archiveStoryIds = Array.isArray(value.archiveStoryIds)
-      ? value.archiveStoryIds.filter(item => typeof item === 'string').slice(-64)
-      : [];
-    if (archiveStoryIds.length > 0) registerArchiveSession(archiveStoryIds);
     if (typeof value.cwd !== 'string' || getWorkspaceEntry(value.cwd)?.type !== 'directory') return null;
     if (typeof value.previousCwd !== 'string' || getWorkspaceEntry(value.previousCwd)?.type !== 'directory') return null;
     if (typeof value.previewPath !== 'string' || !getPreviewDocument(value.previewPath)) return null;
@@ -89,7 +80,6 @@ function parseTerminalSession(raw: string | null): PersistedTerminalSession | nu
       previewPath: value.previewPath,
       terminalView: value.terminalView,
       mobilePane: value.mobilePane,
-      archiveStoryIds,
     };
   } catch {
     return null;
@@ -108,7 +98,7 @@ const QUICK_COMMANDS = [
 ] as const;
 
 const PALETTE_ACTIONS: PaletteAction[] = [
-  { command: 'archive', label: 'Enter Signal Archive', description: 'Follow a question into projects and field notes' },
+  { command: 'archive', label: 'Open the playground', description: 'Try each project hands-on, then read its notes' },
   ...PORTFOLIO_PROJECTS.map(project => ({
     command: `open projects/${project.slug}.md`,
     label: `Open ${project.title}`,
@@ -236,9 +226,7 @@ export default function Terminal({
   const ghostRef = useRef<HTMLDivElement>(null);
   const pendingInputRef = useRef<string | null>(null);
   const [sessionReady, setSessionReady] = useState(false);
-  const [handoffActionsVisible, setHandoffActionsVisible] = useState(false);
   const [liveAnnouncement, setLiveAnnouncement] = useState('');
-  const [archiveStoryIds, setArchiveStoryIds] = useState<string[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
   const outputRef = useRef<HTMLDivElement>(null);
   const workbenchRef = useRef<HTMLElement>(null);
@@ -324,10 +312,8 @@ export default function Terminal({
   useEffect(() => {
     const frame = window.requestAnimationFrame(() => {
       let persistedSession: PersistedTerminalSession | null = null;
-      let rawHandoff: string | null = null;
       try {
         persistedSession = parseTerminalSession(window.sessionStorage.getItem(TERMINAL_SESSION_STORAGE_KEY));
-        rawHandoff = window.sessionStorage.getItem(ARCHIVE_HANDOFF_STORAGE_KEY);
       } catch {
         // Session persistence is optional; the terminal must still mount.
       }
@@ -347,42 +333,8 @@ export default function Terminal({
         setPreviewPath(persistedSession.previewPath);
         setTerminalView(persistedSession.terminalView);
         setMobilePane(persistedSession.mobilePane);
-        setArchiveStoryIds(persistedSession.archiveStoryIds);
       }
 
-      let handoffMessage = '';
-      let repairSummary = 'power · health · boot order';
-      let discoveredCount = 0;
-      if (rawHandoff) {
-        try {
-          const payload = JSON.parse(rawHandoff) as { repairSummary?: string[]; discoveredStoryIds?: string[] };
-          if (Array.isArray(payload.repairSummary) && payload.repairSummary.length > 0) {
-            repairSummary = payload.repairSummary.join(' · ');
-          }
-          if (Array.isArray(payload.discoveredStoryIds)) {
-            const discoveredStoryIds = payload.discoveredStoryIds.filter(item => typeof item === 'string').slice(-64);
-            setArchiveStoryIds(discoveredStoryIds);
-            discoveredCount = registerArchiveSession(discoveredStoryIds);
-          }
-        } catch {
-          // A malformed handoff must never block the terminal.
-        }
-        try {
-          window.sessionStorage.removeItem(ARCHIVE_HANDOFF_STORAGE_KEY);
-        } catch {
-          // A blocked storage write must not block the terminal.
-        }
-        handoffMessage = `[archive] Local node A-17 online · Restored: ${repairSummary} · Recovered signals: ${discoveredCount}.`;
-        const timestamp = new Date();
-        setLines(previousLines => [
-          ...previousLines,
-          { type: 'success', content: handoffMessage, timestamp },
-        ]);
-        setHandoffActionsVisible(true);
-        setTerminalView('shell');
-        setMobilePane('terminal');
-        setLiveAnnouncement(handoffMessage);
-      }
       const requestedDocument = new URLSearchParams(window.location.search).get('open');
       const linkedDocument = requestedDocument ? getPreviewDocument(requestedDocument) : null;
       if (linkedDocument) {
@@ -417,14 +369,13 @@ export default function Terminal({
       previewPath,
       terminalView,
       mobilePane,
-      archiveStoryIds,
     };
     try {
       window.sessionStorage.setItem(TERMINAL_SESSION_STORAGE_KEY, JSON.stringify(snapshot));
     } catch {
       // A blocked session store should not degrade the live terminal.
     }
-  }, [archiveStoryIds, cwd, history, lines, mobilePane, previewPath, previousCwd, sessionReady, terminalView]);
+  }, [cwd, history, lines, mobilePane, previewPath, previousCwd, sessionReady, terminalView]);
 
   const handleCommand = useCallback(async (commandText: string) => {
     const trimmedCommand = commandText.trim();
@@ -795,25 +746,6 @@ export default function Terminal({
               <span id="terminal-autosuggestion" className="sr-only">
                 {autosuggestion ? `建议：${autosuggestion}` : ''}
               </span>
-              {handoffActionsVisible ? (
-                <div className={styles.handoffActions} role="group" aria-label="档案室交接建议">
-                  <span>Archive handoff ready</span>
-                  <div>
-                    {ARCHIVE_HANDOFF_ACTIONS.map(action => (
-                      <button
-                        key={action}
-                        type="button"
-                        onClick={() => {
-                          setHandoffActionsVisible(false);
-                          runCommand(action);
-                        }}
-                      >
-                        {action}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              ) : null}
               {completionOptions.length > 0 ? (
                 <div
                   id="terminal-completions"

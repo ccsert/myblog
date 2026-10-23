@@ -227,44 +227,6 @@
   display: none;
 }
 
-.handoffActions {
-  display: grid;
-  gap: 8px;
-  margin: 12px 0 2px;
-  padding: 10px;
-  color: var(--color-text-secondary);
-  background: var(--terminal-accent-soft);
-  border: 1px solid var(--terminal-accent-muted);
-  border-radius: 7px;
-  font-size: 9px;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-}
-
-.handoffActions > div {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-
-.handoffActions button {
-  min-height: 44px;
-  padding: 0 9px;
-  color: var(--terminal-accent);
-  background: var(--color-control);
-  border: 1px solid var(--color-border);
-  border-radius: 4px;
-  cursor: pointer;
-  font: 10px var(--font-mono);
-  text-transform: none;
-}
-
-.handoffActions button:hover,
-.handoffActions button:focus-visible {
-  border-color: var(--terminal-accent);
-  outline: none;
-}
-
 .completionList {
   display: flex;
   flex-wrap: wrap;
