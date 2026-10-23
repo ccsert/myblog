@@ -24,9 +24,7 @@ export default function MissionLog({ children }: { children: ReactNode }) {
     const element = root.current;
     if (!element) return;
     const sections = Array.from(element.querySelectorAll<HTMLElement>('[data-mission-section]'));
-    const preference = window.matchMedia('(prefers-reduced-motion: reduce)');
     const compact = window.matchMedia('(max-width: 980px)');
-    const animations = new Set<Animation>();
     let offsets: number[] = [];
     let end = 0;
     let frame = 0;
@@ -61,32 +59,14 @@ export default function MissionLog({ children }: { children: ReactNode }) {
     sections.forEach(section => resize.observe(section));
     const hero = document.getElementById('home');
     if (hero) resize.observe(hero);
-    const cancel = () => { animations.forEach(animation => animation.cancel()); animations.clear(); };
-    const reveal = new IntersectionObserver(entries => {
-      entries.forEach(entry => {
-        if (!entry.isIntersecting) return;
-        reveal.unobserve(entry.target);
-        if (preference.matches || document.documentElement.dataset.homeInput === 'keyboard') return;
-        const animation = entry.target.animate([{ opacity: .55, transform: 'translateY(14px)' }, { opacity: 1, transform: 'translateY(0)' }], { duration: 280, easing: 'cubic-bezier(.22,.8,.2,1)' });
-        animations.add(animation);
-        animation.onfinish = () => animations.delete(animation);
-      });
-    }, { rootMargin: '0px 0px -24px 0px', threshold: .2 });
-    element.querySelectorAll('[data-chapter-header]').forEach(header => reveal.observe(header));
     measure();
     window.addEventListener('scroll', schedule, { passive: true });
     window.addEventListener('resize', measure);
-    window.addEventListener('keydown', cancel, true);
-    preference.addEventListener('change', cancel);
     return () => {
       cancelAnimationFrame(frame);
       resize.disconnect();
-      reveal.disconnect();
-      cancel();
       window.removeEventListener('scroll', schedule);
       window.removeEventListener('resize', measure);
-      window.removeEventListener('keydown', cancel, true);
-      preference.removeEventListener('change', cancel);
     };
   }, []);
 
@@ -101,7 +81,7 @@ export default function MissionLog({ children }: { children: ReactNode }) {
     scrollToHomeSection(CHAPTERS[next].id, true);
   }}>
     <div className={styles.topCue}>
-      <div><div className={styles.cueKicker}><ChevronDown size={13} aria-hidden="true" /> KEEP EXPLORING</div><p className={styles.cueDescription}>往下看看，想法怎样变成作品。</p></div>
+      <div><div className={styles.cueKicker}><ChevronDown size={13} aria-hidden="true" /> KEEP EXPLORING</div><p className={styles.cueDescription}>往下是作品、做事方式、常用工具和手记。</p></div>
       <div className={styles.keyboardHint} aria-label="使用 J 和 K 键切换章节"><kbd>J</kbd><kbd>K</kbd><span>切换章节</span></div>
     </div>
     <div className={styles.readingLayout}>
@@ -114,6 +94,6 @@ export default function MissionLog({ children }: { children: ReactNode }) {
       </aside>
       <div className={styles.journey}>{children}</div>
     </div>
-    <footer className={styles.missionFooter}><span><CornerDownRight size={12} aria-hidden="true" />保持好奇，继续动手。</span><span>Developer tools · AI engineering · Self-hosted systems</span><a href="#home">回到开头 ↑</a></footer>
+    <footer className={styles.missionFooter}><span><CornerDownRight size={12} aria-hidden="true" />把复杂留给系统，把好奇心留给自己。</span><span>Developer tools · AI engineering · Self-hosted systems</span><a href="#home">回到开头 ↑</a></footer>
   </div>;
 }

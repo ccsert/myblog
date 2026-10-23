@@ -11,7 +11,7 @@ const note = KNOWLEDGE_SIGNALS[0];
 const SIGNALS = [
   { label: '构建', code: 'BUILD', title: project.title, hint: '一个入口，连接原生协议与不可变字节。', path: `/home/visitor/projects/${project.slug}.md` },
   { label: '思考', code: 'THINK', title: note.title, hint: '如果知识可以像代码一样持续演进？', path: `/home/visitor/knowledge/${note.slug}.md` },
-  { label: '探索', code: 'READ', title: 'Signal Archive', hint: '从一个问题，进入作品与研究背后的选择。', path: null },
+  { label: '动手', code: 'PLAY', title: '个人实验场', hint: '四件作品，各有一个可以直接上手的小实验。', path: null },
 ] as const;
 
 export default function SignalObservatory({ onOpenDocument }: { onOpenDocument: (path: string) => void }) {
@@ -79,7 +79,7 @@ export default function SignalObservatory({ onOpenDocument }: { onOpenDocument: 
             读取这份档案 <ArrowUpRight size={14} aria-hidden="true" />
           </button>
         ) : (
-          <Link className={styles.openSignal} href="/archive">探索技术档案 <ArrowUpRight size={14} aria-hidden="true" /></Link>
+          <Link className={styles.openSignal} href="/archive">进入个人实验场 <ArrowUpRight size={14} aria-hidden="true" /></Link>
         )}
       </div>
       <button type="button" className={styles.motionToggle} aria-label={paused ? '播放轨道动画' : '暂停轨道动画'} aria-pressed={paused} onClick={() => setPaused(value => !value)}>

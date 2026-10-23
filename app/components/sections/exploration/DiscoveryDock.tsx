@@ -18,12 +18,12 @@ const TRAILS = [
 
 export default function DiscoveryDock({ onOpenDocument }: { onOpenDocument: (path: string) => void }) {
   return (
-    <div className={styles.dock}>
+    <div className={styles.dock} data-reveal-group>
       <section className={styles.trails} aria-labelledby="curiosity-heading">
         <div className={styles.kicker}><CornerDownRight size={13} aria-hidden="true" /> FOLLOW A THREAD</div>
         <h2 id="curiosity-heading">好奇心，总有下一站<span>。</span></h2>
         <p className={styles.intro}>从一个问题开始，看看它最后长成了什么。</p>
-        <div className={styles.trailList}>
+        <div className={styles.trailList} data-reveal-group>
           {TRAILS.map((trail, index) => (
             <button key={trail.path} type="button" className={styles.trail} onClick={() => onOpenDocument(trail.path)}>
               <span className={styles.number}>0{index + 1}</span>
@@ -40,7 +40,7 @@ export default function DiscoveryDock({ onOpenDocument }: { onOpenDocument: (pat
           <span className={styles.archiveContent}><strong>别只看，动手玩。</strong><ArrowUpRight size={28} aria-hidden="true" /></span>
           <span className={styles.archiveDescription}>同一件作品，换一个角度认识。选一个想法，直接开始。</span>
         </ArchiveLink>
-        <div className={styles.experiments}>{EXPERIMENTS.map((item, index) => <ArchiveLink key={item.slug} id={`discovery-${item.slug}`} href={`/archive#play=${item.slug}`} className={styles.experiment} data-project={item.slug}>
+        <div className={styles.experiments} data-reveal-group>{EXPERIMENTS.map((item, index) => <ArchiveLink key={item.slug} id={`discovery-${item.slug}`} href={`/archive#play=${item.slug}`} className={styles.experiment} data-project={item.slug}>
           <span><small>0{index + 1}</small><ArrowUpRight size={16} aria-hidden="true" /></span><strong>{item.name}</strong><span>{item.action}</span>
         </ArchiveLink>)}</div>
         <div className={styles.archiveBottom}>个人实验场<span>试玩 / 档案 / 手记</span></div>

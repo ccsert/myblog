@@ -19,25 +19,27 @@ export default function Blog() {
       railSubtitle="Knowledge signals"
       eyebrow="// Research index"
       title="做东西，也留一点追问。"
-      subtitle="关于知识、网络、语音与系统，顺着一条线索继续读。"
+      subtitle="知识管理、网络、语音和 Linux 运行时，几条还在追问的线索。"
       headerAside={(
-        <span className={styles.indexBoundary}>Private notes · public-safe index</span>
+        <span className={styles.indexBoundary}>只公开整理过的摘要</span>
       )}
     >
-      <div className={styles.blogGrid}>
-        <article className={styles.featuredPost} aria-live="polite">
-          <div className={styles.featuredLabel}>Knowledge signal · {selectedPost.id}</div>
-          <h3>{selectedPost.title}</h3>
-          <p>{selectedPost.excerpt}</p>
-          <p className={styles.knowledgeQuestion}><strong>OPEN QUESTION</strong>{selectedPost.openQuestion}</p>
-          <p className={styles.knowledgeBoundary}>{selectedPost.boundary}</p>
-          <div className={styles.featuredMeta}>
-            {selectedPost.tags.map(tag => <span className={styles.tag} key={tag}>{tag}</span>)}
-            <span>Indexed {selectedPost.indexed}</span>
-            <ArchiveLink id={`note-read-${selectedPost.slug}`} className={styles.textLink} href={`/archive#read=${selectedPost.slug}`}>阅读这条手记 <ArrowUpRight size={11} aria-hidden="true" /></ArchiveLink>
-            <a className={styles.textLink} href={selectedPost.sourceUrl} target="_blank" rel="noopener noreferrer">
-              {selectedPost.sourceLabel} <ArrowUpRight size={11} aria-hidden="true" />
-            </a>
+      <div className={styles.blogGrid} data-reveal-group>
+        <article className={styles.featuredPost} aria-live="polite" data-spotlight="card">
+          <div className={styles.featuredSwap} key={selectedPost.id}>
+            <div className={styles.featuredLabel}>手记 · {selectedPost.id}</div>
+            <h3>{selectedPost.title}</h3>
+            <p>{selectedPost.excerpt}</p>
+            <p className={styles.knowledgeQuestion}><strong>还没想清楚的</strong>{selectedPost.openQuestion}</p>
+            <p className={styles.knowledgeBoundary}>{selectedPost.boundary}</p>
+            <div className={styles.featuredMeta}>
+              {selectedPost.tags.map(tag => <span className={styles.tag} key={tag}>{tag}</span>)}
+              <span>整理于 {selectedPost.indexed}</span>
+              <ArchiveLink id={`note-read-${selectedPost.slug}`} className={styles.textLink} href={`/archive#read=${selectedPost.slug}`}>读全文 <ArrowUpRight size={11} aria-hidden="true" /></ArchiveLink>
+              <a className={styles.textLink} href={selectedPost.sourceUrl} target="_blank" rel="noopener noreferrer">
+                {selectedPost.sourceLabel} <ArrowUpRight size={11} aria-hidden="true" />
+              </a>
+            </div>
           </div>
         </article>
 
@@ -61,7 +63,7 @@ export default function Blog() {
           ))}
         </div>
       </div>
-      <div className={styles.endMarker}>Full private notes remain outside the public site by design</div>
+      <div className={styles.endMarker}>完整笔记留在私有知识库里，这里只放可以公开的部分。</div>
     </MissionSection>
   );
 }

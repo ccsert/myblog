@@ -10,29 +10,27 @@ export default function Skills() {
       number="04"
       railTitle="Skills"
       railSubtitle="Evidence map"
-      eyebrow="// Capability evidence"
-      title="Toolbox"
-      subtitle="按公开构建、核心工具与研究方向组织，而不是给自己打分"
+      eyebrow="// Toolbox"
+      title="常用工具"
+      subtitle="按用在哪里来分组，不给自己打分。"
       headerAside={(
         <div className={styles.legend} aria-label="能力状态图例">
-          <span><Circle size={7} fill="currentColor" data-state="public" aria-hidden="true" />Public build</span>
-          <span><Circle size={7} fill="currentColor" data-state="toolbox" aria-hidden="true" />Core toolbox</span>
-          <span><Circle size={7} fill="currentColor" data-state="research" aria-hidden="true" />Active research</span>
+          <span><Circle size={7} fill="currentColor" data-state="public" aria-hidden="true" />公开作品里用过</span>
+          <span><Circle size={7} fill="currentColor" data-state="toolbox" aria-hidden="true" />日常在用</span>
+          <span><Circle size={7} fill="currentColor" data-state="research" aria-hidden="true" />正在研究</span>
         </div>
       )}
     >
-      <div className={styles.skillGrid}>
+      <div className={styles.skillGrid} data-reveal-group>
         {CAPABILITY_GROUPS.map(group => (
-          <article className={styles.skillGroup} key={group.category}>
-            <h3>{group.category}</h3>
-            <ul>
+          <article className={styles.skillGroup} key={group.category} data-state={group.state} data-spotlight="card">
+            <h3><span>{group.category}</span><small aria-hidden="true">{String(group.items.length).padStart(2, '0')}</small></h3>
+            <p className="sr-only">State: {group.state}</p>
+            <ul data-reveal-group>
               {group.items.map(item => (
                 <li key={item}>
-                  <span>{item}</span>
-                  <span className={styles.skillState} title={group.state}>
-                    <Circle size={7} fill="currentColor" data-state={group.state} aria-hidden="true" />
-                    <span className="sr-only">{group.state}</span>
-                  </span>
+                  <Circle size={6} fill="currentColor" aria-hidden="true" />
+                  {item}
                 </li>
               ))}
             </ul>

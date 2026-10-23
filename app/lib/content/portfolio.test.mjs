@@ -53,5 +53,5 @@ test('知识信号公开外部来源与发布边界，而不是私有 Wiki 路�
 });
 
 test('内容证据快照日期明确记录，避免把静态页面误认为实时数据', () => {
-  assert.equal(PUBLIC_EVIDENCE_CHECKED_AT, '2026-08-30');
+  assert.equal(PUBLIC_EVIDENCE_CHECKED_AT, '2026-10-22');
 });

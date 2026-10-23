@@ -37,7 +37,8 @@ export default function MissionSection({
       </aside>
 
       <div className={styles.panel}>
-        <header className={styles.sectionHeader} data-chapter-header>
+        <span className={styles.panelNumber} aria-hidden="true">{number}</span>
+        <header className={styles.sectionHeader} data-reveal>
           <div>
             <div className={styles.eyebrow}>{eyebrow}</div>
             <h2 id={headingId} className={styles.sectionTitle}>

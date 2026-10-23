@@ -37,7 +37,7 @@ const PROJECT_ANGLES: Record<string, { question: string; perspective: string; ne
     related: ['voice-turns', 'github-first-llm-wiki'],
   },
   'artifact-gateway': {
-    question: '一个仓库入口，为什么要保留七种原生协议？',
+    question: '一个仓库入口，为什么不让大家统一换成一种上传方式？',
     perspective: '保留原生客户端，意味着用户能继续沿用熟悉的拉取、发布与依赖管理方式。复杂度由网关接住；控制面的状态协调与字节面的存储职责则分别交给 PostgreSQL 和 S3 兼容存储。',
     nextQuestion: '统一一个系统，应该统一接口，还是统一接口背后的职责？',
     related: ['linux-runtime', 'network-paths'],

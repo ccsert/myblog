@@ -3,7 +3,7 @@
 import Terminal from '@/app/components/terminal/Terminal';
 import SignalObservatory from './exploration/SignalObservatory';
 import DiscoveryDock from './exploration/DiscoveryDock';
-import { KNOWLEDGE_SIGNALS, PORTFOLIO_PROJECTS, SITE_CONFIG } from '@/app/lib/content/portfolio';
+import { KNOWLEDGE_SIGNALS, PORTFOLIO_PROFILE, PORTFOLIO_PROJECTS, SITE_CONFIG } from '@/app/lib/content/portfolio';
 import { Command, TerminalHandle } from '@/app/types/terminal';
 import { ArrowDownRight, ArrowUpRight, TerminalSquare } from 'lucide-react';
 import { useRouter } from 'next/navigation';
@@ -100,17 +100,17 @@ export default function Hero() {
   ];
 
   return (
-    <section id="home" className={`${styles.hero} blueprint-grid`} aria-label="个人信号观测台" tabIndex={-1}>
+    <section id="home" className={`${styles.hero} blueprint-grid`} aria-label="个人信号观测台" tabIndex={-1} data-spotlight="hero">
       <div className={styles.inner}>
         <div className={styles.intro}>
           <div className={styles.identity}>
-            <div className={styles.eyebrow}>INDEPENDENT BUILDER / OPEN SYSTEMS</div>
-            <h1 className={styles.heading}>{brandPrefix}<span>{brandSuffix.join('')}</span></h1>
-            <p className={styles.invitation}>把复杂留给系统，把好奇心留给自己。</p>
+            <div className={styles.eyebrow}>CCSERT / BUILD · VERIFY · SHIP</div>
+            <h1 className={styles.heading}>{brandPrefix}<span>{brandSuffix.join('')}</span><i className={styles.caret} aria-hidden="true" /></h1>
+            <p className={styles.invitation}>{PORTFOLIO_PROFILE.tagline}</p>
             <p className={styles.domains}>Developer tools · AI engineering · Self-hosted systems</p>
             <nav className={styles.shortcuts} aria-label="开始探索">
               <a href="#projects"><b>{String(PORTFOLIO_PROJECTS.length).padStart(2, '0')}</b> 公开构建</a>
-              <a href="#blog"><b>{String(KNOWLEDGE_SIGNALS.length).padStart(2, '0')}</b> 思考线索</a>
+              <a href="#blog"><b>{String(KNOWLEDGE_SIGNALS.length).padStart(2, '0')}</b> 技术手记</a>
               <ArchiveLink href="/archive" id="hero-playground"><span className="playground-colors" aria-hidden="true"><i /><i /><i /><i /></span> 个人实验场 <ArrowUpRight size={11} aria-hidden="true" /></ArchiveLink>
             </nav>
           </div>
@@ -123,7 +123,7 @@ export default function Hero() {
         <div className={styles.workbench} id="workbench">
           <Terminal ref={terminalRef} commands={commands} welcomeMessage={welcomeMessage} />
         </div>
-        <div className={styles.workbenchFooter}><span><i /> 每个文件，都是一条可以继续追问的线索。</span><span>TYPE A COMMAND. FOLLOW A SIGNAL.</span></div>
+        <div className={styles.workbenchFooter}><span><i /> 每个文件都能打开看看，也可以直接敲命令。</span><span>TYPE A COMMAND. FOLLOW A SIGNAL.</span></div>
         <DiscoveryDock onOpenDocument={openDocument} />
       </div>
     </section>

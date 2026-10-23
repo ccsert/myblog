@@ -13,14 +13,14 @@ export const ARCHIVE_STORIES: Readonly<Record<string, ArchiveStory>> = {
   'omz-pm': {
     takeaway: '把选择、预览与真正的配置写入分开，让一次尝试有清楚的退路。',
     sceneTitle: '想换一套主题，先看它会改什么。',
-    scene: '一次终端定制既涉及外观，也会碰到每天使用的配置。omz-pm 把插件解释、主题试穿与写入前的差异预览放进同一条操作路径，让“喜欢这个效果”和“决定保存配置”成为两次明确的选择。',
+    scene: '换终端主题看起来只是换个外观，其实会动到每天都在用的配置。omz-pm 把插件说明、主题试穿和写入前的 diff 放在一条路上，让“喜欢这个效果”和“决定保存”成为两次分开的选择。',
     figureTitle: '从试穿到写入，保留一个可以返回的起点。',
     steps: [
       { title: '理解与试穿', detail: '先读插件用法，再预览主题在终端里的样子。' },
       { title: '核对差异', detail: '写入之前展示 diff，确认配置会怎样变化。' },
       { title: '备份与写入', detail: '保留时间戳备份，再原子替换；需要时可以恢复。' },
     ],
-    tradeoff: '这条路径保留了确认这一步。设计的重点是让用户看得懂变化，并能找到原来的配置；主题数量之外，写入过程本身也是体验的一部分。',
+    tradeoff: '多了一步确认，换来的是看得懂的变化和找得回的旧配置。主题再多，写配置的那一下本身也是体验的一部分。',
     connections: { 'artifact-gateway': '继续看另一个工具怎样保留用户熟悉的操作习惯。', 'github-first-llm-wiki': '从配置备份，继续看知识内容的来源与修改历史。' },
   },
   'DocBabel': {
@@ -33,7 +33,7 @@ export const ARCHIVE_STORIES: Readonly<Record<string, ArchiveStory>> = {
       { title: '管理过程', detail: '排队、追踪状态，并在需要时取消任务。' },
       { title: '保存产物', detail: '在文件库管理产物，下载结果并维护术语。' },
     ],
-    tradeoff: '自托管还带来部署与资产管理的工作。单容器、Compose 和离线安装包覆盖不同环境，离线 profile 则把需要准备的资产集合变成可校验的对象。阅读示例展示中英对应，项目档案解释它背后的完整流程。',
+    tradeoff: '自托管意味着部署和资产也得自己管。单容器、Compose 和离线安装包对应不同环境；离线 profile 把“要准备哪些东西”变成一份可以检查的清单。',
     connections: { 'github-first-llm-wiki': '翻译产物如何继续进入有来源的知识积累。', 'artifact-gateway': '从离线资产，继续看制品内容怎样被保存和分发。' },
   },
   'artifact-gateway': {
@@ -42,11 +42,11 @@ export const ARCHIVE_STORIES: Readonly<Record<string, ArchiveStory>> = {
     scene: '镜像、语言包与普通文件各有自己的客户端。Artifact Gateway 保留这些原生入口，通过 Hosted、Proxy 和 Group 表达仓库形态，再把状态协调和制品字节交给各自的存储层。',
     figureTitle: '入口汇合之后，状态与字节各有去处。',
     steps: [
-      { title: '原生客户端', detail: 'OCI、Maven、npm、PyPI、Go、Conan 与 Raw。' },
+      { title: '原生客户端', detail: 'OCI、Maven、npm、PyPI、Go、Conan、Cargo 与 Raw。' },
       { title: 'Gateway', detail: '承接仓库访问，组织 Hosted、Proxy 与 Group。' },
       { title: '职责分开', detail: 'PostgreSQL 协调状态；S3 兼容存储保存已校验字节。' },
     ],
-    tradeoff: '保留原生协议，也意味着要分别处理协议行为。站点将已经可用的协议、APT 预览与路线图区分展示。单节点或拆分角色的部署方式提供了组织服务的选择，不能单凭构建或演示推断实际环境的性能。',
+    tradeoff: '保留原生协议，就得逐个处理各协议的细节。所以已经可用的、APT 与 NuGet 这样还在预览的、以及只在路线图上的，都会分开标注。单节点还是拆角色部署可以按需选，但真实环境的性能还得在真实环境里测。',
     connections: { 'linux-runtime': '从一个服务镜像，继续追踪它在运行时里的边界。', 'network-paths': '当请求经过网关，怎样验证它实际走过的路径。' },
   },
   'opencode-review-gitea': {
@@ -59,7 +59,7 @@ export const ARCHIVE_STORIES: Readonly<Record<string, ArchiveStory>> = {
       { title: '确定范围', detail: '按需读取完整或增量 diff。' },
       { title: '提交反馈', detail: '返回行级评论和 approve、request_changes 或 comment 结论。' },
     ],
-    tradeoff: '结构化输出让反馈有位置、有结论，团队也能继续核对具体建议。部署使用隔离配置，保留已有 OpenCode 工作区；上方试玩中的 await 修改仅用于说明行级反馈的方式。',
+    tradeoff: '结构化的输出让每条反馈都有位置、有结论，团队可以逐条核对。部署用的是独立配置，不会碰你已有的 OpenCode 工作区。上面试玩里的 await 修改只是演示行级反馈长什么样。',
     connections: { 'voice-turns': '从代码反馈继续看实时语音怎样保持上下文一致。', 'github-first-llm-wiki': '让一次讨论留下可以追踪、继续维护的知识。' },
   },
   'github-first-llm-wiki': {
@@ -72,7 +72,7 @@ export const ARCHIVE_STORIES: Readonly<Record<string, ArchiveStory>> = {
       { title: '维护内容', detail: '在 Markdown 中整理，用 Git 保存历史。' },
       { title: '执行检查', detail: '用 schema 和确定性检查维护结构。' },
     ],
-    tradeoff: '结构检查回答的是内容是否符合约定，理解与判断仍需要回到来源。阅读时可以沿着引用追问，也可以沿着修改历史检查一条结论怎样发生变化。',
+    tradeoff: '结构检查只能告诉你内容合不合约定，理解和判断还得回到来源。读的时候可以顺着引用追问，也可以翻修改历史，看一条结论是怎么变过来的。',
     connections: { 'DocBabel': '看文档翻译与产物管理怎样组成一条工作流。', 'opencode-review-gitea': '看工具怎样把反馈留在可以核对的具体位置。' },
   },
   'network-paths': {
@@ -85,7 +85,7 @@ export const ARCHIVE_STORIES: Readonly<Record<string, ArchiveStory>> = {
       { title: '连接方式', detail: '区分 direct、Peer Relay 与 DERP。' },
       { title: '现场证据', detail: '结合 status、netcheck 与双向抓包核对判断。' },
     ],
-    tradeoff: '一份有用的排障记录需要同时保留已知和未知。把缺少证据的判断写成待验证假设，后续观察才能明确支持或修正它。',
+    tradeoff: '有用的排障记录，既写清已知，也写清未知。证据不够的判断先标成假设，后面的观察才能明确地支持或推翻它。',
     connections: { 'artifact-gateway': '把路径问题放回一个真实的制品访问入口。', 'linux-runtime': '继续拆分运行环境里不同层次的职责。' },
   },
   'voice-turns': {
@@ -98,7 +98,7 @@ export const ARCHIVE_STORIES: Readonly<Record<string, ArchiveStory>> = {
       { title: '待播音频', detail: '同时处理已经生成但尚未听到的部分。' },
       { title: '对话历史', detail: '让后续上下文与用户实际听到的内容一致。' },
     ],
-    tradeoff: '停顿容忍、响应速度和误打断恢复需要一起考虑。可以从一次具体对话出发，分别观察这几个状态，而不是只依据声音是否停止来判断交互是否完整。',
+    tradeoff: '停顿容忍、响应速度和误打断恢复得一起考虑。最好从一次具体对话出发，逐个观察这几个状态，而不是只看声音停没停。',
     connections: { 'opencode-review-gitea': '换一个协作场景，看 AI 反馈怎样留在原有上下文。', 'network-paths': '继续看怎样把观察结果与根因判断分开。' },
   },
   'linux-runtime': {
@@ -111,7 +111,7 @@ export const ARCHIVE_STORIES: Readonly<Record<string, ArchiveStory>> = {
       { title: '组织环境', detail: '分别看 namespace、cgroup 与 rootfs。' },
       { title: '启动契约', detail: '沿 OCI 配置追踪运行时需要的约定。' },
     ],
-    tradeoff: '这条阅读路线提供职责上的坐标。继续研究具体实现时，还需要把规范、镜像层、文件系统和运行时实现分别核对，避免把一个层次的说明当作整个系统。',
+    tradeoff: '这条路线给的是一张按职责划分的地图。真要研究具体实现，还得把规范、镜像层、文件系统和运行时分别对照，别拿一层的说明去解释整个系统。',
     connections: { 'artifact-gateway': '看一个服务怎样提供单节点与拆分角色两种组织方式。', 'DocBabel': '从运行环境继续看在线与离线部署的资产准备。' },
   },
 };
