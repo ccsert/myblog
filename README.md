@@ -48,3 +48,25 @@ npm start
 - 分享图与图标：`app/**/opengraph-image.jpg`、`twitter-image.jpg`、`icon.svg`、`favicon.ico` 与 `apple-icon.png` 由 [compose-og-images.py](scripts/assets/compose-og-images.py) 和 [compose-icons.py](scripts/assets/compose-icons.py) 生成。分享图背景为不含文字的生成插画，标题用站点字体合成；修改文案后重新运行脚本（中文字体使用 macOS 自带的 Hiragino Sans GB）。
 
 内容基于注明日期的公开资料快照；演示不代表真实后端执行或服务的实时状态。
+
+## 项目数据漂移检查
+
+站点在 [portfolio.ts](app/lib/content/portfolio.ts) 里写着每个公开项目的版本、阶段和核对日期。这些内容会过期，所以仓库里带了一个只读的核对脚本：
+
+```bash
+npm run check:projects
+```
+
+脚本读取 `portfolio.ts`，然后逐个到 GitHub 查仓库的 `pushed_at`、最新发行版或最新标签，把站点的 `stage`、`updated` 和 Release 证据和 GitHub 摆在一起对照，最后打一张表。
+
+什么时候跑：
+
+- 改了 `portfolio.ts` 里的版本、阶段或核对日期之后；
+- 收到项目的新发行版通知，想确认站点是不是该跟进了；
+- 发布或改写案例页（例如 `/work/artifact-gateway`）引用的事实之前，确认版本号和发行日期还对得上。
+
+退出码：`0` 表示全部一致，`1` 表示发现漂移（表格下方会列出每一处差异），`2` 表示网络错误、GitHub 限流或仓库不可见，没能完成核对。匿名请求的 GitHub 配额是每小时 60 次，需要时设置 `GITHUB_TOKEN` 提高配额：
+
+```bash
+GITHUB_TOKEN=ghp_xxx npm run check:projects
+```

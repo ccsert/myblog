@@ -1,0 +1,881 @@
+/* Artifact Gateway 案例页：深色终端底色 + 纸张色项目标识 */
+
+.page {
+  --project-color: #f4f1e9;
+  padding: 106px 0 110px;
+}
+
+:global(html[data-theme='light']) .page {
+  --project-color: #8a8d80;
+}
+
+.shell {
+  width: min(1340px, 100%);
+  margin-inline: auto;
+  padding-inline: 36px;
+}
+
+/* ---------- 头部 ---------- */
+
+.header {
+  padding-bottom: 8px;
+}
+
+.cover {
+  position: relative;
+  margin-top: 38px;
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+
+.cover::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(10, 10, 11, 0) 55%, rgba(10, 10, 11, 0.55));
+}
+
+.coverImage {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  color: var(--color-text-secondary);
+  font: 12px var(--font-mono);
+  letter-spacing: .16em;
+}
+
+.eyebrow::before {
+  content: '';
+  width: 22px;
+  height: 1px;
+  background: var(--color-accent);
+}
+
+.title {
+  margin: 18px 0 0;
+  max-width: 15em;
+  color: var(--color-text-primary);
+  font-family: var(--font-serif);
+  font-size: clamp(38px, 5.6vw, 72px);
+  font-weight: 600;
+  line-height: 1.08;
+  letter-spacing: -.02em;
+}
+
+.lede {
+  max-width: 62ch;
+  margin: 22px 0 0;
+  color: var(--color-text-secondary);
+  font-size: 16.5px;
+  line-height: 1.95;
+}
+
+.metaStrip {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  margin: 22px 0 0;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+
+.metaItem {
+  padding: 16px 18px 15px;
+  border-left: 1px solid var(--color-border);
+}
+
+.metaItem:first-child {
+  border-left: 0;
+}
+
+.metaLabel {
+  color: var(--color-text-dim);
+  font: 12px var(--font-mono);
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+
+.metaValue {
+  margin: 7px 0 0;
+  color: var(--color-text-primary);
+  font: 13.5px var(--font-mono);
+}
+
+.stackList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 16px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.stackTag {
+  padding: 5px 11px;
+  border: 1px solid var(--color-border);
+  color: var(--color-text-secondary);
+  font: 12px var(--font-mono);
+}
+
+/* ---------- 正文骨架 ---------- */
+
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 820px) 208px;
+  gap: clamp(32px, 5vw, 92px);
+  justify-content: center;
+  align-items: start;
+  margin-top: 68px;
+}
+
+.content {
+  min-width: 0;
+}
+
+.section {
+  margin-top: 76px;
+  scroll-margin-top: 96px;
+}
+
+.section:first-child {
+  margin-top: 0;
+}
+
+.sectionHead {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.sectionIndex {
+  color: var(--color-accent);
+  font: 12px var(--font-mono);
+  letter-spacing: .14em;
+}
+
+.sectionTitle {
+  margin: 0;
+  color: var(--color-text-primary);
+  font-family: var(--font-serif);
+  font-size: clamp(24px, 2.8vw, 32px);
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -.01em;
+}
+
+/* ---------- 正文排版 ---------- */
+
+.prose {
+  margin-top: 22px;
+}
+
+.prose p {
+  margin: 0 0 18px;
+  color: var(--color-text-secondary);
+  font-size: 16.5px;
+  line-height: 1.95;
+  overflow-wrap: anywhere;
+}
+
+.prose p:last-child {
+  margin-bottom: 0;
+}
+
+.prose strong {
+  color: var(--color-text-primary);
+  font-weight: 600;
+}
+
+.prose code,
+.gateCommand {
+  padding: 1px 6px;
+  border: 1px solid var(--color-border);
+  background: var(--color-control);
+  color: var(--color-text-primary);
+  font: 13px/1.6 var(--font-mono);
+  overflow-wrap: anywhere;
+}
+
+.prose a,
+.decisionSource a,
+.implSources a,
+.linkList a {
+  color: var(--color-accent);
+  text-decoration: none;
+  border-bottom: 1px solid var(--color-accent-20);
+  transition: border-color 220ms var(--ease-out-expo), color 220ms var(--ease-out-expo);
+}
+
+.prose a:hover,
+.decisionSource a:hover,
+.implSources a:hover,
+.linkList a:hover {
+  border-bottom-color: var(--color-accent);
+}
+
+/* ---------- 约束列表 ---------- */
+
+.constraintList {
+  display: grid;
+  gap: 12px;
+  margin: 24px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.constraintItem {
+  position: relative;
+  padding: 16px 18px 16px 20px;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+
+.constraintItem::before {
+  content: '';
+  position: absolute;
+  inset: -1px auto -1px -1px;
+  width: 2px;
+  background: var(--project-color);
+  opacity: .8;
+}
+
+.constraintTitle {
+  margin: 0;
+  color: var(--color-text-primary);
+  font-size: 15.5px;
+  font-weight: 600;
+}
+
+.constraintBody {
+  margin: 8px 0 0;
+  color: var(--color-text-secondary);
+  font-size: 15px;
+  line-height: 1.85;
+  overflow-wrap: anywhere;
+}
+
+/* ---------- 决策卡片 ---------- */
+
+.decisionGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
+  gap: 14px;
+  margin-top: 24px;
+}
+
+.decisionCard {
+  display: flex;
+  flex-direction: column;
+  padding: 20px 20px 18px;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+
+.decisionHead {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.decisionIndex {
+  color: var(--project-color);
+  font: 12px var(--font-mono);
+  letter-spacing: .1em;
+}
+
+.decisionTitle {
+  margin: 0;
+  color: var(--color-text-primary);
+  font-size: 16.5px;
+  font-weight: 600;
+}
+
+.decisionRows {
+  display: grid;
+  gap: 12px;
+  margin: 14px 0 0;
+}
+
+.decisionRow {
+  display: grid;
+  grid-template-columns: 62px minmax(0, 1fr);
+  gap: 12px;
+}
+
+.decisionLabel {
+  color: var(--color-text-dim);
+  font: 12px/1.9 var(--font-mono);
+  letter-spacing: .06em;
+}
+
+.decisionValue {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: 14.5px;
+  line-height: 1.85;
+  overflow-wrap: anywhere;
+}
+
+.decisionSource {
+  margin: 16px 0 0;
+  margin-top: auto;
+  padding-top: 14px;
+  font: 12px var(--font-mono);
+}
+
+/* ---------- 实现要点 ---------- */
+
+.implList {
+  display: grid;
+  gap: 16px;
+  margin: 24px 0 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: impl;
+}
+
+.implItem {
+  min-width: 0;
+  padding: 20px 20px 18px;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+
+.implHead {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.implIndex {
+  color: var(--color-accent);
+  font: 12px var(--font-mono);
+  letter-spacing: .12em;
+}
+
+.implTitle {
+  margin: 0;
+  color: var(--color-text-primary);
+  font-size: 16.5px;
+  font-weight: 600;
+}
+
+.implRow {
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr);
+  min-width: 0;
+  gap: 12px;
+  margin: 13px 0 0;
+}
+
+.implLabel {
+  color: var(--color-text-dim);
+  font: 12px/1.9 var(--font-mono);
+  letter-spacing: .06em;
+}
+
+.implValue {
+  color: var(--color-text-secondary);
+  font-size: 15px;
+  line-height: 1.9;
+  overflow-wrap: anywhere;
+}
+
+.implSources {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  margin: 14px 0 0;
+  padding-top: 12px;
+  border-top: 1px solid var(--color-border);
+  font: 12px var(--font-mono);
+  overflow-wrap: anywhere;
+}
+
+/* ---------- 验证 ---------- */
+
+.metricGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr));
+  gap: 1px;
+  margin-top: 26px;
+  border: 1px solid var(--color-border);
+  background: var(--color-border);
+}
+
+.metric {
+  display: flex;
+  flex-direction: column;
+  padding: 18px 18px 16px;
+  background: var(--color-surface);
+}
+
+.metricLabel {
+  color: var(--color-text-dim);
+  font: 12px var(--font-mono);
+  letter-spacing: .08em;
+}
+
+.metricValue {
+  margin-top: 9px;
+  color: var(--color-text-primary);
+  font: 21px/1.25 var(--font-mono);
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}
+
+.metricNote {
+  margin-top: 8px;
+  color: var(--color-text-secondary);
+  font-size: 13.5px;
+  line-height: 1.75;
+}
+
+.gateList {
+  display: grid;
+  gap: 10px;
+  margin: 24px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.gateItem {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 6px;
+  padding: 14px 16px;
+  border-left: 2px solid var(--project-color);
+  background: var(--color-surface);
+}
+
+.gateCommand {
+  width: fit-content;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  color: var(--color-text-primary);
+  background: transparent;
+  border-color: var(--color-border);
+}
+
+.gateBody {
+  color: var(--color-text-secondary);
+  font-size: 14.5px;
+  line-height: 1.8;
+}
+
+/* ---------- 边界 ---------- */
+
+.boundaryList {
+  display: grid;
+  gap: 10px;
+  margin: 24px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.boundaryItem {
+  position: relative;
+  padding-left: 20px;
+  color: var(--color-text-secondary);
+  font-size: 15.5px;
+  line-height: 1.9;
+  overflow-wrap: anywhere;
+}
+
+.boundaryItem::before {
+  content: '';
+  position: absolute;
+  left: 2px;
+  top: .78em;
+  width: 6px;
+  height: 6px;
+  background: var(--project-color);
+}
+
+/* ---------- 链接 ---------- */
+
+.linkGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr));
+  gap: 14px;
+  margin-top: 24px;
+}
+
+.linkGroup {
+  padding: 18px 20px 16px;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+
+.linkGroupTitle {
+  margin: 0 0 12px;
+  color: var(--color-text-dim);
+  font: 12px var(--font-mono);
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+
+.linkList {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.linkList a {
+  font-size: 14.5px;
+}
+
+/* ---------- 目录 ---------- */
+
+.toc {
+  position: sticky;
+  top: 96px;
+  align-self: start;
+  padding: 18px 18px 16px;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+
+.tocTitle {
+  margin: 0 0 12px;
+  color: var(--color-text-dim);
+  font: 12px var(--font-mono);
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+
+.tocList {
+  display: grid;
+  gap: 9px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: toc;
+}
+
+.tocList li {
+  counter-increment: toc;
+}
+
+.tocList a {
+  display: flex;
+  gap: 9px;
+  color: var(--color-text-secondary);
+  font-size: 13.5px;
+  line-height: 1.6;
+  text-decoration: none;
+  transition: color 200ms var(--ease-out-expo);
+}
+
+.tocList a::before {
+  content: counter(toc, decimal-leading-zero);
+  color: var(--color-text-dim);
+  font: 12px/1.7 var(--font-mono);
+}
+
+.tocList a:hover {
+  color: var(--color-accent);
+}
+
+.tocNote {
+  margin: 16px 0 0;
+  padding-top: 12px;
+  border-top: 1px solid var(--color-border);
+  color: var(--color-text-dim);
+  font-size: 12.5px;
+  line-height: 1.7;
+}
+
+/* ---------- 架构图 ---------- */
+
+.diagramSection {
+  margin-top: 88px;
+  padding: 44px 0 48px;
+  border-top: 1px solid var(--color-border);
+  background: linear-gradient(180deg, var(--color-highlight-soft), transparent 60%);
+}
+
+.diagramTitle {
+  margin: 0 0 24px;
+  color: var(--color-text-primary);
+  font-family: var(--font-serif);
+  font-size: clamp(21px, 2.2vw, 26px);
+  font-weight: 600;
+}
+
+.diagram {
+  display: flex;
+  align-items: start;
+  gap: 14px;
+}
+
+.diagramNode {
+  flex: 1 1 0;
+  align-self: start;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 16px 18px 15px;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+
+.diagramNode[data-kind='client'] {
+  border-color: var(--color-border);
+}
+
+.diagramNode[data-kind='gateway'] {
+  border-color: var(--color-accent-20);
+  background: linear-gradient(180deg, var(--color-accent-5), transparent 70%), var(--color-surface);
+}
+
+.diagramNode[data-kind='control'] {
+  border-color: var(--project-color);
+}
+
+.diagramKind {
+  color: var(--color-text-dim);
+  font: 12px var(--font-mono);
+  letter-spacing: .1em;
+}
+
+.diagramName {
+  color: var(--color-text-primary);
+  font: 15px var(--font-mono);
+  font-weight: 500;
+}
+
+.diagramList {
+  color: var(--color-text-secondary);
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.diagramStack {
+  flex: 1.35 1 0;
+  display: grid;
+  gap: 14px;
+  grid-template-rows: 1fr 1fr;
+}
+
+.arrowHorizontal {
+  flex: 0 0 34px;
+  align-self: center;
+  height: 1px;
+  background: var(--color-border);
+  position: relative;
+}
+
+.arrowHorizontal::after {
+  content: '';
+  position: absolute;
+  right: -1px;
+  top: -3.5px;
+  border-left: 7px solid var(--color-accent);
+  border-top: 4px solid transparent;
+  border-bottom: 4px solid transparent;
+}
+
+.diagramNote {
+  max-width: 70ch;
+  margin: 20px 0 0;
+  color: var(--color-text-secondary);
+  font-size: 14.5px;
+  line-height: 1.85;
+}
+
+/* ---------- 响应式 ---------- */
+
+@media (max-width: 1180px) {
+  .layout {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 32px;
+  }
+
+  .toc {
+    position: static;
+    order: -1;
+  }
+
+  .tocList {
+    grid-template-columns: repeat(auto-fit, minmax(112px, 1fr));
+    gap: 10px 14px;
+    padding-bottom: 0;
+  }
+
+  .tocNote {
+    display: none;
+  }
+}
+
+@media (max-width: 900px) {
+  .metaStrip {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .metaItem:nth-child(4) {
+    border-left: 0;
+  }
+
+  .metaItem:nth-child(n + 4) {
+    border-top: 1px solid var(--color-border);
+  }
+
+  .diagram {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .diagramNode {
+    align-self: stretch;
+    flex: 0 0 auto;
+  }
+
+  .diagramStack {
+    grid-template-rows: auto auto;
+    flex: 0 0 auto;
+  }
+
+  .arrowHorizontal {
+    flex: 0 0 1px;
+    width: 1px;
+    height: 26px;
+    align-self: center;
+    margin-inline: 0;
+  }
+
+  .arrowHorizontal::after {
+    right: -3.5px;
+    top: auto;
+    bottom: -1px;
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+    border-top: 7px solid var(--color-accent);
+    border-bottom: 0;
+  }
+}
+
+@media (max-width: 767px) {
+  .page {
+    padding: 96px 0 84px;
+  }
+
+  .shell {
+    padding-inline: 20px;
+  }
+
+  .eyebrow {
+    margin-top: 26px;
+    font-size: 12px;
+  }
+
+  .title {
+    font-size: clamp(34px, 10vw, 48px);
+  }
+
+  .lede {
+    font-size: 16px;
+    line-height: 1.9;
+  }
+
+  .metaStrip {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    margin-top: 30px;
+  }
+
+  .metaItem:nth-child(odd) {
+    border-left: 0;
+  }
+
+  .metaItem:nth-child(n + 3) {
+    border-top: 1px solid var(--color-border);
+  }
+
+  .metaItem:nth-child(2) {
+    border-left: 1px solid var(--color-border);
+  }
+
+  .layout {
+    margin-top: 48px;
+  }
+
+  .section {
+    margin-top: 60px;
+  }
+
+  .prose p,
+  .implValue,
+  .decisionValue {
+    font-size: 16px;
+    line-height: 1.9;
+  }
+
+  .decisionRow,
+  .implRow {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 2px;
+  }
+
+  .decisionLabel,
+  .implLabel {
+    line-height: 1.6;
+  }
+
+  .gateItem {
+    padding: 12px 14px;
+  }
+
+  .diagramSection {
+    margin-top: 64px;
+    padding: 34px 0 38px;
+  }
+}
+
+@media (max-width: 359px) {
+  .shell {
+    padding-inline: 16px;
+  }
+
+  .title {
+    font-size: 32px;
+  }
+
+  .metaStrip {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .metaItem {
+    border-left: 0 !important;
+    border-top: 1px solid var(--color-border);
+  }
+
+  .metaItem:first-child {
+    border-top: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .prose a,
+  .decisionSource a,
+  .implSources a,
+  .linkList a,
+  .tocList a {
+    transition: none;
+  }
+}

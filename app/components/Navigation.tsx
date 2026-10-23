@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { usePathname } from 'next/navigation';
 import { Menu, X } from 'lucide-react';
 import ThemeSignalFader from '@/app/components/theme/ThemeSignalFader';
 import { SITE_CONFIG } from '@/app/lib/content/portfolio';
@@ -17,6 +18,9 @@ const navItems = [
 ];
 
 export default function Navigation() {
+  const pathname = usePathname();
+  // Chapter links only exist on the homepage; elsewhere they must navigate there.
+  const isHome = pathname === '/';
   const [isOpen, setIsOpen] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
   const navigation = useRef<HTMLElement>(null);
@@ -65,6 +69,8 @@ export default function Navigation() {
         const link = (event.target as Element).closest('a[href^="#"]');
         const hash = link?.getAttribute('href');
         if (!hash) return;
+        // A missing target means the click belongs to another page.
+        if (!document.getElementById(hash.slice(1))) return;
         event.preventDefault();
         setIsOpen(false);
         const keyboard = event.detail === 0;
@@ -81,7 +87,7 @@ export default function Navigation() {
       <div className="max-w-[1440px] mx-auto px-4 md:px-8 py-4">
         <div className="flex items-center justify-between">
           {/* Logo */}
-          <a href="#home" aria-label="返回首页" className="font-mono text-lg font-bold text-text-primary hover:text-accent transition-colors">
+          <a href={isHome ? '#home' : '/'} aria-label="返回首页" className="font-mono text-lg font-bold text-text-primary hover:text-accent transition-colors">
             {brandPrefix}<span className="text-accent">{brandSuffix.join('')}</span>
           </a>
 
@@ -99,7 +105,7 @@ export default function Navigation() {
               ) : (
                 <a
                   key={item.name}
-                  href={item.href}
+                  href={isHome ? item.href : `/${item.href}`}
                   className="font-mono text-sm text-text-secondary hover:text-accent transition-colors"
                 >
                   <span className="text-accent">~/</span>{item.name}
@@ -141,7 +147,7 @@ export default function Navigation() {
               ) : (
                 <a
                   key={item.name}
-                  href={item.href}
+                  href={isHome ? item.href : `/${item.href}`}
                   onClick={() => setIsOpen(false)}
                   className="block px-4 py-2 font-mono text-sm text-text-secondary hover:text-accent hover:bg-surface rounded transition-colors"
                 >
