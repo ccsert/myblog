@@ -1,9 +1,12 @@
 'use client';
 
-import { useEffect, useLayoutEffect, type MouseEvent, type ReactNode } from 'react';
+import { useEffect, useLayoutEffect, useRef, type MouseEvent, type ReactNode } from 'react';
+import { installSpotlight } from '@/app/lib/home-motion';
 import { cancelHomeScroll, restoreHomePosition, scrollToHomeSection } from '@/app/lib/home-navigation';
 
 export default function HomeExperience({ children }: { children: ReactNode }) {
+  const mainRef = useRef<HTMLElement>(null);
+
   useLayoutEffect(() => {
     const frame = requestAnimationFrame(restoreHomePosition);
     return () => cancelAnimationFrame(frame);
@@ -25,6 +28,12 @@ export default function HomeExperience({ children }: { children: ReactNode }) {
     };
   }, []);
 
+  useEffect(() => {
+    const main = mainRef.current;
+    if (!main) return;
+    return installSpotlight(main);
+  }, []);
+
   function followAnchor(event: MouseEvent<HTMLElement>) {
     if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
     const link = (event.target as Element).closest<HTMLAnchorElement>('a[href^="#"]');
@@ -37,5 +46,10 @@ export default function HomeExperience({ children }: { children: ReactNode }) {
     scrollToHomeSection(id, event.detail === 0);
   }
 
-  return <main className="min-h-screen" data-home-experience onClick={followAnchor}>{children}</main>;
+  return (
+    <main ref={mainRef} className="min-h-screen" data-home-experience onClick={followAnchor}>
+      <div className="home-scroll-progress" aria-hidden="true" />
+      {children}
+    </main>
+  );
 }

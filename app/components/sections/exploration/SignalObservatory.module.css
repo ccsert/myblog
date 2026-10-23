@@ -12,12 +12,12 @@
 .scope { display: block; width: 100%; max-height: 238px; overflow: visible; }
 .coordinate, .instrumentCaption {
   position: absolute;
-  font: 8px var(--font-mono);
+  font: 10px var(--font-mono);
   letter-spacing: .12em;
   color: var(--color-text-secondary);
 }
 .coordinate { top: 5px; left: 5px; }
-.instrumentCaption { bottom: -3px; width: 100%; text-align: center; font-size: 7px; }
+.instrumentCaption { bottom: -3px; width: 100%; text-align: center; font-size: 10px; }
 .crosshair { stroke: var(--color-accent-10); stroke-width: .7; }
 .boundary { stroke: var(--color-accent-20); stroke-width: .75; }
 .sphere {
@@ -39,21 +39,21 @@
 .observatory[data-running='true'][data-paused='false'] .sphere { animation-play-state: running; }
 .observatory:has(:focus-visible) .orbitAngle { transition: none; }
 .readout { padding: 14px 0 12px 10px; }
-.readoutMeta { display: flex; align-items: center; gap: 7px; font: 8px var(--font-mono); letter-spacing: .1em; color: var(--color-text-secondary); }
+.readoutMeta { display: flex; align-items: center; gap: 7px; font: 10px var(--font-mono); letter-spacing: .1em; color: var(--color-text-secondary); }
 .dot { width: 5px; height: 5px; background: var(--color-accent); border-radius: 50%; box-shadow: 0 0 9px var(--color-accent-50); }
 .channels { display: flex; gap: 13px; margin: 19px 0 20px; }
 .channels button {
   display: flex; align-items: center; gap: 5px; min-height: 32px; padding: 2px 0 7px;
   border: 0; border-bottom: 1px solid var(--color-border); background: transparent;
-  color: var(--color-text-secondary); font-size: 11px; cursor: pointer;
+  color: var(--color-text-secondary); font-size: 13px; cursor: pointer;
 }
-.channels button span { font: 9px var(--font-mono); opacity: .65; }
+.channels button span { font: 11px var(--font-mono); opacity: .65; }
 .channels button[aria-pressed='true'] { color: var(--color-accent); border-color: var(--color-accent); }
 .signalDetail { min-height: 102px; }
-.signalCode { font: 8px var(--font-mono); letter-spacing: .06em; color: var(--color-text-secondary); }
+.signalCode { font: 10px var(--font-mono); letter-spacing: .06em; color: var(--color-text-secondary); }
 .signalDetail h2 { margin: 7px 0; font-size: 19px; font-weight: 550; line-height: 1.3; letter-spacing: -.035em; }
-.signalDetail p { max-width: 210px; margin: 0; color: var(--color-text-secondary); font-size: 12px; line-height: 1.8; text-wrap: pretty; }
-.openSignal { display: inline-flex; align-items: center; min-height: 40px; gap: 16px; padding: 0; border: 0; background: transparent; color: var(--color-accent); font-size: 12px; cursor: pointer; }
+.signalDetail p { max-width: 210px; margin: 0; color: var(--color-text-secondary); font-size: 14px; line-height: 1.8; text-wrap: pretty; }
+.openSignal { display: inline-flex; align-items: center; min-height: 40px; gap: 16px; padding: 0; border: 0; background: transparent; color: var(--color-accent); font-size: 14px; cursor: pointer; }
 .openSignal svg { transition: transform 180ms cubic-bezier(.16, 1, .3, 1); }
 .motionToggle { position: absolute; right: 0; top: 0; display: grid; place-items: center; width: 28px; height: 28px; border: 1px solid var(--color-border); border-radius: 50%; background: var(--color-bg); color: var(--color-text-secondary); cursor: pointer; }
 .observatory button:focus-visible, .observatory a:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 4px; }
@@ -69,9 +69,9 @@
   .signalDetail h2 { font-size: 16px; }
   .openSignal { min-height: 44px; }
   .motionToggle { top: 13px; width: 26px; height: 26px; }
-  .readoutMeta { font-size: 7px; }
+  .readoutMeta { font-size: 10px; }
   .coordinate { top: -10px; }
-  .instrumentCaption { font-size: 6px; }
+  .instrumentCaption { font-size: 9px; }
 }
 @media (max-width: 359px) {
   .observatory { grid-template-columns: minmax(100px, .7fr) minmax(160px, 1fr); }

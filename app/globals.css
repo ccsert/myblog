@@ -8,7 +8,7 @@
   --color-subtle: #26262A;
   --color-text-primary: #E4E4E7;
   --color-text-secondary: #A1A1AA;
-  --color-text-dim: #52525B;
+  --color-text-dim: #7A7A84;
 
   --color-accent: #00FF88;
   --color-accent-50: rgba(0, 255, 136, 0.5);
@@ -40,7 +40,7 @@
   --color-subtle: #26262A;
   --color-text-primary: #E4E4E7;
   --color-text-secondary: #A1A1AA;
-  --color-text-dim: #52525B;
+  --color-text-dim: #7A7A84;
   --color-accent: #00FF88;
   --color-accent-hover: #35FF9F;
   --color-accent-50: rgba(0, 255, 136, 0.5);
@@ -68,7 +68,6 @@
   --grain-opacity: 0.04;
   --scanline-opacity: 0.3;
   --scanline-pitch: 3px;
-  --scanline-blend-mode: multiply;
   --theme-grid-x: 32px;
   --theme-grid-y: 32px;
   --theme-atmosphere:
@@ -86,7 +85,7 @@ html[data-theme='cyan'] {
   --color-subtle: #1D333B;
   --color-text-primary: #E5F7FB;
   --color-text-secondary: #9BB9C1;
-  --color-text-dim: #4E727D;
+  --color-text-dim: #6A8F9A;
   --color-accent: #00D9FF;
   --color-accent-hover: #36E2FF;
   --color-accent-50: rgba(0, 217, 255, 0.5);
@@ -110,7 +109,6 @@ html[data-theme='cyan'] {
   --grain-opacity: 0.03;
   --scanline-opacity: 0.34;
   --scanline-pitch: 5px;
-  --scanline-blend-mode: screen;
   --theme-grid-x: 48px;
   --theme-grid-y: 16px;
   --theme-atmosphere:
@@ -125,7 +123,7 @@ html[data-theme='amber'] {
   --color-subtle: #382B17;
   --color-text-primary: #F5ECD9;
   --color-text-secondary: #BDAD91;
-  --color-text-dim: #6F6047;
+  --color-text-dim: #8C7B5E;
   --color-accent: #FFB800;
   --color-accent-hover: #FFC83D;
   --color-accent-50: rgba(255, 184, 0, 0.5);
@@ -150,7 +148,6 @@ html[data-theme='amber'] {
   --grain-opacity: 0.052;
   --scanline-opacity: 0.4;
   --scanline-pitch: 4px;
-  --scanline-blend-mode: multiply;
   --theme-grid-x: 24px;
   --theme-grid-y: 24px;
   --theme-atmosphere:
@@ -194,7 +191,6 @@ html[data-theme='light'] {
   --grain-opacity: 0.025;
   --scanline-opacity: 0.2;
   --scanline-pitch: 4px;
-  --scanline-blend-mode: multiply;
   --theme-grid-x: 36px;
   --theme-grid-y: 36px;
   --theme-atmosphere:
@@ -235,8 +231,11 @@ body {
     var(--color-scanline) 0 1px,
     transparent 1px var(--scanline-pitch)
   );
-  mix-blend-mode: var(--scanline-blend-mode);
+  /* Blending a fixed full-screen layer re-composites the page on every scroll
+     frame; a plain layer on its own compositor surface keeps scrolling smooth. */
   opacity: var(--scanline-opacity);
+  transform: translateZ(0);
+  will-change: transform;
 }
 
 /* 噪点效果 */
@@ -247,6 +246,8 @@ body {
   pointer-events: none;
   z-index: 9998;
   opacity: var(--grain-opacity);
+  transform: translateZ(0);
+  will-change: transform;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.6'/%3E%3C/svg%3E");
 }
 
@@ -595,6 +596,101 @@ html[data-home-input='keyboard'] [data-home-experience] *::after { transition-du
 .playground-colors i:nth-child(3) { background: #f4f1e9; border: 1px solid #11131220; }
 .playground-colors i:nth-child(4) { background: #ff5834; }
 .home-navigation { transition-timing-function: cubic-bezier(.22,.8,.2,1); }
-body.scanlines:has([data-home-experience])::after { opacity: calc(var(--scanline-opacity) * .35); }
+body.scanlines:has([data-home-experience])::after { display: none; }
 body.grain:has([data-home-experience])::before { opacity: calc(var(--grain-opacity) * .5); }
 .home-navigation a:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 4px; }
+
+/* Scroll-driven reveal: progress follows the scroll position, so content
+   never waits on a timer and scrolling back plays it in reverse. `translate`
+   and `scale` leave `transform` free for hover effects. Browsers without
+   scroll timelines, reduced-motion visitors and keyboard users see content
+   in its final state. */
+[data-reveal-group] > :nth-child(2) { --reveal-index: 1; }
+[data-reveal-group] > :nth-child(3) { --reveal-index: 2; }
+[data-reveal-group] > :nth-child(4) { --reveal-index: 3; }
+[data-reveal-group] > :nth-child(5) { --reveal-index: 4; }
+[data-reveal-group] > :nth-child(n + 6) { --reveal-index: 5; }
+
+@keyframes reveal-rise {
+  from { opacity: 0; translate: 0 40px; scale: .97; }
+  to { opacity: 1; translate: 0 0; scale: 1; }
+}
+
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    [data-reveal],
+    [data-reveal-group] > * {
+      animation: reveal-rise both cubic-bezier(.2, .7, .2, 1);
+      animation-timeline: view();
+      animation-range: entry 0% cover calc(22% + var(--reveal-index, 0) * 4%);
+    }
+
+    html[data-home-input='keyboard'] [data-reveal],
+    html[data-home-input='keyboard'] [data-reveal-group] > * {
+      animation: none;
+    }
+  }
+}
+
+/* Homepage reading progress, driven by the root scroller. */
+.home-scroll-progress {
+  position: fixed;
+  inset: 0 0 auto;
+  z-index: 60;
+  height: 2px;
+  pointer-events: none;
+  background: linear-gradient(90deg, #dfff63, #c7baf1 35%, #f4f1e9 65%, #ff5834);
+  transform-origin: left;
+  scale: 0 1;
+}
+
+@keyframes home-scroll-progress { to { scale: 1 1; } }
+
+@supports (animation-timeline: scroll()) {
+  .home-scroll-progress {
+    animation: home-scroll-progress linear both;
+    animation-timeline: scroll(root);
+  }
+}
+
+@supports not (animation-timeline: scroll()) {
+  .home-scroll-progress { display: none; }
+}
+
+/* Pointer spotlight: a soft fill plus a brighter ring that follow the cursor. */
+[data-spotlight='card'] {
+  position: relative;
+  isolation: isolate;
+}
+
+[data-spotlight='card']::before,
+[data-spotlight='card']::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 260ms ease;
+}
+
+[data-spotlight='card']::before {
+  background: radial-gradient(320px circle at var(--spot-x, 50%) var(--spot-y, 50%), var(--color-accent-5), transparent 70%);
+}
+
+[data-spotlight='card']::after {
+  z-index: 1;
+  padding: 1px;
+  background: radial-gradient(220px circle at var(--spot-x, 50%) var(--spot-y, 50%), var(--color-accent-50), transparent 72%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  [data-spotlight='card']:hover::before,
+  [data-spotlight='card']:hover::after {
+    opacity: 1;
+  }
+}
