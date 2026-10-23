@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import ClientLayout from "./client-layout";
@@ -62,6 +62,11 @@ export const metadata: Metadata = {
     address: false,
     telephone: false,
   },
+};
+
+export const viewport: Viewport = {
+  themeColor: '#0A0A0B',
+  colorScheme: 'dark',
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
