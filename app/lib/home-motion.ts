@@ -5,7 +5,7 @@
 
 /** Tracks the pointer inside `[data-spotlight]` elements as `--spot-x` / `--spot-y`. */
 export function installSpotlight(root: HTMLElement): () => void {
-  if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return () => {};
+  const enabled = window.matchMedia('(hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference)');
 
   let frame = 0;
   let latest: PointerEvent | null = null;
@@ -13,7 +13,7 @@ export function installSpotlight(root: HTMLElement): () => void {
   const update = () => {
     frame = 0;
     const event = latest;
-    if (!event) return;
+    if (!event || !enabled.matches) return;
     // Nested spotlights (a card inside the hero) all follow the same pointer.
     let target = (event.target as Element | null)?.closest<HTMLElement>('[data-spotlight]');
     while (target) {
@@ -25,6 +25,7 @@ export function installSpotlight(root: HTMLElement): () => void {
   };
 
   const onMove = (event: PointerEvent) => {
+    if (!enabled.matches || event.pointerType === 'touch') return;
     latest = event;
     if (!frame) frame = requestAnimationFrame(update);
   };

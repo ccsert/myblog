@@ -255,6 +255,7 @@
 .projectItem {
   --project-color: var(--color-accent);
   position: relative;
+  isolation: isolate;
 }
 
 .projectItem[data-project='omz-pm'] { --project-color: #dfff63; }
@@ -748,7 +749,7 @@
 
 .skillGrid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 12px;
 }
 
@@ -1354,3 +1355,123 @@
   .nowStrip h3 > i::after { animation: none; }
   .projectToggle:hover .projectTitle { transform: none; }
 }
+
+/* Stack ticker (Magic UI Marquee): every tool in the grid below, scrolling. */
+.stackTicker { display: grid; gap: 8px; margin: 4px -22px 16px; padding-block: 2px; }
+.stackChip {
+  --state-color: var(--color-accent);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  background: var(--color-control);
+  color: var(--color-text-secondary);
+  font: 12px var(--font-mono);
+  white-space: nowrap;
+}
+.stackChip[data-kind='delivery'] { --state-color: var(--color-info); }
+.stackChip > span { color: var(--state-color); font-family: var(--font-mono); text-shadow: 0 0 6px var(--state-color); }
+@media (max-width: 767px) { .stackTicker { margin-inline: -16px; } }
+
+/* Composer: a beam circles the form; the send button gets a Shimmer Button
+   sweep (Magic UI). */
+.composer { position: relative; }
+.sendButton { position: relative; overflow: hidden; isolation: isolate; }
+.shimmer {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(100deg, transparent 30%, rgba(255, 255, 255, .55) 50%, transparent 70%) 0 0 / 250% 100% no-repeat;
+  background-position: 150% 0;
+  animation: sendShimmer 3.2s 1s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes sendShimmer { 0% { background-position: 150% 0; } 45%, 100% { background-position: -50% 0; } }
+@media (prefers-reduced-motion: reduce) { .shimmer { display: none; } }
+
+/* Glare Hover (React Bits): a diagonal light sweeps a post row on hover. */
+.postButton[data-glare] { overflow: hidden; }
+.postButton[data-glare]::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(-45deg, transparent 60%, color-mix(in srgb, var(--color-accent) 22%, transparent) 70%, transparent 80%) 0 0 / 250% 250% no-repeat;
+  background-position: 100% 100%;
+}
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  .postButton[data-glare]::after { transition: background-position 700ms ease; }
+  .postButton[data-glare]:hover::after { background-position: 0 0; }
+}
+
+/* Closing wordmark sits in the same column as the chapter panels. */
+/* Closing scene: React Bits Dot Grid + Magic UI Aurora Text + React Bits Circular Text. */
+.closing {
+  position: relative;
+  display: flex;
+  width: min(1370px, 100%);
+  min-height: 340px;
+  margin: 24px auto 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: 32px;
+  padding: 56px 48px 56px 144px;
+  overflow: clip;
+  border-top: 1px solid var(--color-border);
+  isolation: isolate;
+}
+.closing > canvas { z-index: -1; }
+.closingCopy { display: grid; gap: 16px; max-width: 760px; pointer-events: none; }
+.closingLabel { font: 500 12px/1 var(--font-mono); letter-spacing: .08em; color: var(--color-accent); }
+.closingLine { margin: 0; font: 650 clamp(30px, 4.4vw, 60px)/1.14 var(--font-sans); letter-spacing: -.035em; color: var(--color-text-primary); text-wrap: balance; }
+.closingSub { max-width: 52ch; font: 400 14px/1.6 var(--font-mono); color: var(--color-text-secondary); }
+.aurora {
+  background: linear-gradient(110deg, var(--color-accent), var(--color-info), var(--color-warning), var(--color-accent), var(--color-info));
+  background-size: 300% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+/* The gradient sweeps once, tied to scrolling the closing line into view,
+   so nothing repaints while the page sits still. */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .aurora { animation: aurora linear both; animation-timeline: view(); animation-range: entry 0% cover 38%; }
+  }
+}
+@keyframes aurora { from { background-position: 0% 50%; } to { background-position: 100% 50%; } }
+.closingTop { display: inline-grid; place-items: center; border-radius: 50%; color: inherit; text-decoration: none; }
+.closingTop { --read: 0; }
+/* Reading progress drawn around the button's core, shared with the chapter sidebar. */
+.closingMeter {
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  background: conic-gradient(var(--color-accent) calc(var(--read) * 1turn), color-mix(in srgb, var(--color-accent) 14%, transparent) 0);
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 2px), #000 calc(100% - 2px));
+  mask: radial-gradient(farthest-side, transparent calc(100% - 2px), #000 calc(100% - 2px));
+  filter: drop-shadow(0 0 4px color-mix(in srgb, var(--color-accent) 50%, transparent));
+}
+.closingTop:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 6px; }
+@media (max-width: 980px) { .closing { padding-left: 24px; padding-right: 24px; } }
+@media (max-width: 680px) { .closing { flex-direction: column; align-items: flex-start; min-height: 0; padding-block: 44px; } }
+.rippleBlock { position: relative; isolation: isolate; }
+.rippleBlock > :not(:first-child) { position: relative; }
+
+/* Cover pixels, tilt shadow and glare share the card's --project-color,
+   the same color the Magic Card glow uses, so the card reads as one surface. */
+.projectCover { --pixel-color: var(--project-color, var(--color-accent)); --tilt-color: var(--project-color, var(--color-accent)); }
+
+/* True Focus legend: hovering a state highlights the matching tool groups
+   and chips. Uses filter/transform because the scroll reveal owns opacity. */
+.skillGroup { transition: filter 300ms ease, transform 300ms var(--ease-out-expo); }
+.section[data-focus] .skillGroup { filter: opacity(.32) saturate(.3); }
+.section[data-focus='public'] .skillGroup[data-state='public'],
+.section[data-focus='toolbox'] .skillGroup[data-state='toolbox'],
+.section[data-focus='research'] .skillGroup[data-state='research'] { filter: none; }
+.section[data-focus='public'] .skillGroup[data-state='public'],
+.section[data-focus='toolbox'] .skillGroup[data-state='toolbox'],
+.section[data-focus='research'] .skillGroup[data-state='research'] { transform: translateY(-4px); }
+.legend > [data-focus-item] { cursor: default; padding: 2px 0; }

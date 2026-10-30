@@ -1,5 +1,6 @@
 import { ReactNode } from 'react';
 import { Circle } from 'lucide-react';
+import BlurText from '@/app/components/ui/BlurText';
 import styles from './MissionLog.module.css';
 
 interface MissionSectionProps {
@@ -42,7 +43,7 @@ export default function MissionSection({
           <div>
             <div className={styles.eyebrow}>{eyebrow}</div>
             <h2 id={headingId} className={styles.sectionTitle}>
-              {title}<Circle size={7} fill="currentColor" aria-hidden="true" />
+              <BlurText text={title} /><Circle size={7} fill="currentColor" aria-hidden="true" />
             </h2>
             <p className={styles.sectionSubtitle}>{subtitle}</p>
           </div>

@@ -8,6 +8,9 @@ import MissionSection from '@/app/components/sections/mission/MissionSection';
 import { PORTFOLIO_PROJECTS, PUBLIC_EVIDENCE_CHECKED_AT } from '@/app/lib/content/portfolio';
 import styles from '@/app/components/sections/mission/MissionLog.module.css';
 import { ArchiveLink } from '@/app/components/ArchiveLink';
+import MagicCardGlow from '@/app/components/ui/MagicCardGlow';
+import TiltedCard from '@/app/components/ui/TiltedCard';
+import PixelTransition from '@/app/components/ui/PixelTransition';
 
 export default function Projects() {
   const [openProjectId, setOpenProjectId] = useSessionSelection('home-open-project', PORTFOLIO_PROJECTS[0].id, ['', ...PORTFOLIO_PROJECTS.map(project => project.id)]);
@@ -40,7 +43,8 @@ export default function Projects() {
           const contentId = `${project.id.toLowerCase()}-details`;
 
           return (
-            <article className={styles.projectItem} key={project.id} data-project={project.slug} data-open={isOpen}>
+            <article className={styles.projectItem} key={project.id} data-project={project.slug} data-open={isOpen} data-spotlight="project">
+              <MagicCardGlow />
               <button
                 type="button"
                 className={styles.projectToggle}
@@ -76,9 +80,10 @@ export default function Projects() {
               <div className={styles.projectExpandWrap} data-open={isOpen} inert={!isOpen}>
                 <div className={styles.projectExpandInner}>
                   <div className={styles.projectExpanded} id={contentId} role="region" aria-label={`${project.title} 项目详情`}>
-                    <div className={styles.projectCover}>
+                    <TiltedCard className={styles.projectCover} maxTilt={6}>
                       <Image src={`/projects/${project.slug}/cover.jpg`} alt="" fill sizes="(max-width: 680px) 100vw, 320px" />
-                    </div>
+                      <PixelTransition active={isOpen} />
+                    </TiltedCard>
                     <div className={styles.expandedOverview}>
                       <p>{project.overview}</p>
                       <div className={styles.projectActions}>

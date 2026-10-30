@@ -249,7 +249,17 @@ export const CAPABILITY_GROUPS = [
     state: 'public',
   },
   {
-    category: '日常工具',
+    category: '后端与微服务',
+    items: ['Java', 'Spring Boot', 'Spring Cloud', 'MyBatis', 'RESTful / RPC APIs'],
+    state: 'toolbox',
+  },
+  {
+    category: '中间件与数据',
+    items: ['MySQL', 'Redis', 'Kafka / RocketMQ', 'Nacos', 'Elasticsearch'],
+    state: 'toolbox',
+  },
+  {
+    category: '部署与运维',
     items: ['Docker', 'Kubernetes', 'Linux', 'Jenkins', 'Gitea Actions'],
     state: 'toolbox',
   },
@@ -258,6 +268,12 @@ export const CAPABILITY_GROUPS = [
     items: ['RAG & knowledge systems', 'Voice agents', 'Linux & OCI runtime', 'Model gateways'],
     state: 'research',
   },
+] as const;
+
+/** Engineering practices behind the tools; shown in the Skills ticker. */
+export const ENGINEERING_PRACTICES = [
+  ['服务拆分与边界', '接口幂等', '分布式事务', '限流 · 熔断 · 降级', '缓存一致性', '消息可靠投递', '配置中心与服务发现', '分库分表'],
+  ['灰度与回滚', '链路追踪', '日志与指标', '容器化交付', 'CI/CD 流水线', '自托管基础设施', '可复现构建', 'AI 辅助工程'],
 ] as const;
 
 export function getPortfolioProject(slug: string): PortfolioProject | undefined {

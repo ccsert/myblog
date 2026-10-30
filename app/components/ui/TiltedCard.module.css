@@ -1,0 +1,28 @@
+.card {
+  --rx: 0deg;
+  --ry: 0deg;
+  transform: perspective(900px) rotateX(var(--rx)) rotateY(var(--ry)) scale(1);
+  transform-style: preserve-3d;
+  transition: transform 700ms var(--ease-out-back), box-shadow 400ms ease;
+  will-change: transform;
+}
+
+.card[data-tilting='true'] {
+  transform: perspective(900px) rotateX(var(--rx)) rotateY(var(--ry)) scale(1.02);
+  transition-duration: 120ms, 400ms;
+  transition-timing-function: ease-out, ease;
+  box-shadow: 0 22px 44px -22px color-mix(in srgb, var(--tilt-color, var(--color-accent)) 55%, transparent);
+}
+
+.glare {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background: radial-gradient(circle at var(--gx, 50%) var(--gy, 50%), color-mix(in srgb, var(--tilt-color, #fff) 45%, #fff), transparent 55%);
+  mix-blend-mode: overlay;
+  opacity: 0;
+  transition: opacity 300ms ease;
+}
+
+.card[data-tilting='true'] .glare { opacity: .75; }

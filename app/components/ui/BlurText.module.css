@@ -1,0 +1,11 @@
+.text { display: inline; }
+.char { display: inline-block; white-space: pre; }
+.text[data-state='waiting'] .char { opacity: 0; filter: blur(10px); translate: 0 -0.35em; }
+.text[data-state='in'] .char { animation: blurIn 640ms var(--ease-out-expo) both; }
+@keyframes blurIn {
+  from { opacity: 0; filter: blur(10px); translate: 0 -0.35em; }
+  55% { opacity: 1; filter: blur(2px); translate: 0 0.04em; }
+  to { opacity: 1; filter: none; translate: 0 0; }
+}
+/* Keyboard readers jumping between chapters get the title immediately. */
+:global(html[data-home-input='keyboard']) .text .char { opacity: 1; filter: none; translate: 0 0; animation: none; }

@@ -1,0 +1,20 @@
+.pixels {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: grid;
+  pointer-events: none;
+}
+
+.pixels span {
+  background: var(--pixel-color, var(--color-accent));
+  opacity: 1;
+  transition: opacity 0s linear;
+  transition-delay: calc(var(--order) * var(--duration));
+}
+
+.pixels[data-active='true'] span { opacity: 0; }
+
+@media (prefers-reduced-motion: reduce) {
+  .pixels span { transition: none; }
+}

@@ -1,0 +1,38 @@
+.ripple {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  mask: linear-gradient(to bottom, #000, transparent 90%);
+  opacity: 0;
+  transition: opacity 500ms ease;
+}
+
+.ripple span {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: calc(90px + var(--n) * 64px);
+  aspect-ratio: 1;
+  border: 1px solid color-mix(in srgb, var(--color-accent) calc(42% - var(--n) * 6%), transparent);
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--color-accent) calc(7% - var(--n) * 1%), transparent);
+  translate: 50% -50%;
+  scale: .7;
+  transition: scale 700ms var(--ease-out-expo);
+  transition-delay: calc(var(--n) * 40ms);
+}
+
+/* Revealed by hovering or focusing inside the card that hosts it. */
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  :global([data-ripple-host]):is(:hover, :focus-within) .ripple { opacity: 1; }
+  :global([data-ripple-host]):is(:hover, :focus-within) .ripple span {
+    scale: 1;
+    animation: ripple 3.4s calc(700ms + var(--n) * 120ms) ease-in-out infinite;
+  }
+}
+
+@keyframes ripple {
+  0%, 100% { scale: 1; }
+  50% { scale: .92; }
+}

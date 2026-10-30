@@ -1,6 +1,7 @@
 import { Circle } from 'lucide-react';
 import MissionSection from '@/app/components/sections/mission/MissionSection';
 import { NOW, PORTFOLIO_PROFILE } from '@/app/lib/content/portfolio';
+import RotatingText from '@/app/components/ui/RotatingText';
 import styles from '@/app/components/sections/mission/MissionLog.module.css';
 
 const VALUES = [
@@ -45,7 +46,7 @@ export default function About() {
 
         <div className={styles.operatorCard} aria-label="Operator profile summary" data-spotlight="card">
           <div className={styles.operatorRow}><span>Handle</span><strong>ccsert</strong></div>
-          <div className={styles.operatorRow}><span>Builds</span><strong>Developer tools</strong></div>
+          <div className={styles.operatorRow}><span>Builds</span><strong><RotatingText words={['Developer tools', 'AI platforms', 'Artifact registries', 'Self-hosted systems']} /></strong></div>
           <div className={styles.operatorRow}><span>Focus</span><strong>AI platforms · Self-hosted</strong></div>
           <div className={styles.operatorRow}><span>Loop</span><strong data-accent="true">Build → Verify → Ship</strong></div>
         </div>

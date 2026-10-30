@@ -1,0 +1,6 @@
+.root { position: relative; display: inline-flex; overflow: hidden; vertical-align: bottom; }
+.word { display: inline-flex; white-space: pre; }
+.char { display: inline-block; white-space: pre; animation: rotateIn 520ms var(--ease-out-expo) both; }
+@keyframes rotateIn { from { opacity: 0; translate: 0 105%; filter: blur(3px); } to { opacity: 1; translate: 0 0; filter: none; } }
+.srOnly { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+@media (prefers-reduced-motion: reduce) { .char { animation: none; } }

@@ -1,0 +1,59 @@
+.root {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  width: var(--size);
+  height: var(--size);
+}
+
+.ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  animation: spin 18s linear infinite;
+}
+
+.glyph {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  height: 50%;
+  translate: -50% 0;
+  transform-origin: bottom center;
+  rotate: var(--turn);
+  font: 500 11px/1 var(--font-mono);
+  letter-spacing: 0;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+  transition: color 300ms ease;
+}
+
+.center {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 46%;
+  height: 46%;
+  border: 1px solid var(--color-border);
+  border-radius: 50%;
+  color: var(--color-accent);
+  background: var(--color-bg);
+  transition: scale 400ms var(--ease-out-back), border-color 300ms ease, background-color 300ms ease;
+}
+
+:global(a):hover > .root .ring,
+:global(a):focus-visible > .root .ring { animation-duration: 4s; }
+:global(a):hover > .root .glyph,
+:global(a):focus-visible > .root .glyph { color: var(--color-accent); }
+:global(a):hover > .root .center,
+:global(a):focus-visible > .root .center {
+  scale: 1.12;
+  border-color: var(--color-accent);
+  background: color-mix(in srgb, var(--color-accent) 12%, var(--color-bg));
+}
+
+@keyframes spin { to { rotate: 360deg; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .ring { animation: none; }
+}

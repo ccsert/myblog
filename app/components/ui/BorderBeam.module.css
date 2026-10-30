@@ -1,0 +1,20 @@
+.beam {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  padding: var(--beam-width);
+  border-radius: inherit;
+  pointer-events: none;
+  background: conic-gradient(from var(--beam-angle), transparent 0 72%, color-mix(in srgb, var(--beam-color, var(--color-accent)) 30%, transparent) 84%, var(--beam-color, var(--color-accent)) 97%, transparent 100%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+  animation: beamOrbit var(--beam-duration) linear var(--beam-delay) infinite;
+}
+
+/* --beam-angle is registered with @property in globals.css so it interpolates. */
+@keyframes beamOrbit { to { --beam-angle: 360deg; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .beam { display: none; }
+}

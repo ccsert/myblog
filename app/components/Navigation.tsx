@@ -7,6 +7,7 @@ import ThemeSignalFader from '@/app/components/theme/ThemeSignalFader';
 import { SITE_CONFIG } from '@/app/lib/content/portfolio';
 import { ArchiveLink } from '@/app/components/ArchiveLink';
 import { scrollToHomeSection } from '@/app/lib/home-navigation';
+import HyperText from '@/app/components/ui/HyperText';
 
 const navItems = [
   { name: '个人实验场', href: '/archive' },
@@ -108,7 +109,7 @@ export default function Navigation() {
                   href={isHome ? item.href : `/${item.href}`}
                   className="font-mono text-sm text-text-secondary hover:text-accent transition-colors"
                 >
-                  <span className="text-accent">~/</span>{item.name}
+                  <span className="text-accent">~/</span><HyperText text={item.name} />
                 </a>
               )
             ))}

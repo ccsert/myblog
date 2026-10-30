@@ -1,8 +1,12 @@
 'use client';
 
 import { useEffect, useRef, type ReactNode } from 'react';
-import { ChevronDown, CornerDownRight } from 'lucide-react';
+import { ArrowUp, ChevronDown, CornerDownRight } from 'lucide-react';
 import { scrollToHomeSection } from '@/app/lib/home-navigation';
+import DotGrid from '@/app/components/ui/DotGrid';
+import CircularText from '@/app/components/ui/CircularText';
+import Magnet from '@/app/components/ui/Magnet';
+import { PORTFOLIO_PROFILE, SITE_CONFIG } from '@/app/lib/content/portfolio';
 import styles from './MissionLog.module.css';
 
 const CHAPTERS = [
@@ -18,6 +22,7 @@ export default function MissionLog({ children }: { children: ReactNode }) {
   const active = useRef(0);
   const line = useRef<HTMLSpanElement>(null);
   const progressLabel = useRef<HTMLSpanElement>(null);
+  const closingTop = useRef<HTMLAnchorElement>(null);
   const buttons = useRef<(HTMLButtonElement | null)[]>([]);
 
   useEffect(() => {
@@ -47,6 +52,16 @@ export default function MissionLog({ children }: { children: ReactNode }) {
       const fraction = Math.max(0, Math.min(1, (y - offsets[0]) / Math.max(1, end - offsets[0])));
       if (line.current) line.current.style.transform = `scaleX(${fraction})`;
       if (progressLabel.current) progressLabel.current.textContent = `${Math.round(fraction * 100)}%`;
+      // The ring sits below the chapters, where page progress is already
+      // near 100%, so it closes over the last stretch: from the closing scene
+      // entering the viewport to the end of the page.
+      const closing = closingTop.current?.closest<HTMLElement>('[data-closing]');
+      if (closing && closingTop.current) {
+        const start = closing.getBoundingClientRect().top + window.scrollY - window.innerHeight;
+        const finish = document.documentElement.scrollHeight - window.innerHeight;
+        const arrival = (window.scrollY - start) / Math.max(1, finish - start);
+        closingTop.current.style.setProperty('--read', Math.max(0, Math.min(1, arrival)).toFixed(3));
+      }
     };
     const schedule = () => { if (!frame) frame = requestAnimationFrame(update); };
     const measure = () => {
@@ -94,6 +109,15 @@ export default function MissionLog({ children }: { children: ReactNode }) {
       </aside>
       <div className={styles.journey}>{children}</div>
     </div>
-    <footer className={styles.missionFooter}><span><CornerDownRight size={12} aria-hidden="true" />把复杂留给系统，把好奇心留给自己。</span><span>Developer tools · AI engineering · Self-hosted systems</span><a href="#home">回到开头 ↑</a></footer>
+    <div className={styles.closing} data-closing>
+      <DotGrid />
+      <div className={styles.closingCopy}>
+        <span className={styles.closingLabel}>~/{SITE_CONFIG.domain}</span>
+        <p className={styles.closingLine}>把复杂的工程工作，<br />做成<span className={styles.aurora}>真正能用的工具</span>。</p>
+        <span className={styles.closingSub}>{PORTFOLIO_PROFILE.headline}</span>
+      </div>
+      <Magnet padding={64} strength={5}><a ref={closingTop} className={styles.closingTop} href="#home" aria-label="回到开头"><CircularText size={128} text="BACK TO TOP · BACK TO TOP · "><span className={styles.closingMeter} aria-hidden="true" /><ArrowUp size={20} aria-hidden="true" /></CircularText></a></Magnet>
+    </div>
+    <footer className={styles.missionFooter}><span><CornerDownRight size={12} aria-hidden="true" />把复杂留给系统，把好奇心留给自己。</span><span>Developer tools · AI engineering · Self-hosted systems</span><span>{SITE_CONFIG.domain}</span></footer>
   </div>;
 }

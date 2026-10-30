@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { createRef, useEffect, useMemo, useRef, useState } from 'react';
+import AnimatedBeam from '@/app/components/ui/AnimatedBeam';
 import Link from 'next/link';
 import { ArrowUpRight, Pause, Play } from 'lucide-react';
 import { KNOWLEDGE_SIGNALS, PORTFOLIO_PROJECTS } from '@/app/lib/content/portfolio';
@@ -17,29 +18,41 @@ const SIGNALS = [
 export default function SignalObservatory({ onOpenDocument }: { onOpenDocument: (path: string) => void }) {
   const [selected, setSelected] = useState(0);
   const [paused, setPaused] = useState(false);
+  const [pulse, setPulse] = useState(0);
   const rootRef = useRef<HTMLDivElement>(null);
+  const instrumentRef = useRef<HTMLDivElement>(null);
+  const channelRefs = useMemo(() => SIGNALS.map(() => createRef<HTMLButtonElement>()), []);
   const signal = SIGNALS[selected];
 
   useEffect(() => {
     const root = rootRef.current;
     if (!root) return;
     let inView = false;
-    const update = () => { root.dataset.running = String(inView && !document.hidden); };
+    const update = () => {
+      const running = inView && !document.hidden;
+      root.dataset.running = String(running);
+      if (!running) setPulse(0);
+    };
     const observer = new IntersectionObserver(([entry]) => {
       inView = entry.isIntersecting;
       update();
     });
+    const preference = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const cancelPulse = () => setPulse(0);
     observer.observe(root);
     document.addEventListener('visibilitychange', update);
+    preference.addEventListener('change', cancelPulse);
     return () => {
       observer.disconnect();
       document.removeEventListener('visibilitychange', update);
+      preference.removeEventListener('change', cancelPulse);
     };
   }, []);
 
   return (
-    <div ref={rootRef} className={styles.observatory} data-signal={selected} data-paused={paused} data-running="false">
-      <div className={styles.instrument} aria-hidden="true">
+    <div ref={rootRef} className={styles.observatory} data-signal={selected} data-paused={paused} data-running="false" onKeyDownCapture={() => setPulse(0)}>
+      <AnimatedBeam containerRef={rootRef} fromRef={instrumentRef} toRef={channelRefs[selected]} pulse={pulse} paused={paused} onComplete={completed => setPulse(current => current === completed ? 0 : current)} />
+      <div ref={instrumentRef} className={styles.instrument} aria-hidden="true">
         <span className={styles.coordinate}>SIG / 0{selected + 1}</span>
         <svg viewBox="0 0 280 260" className={styles.scope} fill="none">
           <path className={styles.crosshair} d="M140 5v250M10 130h260" />
@@ -64,7 +77,11 @@ export default function SignalObservatory({ onOpenDocument }: { onOpenDocument: 
         <div className={styles.readoutMeta}><span className={styles.dot} /> OPEN FREQUENCY</div>
         <div className={styles.channels} role="group" aria-label="选择探索信号">
           {SIGNALS.map((item, index) => (
-            <button type="button" key={item.code} aria-pressed={selected === index} onClick={() => setSelected(index)}>
+            <button type="button" key={item.code} ref={channelRefs[index]} aria-pressed={selected === index} onClick={event => {
+              setSelected(index);
+              const canAnimate = event.detail > 0 && !paused && !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+              setPulse(canAnimate ? value => value + 1 : 0);
+            }}>
               <span>0{index + 1}</span>{item.label}
             </button>
           ))}
@@ -82,7 +99,7 @@ export default function SignalObservatory({ onOpenDocument }: { onOpenDocument: 
           <Link className={styles.openSignal} href="/archive">进入个人实验场 <ArrowUpRight size={14} aria-hidden="true" /></Link>
         )}
       </div>
-      <button type="button" className={styles.motionToggle} aria-label={paused ? '播放轨道动画' : '暂停轨道动画'} aria-pressed={paused} onClick={() => setPaused(value => !value)}>
+      <button type="button" className={styles.motionToggle} aria-label={paused ? '播放轨道动画' : '暂停轨道动画'} aria-pressed={paused} onClick={() => { setPulse(0); setPaused(value => !value); }}>
         {paused ? <Play size={11} aria-hidden="true" /> : <Pause size={11} aria-hidden="true" />}
       </button>
     </div>

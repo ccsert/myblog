@@ -1,0 +1,14 @@
+.glow { position: absolute; inset: 0; z-index: -1; border-radius: inherit; pointer-events: none; opacity: 0; }
+.glow::before, .glow::after { content: ''; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; }
+.glow::before { background: radial-gradient(320px circle at var(--spot-x, 50%) var(--spot-y, 50%), color-mix(in srgb, var(--project-color, var(--color-accent)) 10%, transparent), transparent 70%); }
+.glow::after {
+  padding: 1px;
+  background: radial-gradient(220px circle at var(--spot-x, 50%) var(--spot-y, 50%), color-mix(in srgb, var(--project-color, var(--color-accent)) 60%, transparent), transparent 72%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+}
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  .glow { transition: opacity 200ms ease; }
+  :global([data-spotlight='project']:hover) > .glow { opacity: 1; }
+}

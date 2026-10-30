@@ -8,6 +8,7 @@ import { ARCHIVE_ENTRIES, archiveEntryHref, findArchiveEntry } from '@/app/lib/a
 import { PUBLIC_EVIDENCE_CHECKED_AT, SITE_CONFIG } from '@/app/lib/content/portfolio';
 import ArchiveReader from './ArchiveReader';
 import { DocumentDemo, DocumentTeaser, GatewayDemo, ProtocolTeaser, ReviewDemo, ReviewTeaser, TerminalDemo } from './ProjectDemos';
+import DecryptedText from '@/app/components/ui/DecryptedText';
 import styles from './Playground.module.css';
 
 const PROJECTS = [
@@ -27,6 +28,7 @@ function HeadingText({ project }: { project: typeof PROJECTS[number] }) {
 export default function Playground() {
   const [active, setActive] = useState(0);
   const [keyboard, setKeyboard] = useState(false);
+  const [decode, setDecode] = useState({ run: 0, animate: true });
   const buttons = useRef<(HTMLButtonElement | null)[]>([]);
   const mobileButtons = useRef<(HTMLButtonElement | null)[]>([]);
   const panels = useRef<(HTMLElement | null)[]>([]);
@@ -124,7 +126,10 @@ export default function Playground() {
       <ReturnHomeLink className={styles.brand}>{SITE_CONFIG.domain}<span>/</span><span>个人实验场</span></ReturnHomeLink>
       <nav aria-label="实验场导航"><a href="#works">作品</a><span aria-hidden="true">/</span><a href="#notes">手记</a><ReturnHomeLink className={styles.backLink}>返回首页<ArrowUpRight size={19} aria-hidden="true" /></ReturnHomeLink></nav>
     </header>
-    <section className={styles.intro} aria-labelledby="playground-heading"><h1 id="playground-heading">别只看，动手玩。</h1><p>选一件作品，试一下它的想法。</p></section>
+    <section className={styles.intro} aria-labelledby="playground-heading">
+      <h1 id="playground-heading"><DecryptedText text="别只看，动手玩。" replay={decode.run} animate={decode.animate} /></h1>
+      <div className={styles.introAside}><p>选一件作品，试一下它的想法。</p><button type="button" className={styles.decodeButton} onClick={event => setDecode(value => ({ run: value.run + 1, animate: event.detail > 0 }))}><span aria-hidden="true">↻</span> 重播文字解码</button></div>
+    </section>
 
     <section id="works" className={styles.stage} aria-label="可体验的作品">
       <nav className={styles.mobileTabs} aria-label="切换作品">

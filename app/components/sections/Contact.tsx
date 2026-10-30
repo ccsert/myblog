@@ -4,6 +4,8 @@ import { FormEvent, useState } from 'react';
 import { GitBranch, Mail, MessageSquareText, Send } from 'lucide-react';
 import MissionSection from '@/app/components/sections/mission/MissionSection';
 import { SITE_CONFIG } from '@/app/lib/content/portfolio';
+import BorderBeam from '@/app/components/ui/BorderBeam';
+import Ripple from '@/app/components/ui/Ripple';
 import styles from '@/app/components/sections/mission/MissionLog.module.css';
 
 export default function Contact() {
@@ -34,8 +36,9 @@ export default function Contact() {
       subtitle="说说你遇到的问题、手上的限制，和希望得到的结果。"
     >
       <div className={styles.contactGrid} data-reveal-group>
-        <div className={styles.directPanel} data-spotlight="card">
-          <div className={styles.directBlock}>
+        <div className={styles.directPanel} data-spotlight="card" data-ripple-host>
+          <div className={`${styles.directBlock} ${styles.rippleBlock}`}>
+            <Ripple />
             <h3 className={styles.subpanelTitle}>直接联系</h3>
             <div className={styles.directLinks}>
               <a href={`mailto:${SITE_CONFIG.email}`}><Mail size={14} aria-hidden="true" />{SITE_CONFIG.email}</a>
@@ -52,6 +55,7 @@ export default function Contact() {
         </div>
 
         <form className={styles.composer} onSubmit={openEmailDraft} data-spotlight="card">
+          <BorderBeam duration={8} />
           <h3 className={styles.subpanelTitle}>写封邮件</h3>
           <div className={styles.formGrid}>
             <div className={styles.fieldStack}>
@@ -70,7 +74,7 @@ export default function Contact() {
             </div>
           </div>
           <button className={styles.sendButton} type="submit">
-            生成邮件草稿 <Send size={13} aria-hidden="true" />
+            <span data-motion className={styles.shimmer} aria-hidden="true" />生成邮件草稿 <Send size={13} aria-hidden="true" />
           </button>
           <p className={styles.formNote}>点击后会打开你的邮件客户端，内容已经填好；本站不保存任何表单内容。</p>
           <p className={styles.formStatus} role="status" aria-live="polite">{formStatus}</p>

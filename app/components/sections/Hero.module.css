@@ -18,7 +18,7 @@
 .workbenchHeading > span { display: flex; gap: 9px; align-items: center; }
 .workbenchHeading b { color: var(--color-accent); font-weight: 400; }
 .workbenchHeading a { color: var(--color-text-secondary); display: inline-flex; align-items: center; gap: 7px; min-height: 28px; }
-.workbench { height: clamp(490px, calc(100svh - 340px), 680px); scroll-margin-top: 0; }
+.workbench { position: relative; height: clamp(490px, calc(100svh - 340px), 680px); border-radius: 12px; scroll-margin-top: 0; }
 .workbenchFooter { display: flex; justify-content: space-between; gap: 15px; margin-top: 13px; color: var(--color-text-secondary); font: 10px/1.6 var(--font-mono); }
 .workbenchFooter > span { display: inline-flex; align-items: center; gap: 6px; }
 .workbenchFooter i { width: 4px; height: 4px; background: var(--color-accent); border-radius: 50%; }
@@ -52,7 +52,7 @@
   opacity: 0;
   transition: opacity 600ms ease;
 }
-@media (hover: hover) and (pointer: fine) { .hero:hover::after { opacity: 1; } }
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) { .hero:hover::after { opacity: 1; } }
 
 .caret {
   display: inline-block;
@@ -103,3 +103,28 @@
     .intro > :last-child { animation: heroRise 820ms var(--ease-out-expo) 300ms both, heroExitFar linear both; animation-timeline: auto, --hero-intro; animation-range: normal, exit 0% exit 100%; }
   }
 }
+
+/* Flickering dot field behind the identity and observatory (Magic UI). It
+   fades out before the workbench so terminal text never sits on noise. */
+.flicker {
+  position: absolute;
+  inset: 0 0 auto;
+  z-index: -1;
+  height: min(820px, 100%);
+  pointer-events: none;
+  mask: radial-gradient(ellipse 72% 78% at 62% 22%, #000 18%, transparent 74%);
+}
+@media (max-width: 767px) { .flicker { height: 620px; mask: radial-gradient(ellipse 120% 70% at 70% 20%, #000 10%, transparent 72%); } }
+
+/* Shiny Text (React Bits): a light band sweeps across the accent wordmark. */
+.heading .shiny {
+  color: var(--color-accent);
+  background: linear-gradient(110deg, var(--color-accent) 40%, color-mix(in srgb, var(--color-accent) 35%, var(--color-text-primary)) 50%, var(--color-accent) 60%) 0 0 / 260% 100% no-repeat;
+  background-position: 100% 0;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shinySweep 6s 1.4s cubic-bezier(.6, 0, .4, 1) infinite;
+}
+@keyframes shinySweep { 0% { background-position: 100% 0; } 30%, 100% { background-position: 0 0; } }
+@media (prefers-reduced-motion: reduce) { .heading .shiny { animation: none; } }

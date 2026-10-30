@@ -632,6 +632,10 @@ body.grain:has([data-home-experience])::before { opacity: calc(var(--grain-opaci
   }
 }
 
+/* Looping decorations pause off screen (see OffscreenMotion.tsx). */
+[data-motion='paused'],
+[data-motion='paused'] > * { animation-play-state: paused !important; }
+
 /* Homepage reading progress, driven by the root scroller. */
 .home-scroll-progress {
   position: fixed;
@@ -688,9 +692,16 @@ body.grain:has([data-home-experience])::before { opacity: calc(var(--grain-opaci
   mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
 }
 
-@media (hover: hover) and (pointer: fine) {
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
   [data-spotlight='card']:hover::before,
   [data-spotlight='card']:hover::after {
     opacity: 1;
   }
+}
+
+/* Animated angle for the Border Beam component (app/components/ui/BorderBeam). */
+@property --beam-angle {
+  syntax: '<angle>';
+  inherits: false;
+  initial-value: 0deg;
 }

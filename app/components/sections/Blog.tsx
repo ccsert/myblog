@@ -5,6 +5,8 @@ import { ArrowUpRight, FileText } from 'lucide-react';
 import MissionSection from '@/app/components/sections/mission/MissionSection';
 import { KNOWLEDGE_SIGNALS } from '@/app/lib/content/portfolio';
 import styles from '@/app/components/sections/mission/MissionLog.module.css';
+import DecryptedText from '@/app/components/ui/DecryptedText';
+import AnimatedList from '@/app/components/ui/AnimatedList';
 import { ArchiveLink } from '@/app/components/ArchiveLink';
 
 export default function Blog() {
@@ -28,7 +30,7 @@ export default function Blog() {
         <article className={styles.featuredPost} aria-live="polite" data-spotlight="card">
           <div className={styles.featuredSwap} key={selectedPost.id}>
             <div className={styles.featuredLabel}>手记 · {selectedPost.id}</div>
-            <h3>{selectedPost.title}</h3>
+            <h3><DecryptedText text={selectedPost.title} /></h3>
             <p>{selectedPost.excerpt}</p>
             <p className={styles.knowledgeQuestion}><strong>还没想清楚的</strong>{selectedPost.openQuestion}</p>
             <p className={styles.knowledgeBoundary}>{selectedPost.boundary}</p>
@@ -43,12 +45,13 @@ export default function Blog() {
           </div>
         </article>
 
-        <div className={styles.postQueue} aria-label="知识信号队列">
+        <AnimatedList className={styles.postQueue} aria-label="知识信号队列">
           {KNOWLEDGE_SIGNALS.map(post => (
             <button
               type="button"
               key={post.id}
               className={styles.postButton}
+              data-glare
               data-active={post.id === selectedPostId}
               onClick={() => setSelectedPostId(post.id)}
               aria-pressed={post.id === selectedPostId}
@@ -61,7 +64,7 @@ export default function Blog() {
               <span className={styles.draftLabel}>{post.state}</span>
             </button>
           ))}
-        </div>
+        </AnimatedList>
       </div>
       <div className={styles.endMarker}>完整笔记留在私有知识库里，这里只放可以公开的部分。</div>
     </MissionSection>

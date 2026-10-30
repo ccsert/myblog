@@ -10,6 +10,9 @@ import { useRouter } from 'next/navigation';
 import { ArchiveLink } from '@/app/components/ArchiveLink';
 import { rememberHomePosition, scrollToHomeSection } from '@/app/lib/home-navigation';
 import { useRef } from 'react';
+import FlickeringGrid from '@/app/components/ui/FlickeringGrid';
+import BorderBeam from '@/app/components/ui/BorderBeam';
+import NumberTicker from '@/app/components/ui/NumberTicker';
 import styles from './Hero.module.css';
 
 export default function Hero() {
@@ -101,16 +104,17 @@ export default function Hero() {
 
   return (
     <section id="home" className={`${styles.hero} blueprint-grid`} aria-label="个人信号观测台" tabIndex={-1} data-spotlight="hero">
+      <div className={styles.flicker}><FlickeringGrid /></div>
       <div className={styles.inner}>
         <div className={styles.intro}>
           <div className={styles.identity}>
             <div className={styles.eyebrow}>CCSERT / BUILD · VERIFY · SHIP</div>
-            <h1 className={styles.heading}>{brandPrefix}<span>{brandSuffix.join('')}</span><i className={styles.caret} aria-hidden="true" /></h1>
+            <h1 className={styles.heading} data-motion>{brandPrefix}<span className={styles.shiny}>{brandSuffix.join('')}</span><i className={styles.caret} aria-hidden="true" /></h1>
             <p className={styles.invitation}>{PORTFOLIO_PROFILE.tagline}</p>
             <p className={styles.domains}>Developer tools · AI engineering · Self-hosted systems</p>
             <nav className={styles.shortcuts} aria-label="开始探索">
-              <a href="#projects"><b>{String(PORTFOLIO_PROJECTS.length).padStart(2, '0')}</b> 公开构建</a>
-              <a href="#blog"><b>{String(KNOWLEDGE_SIGNALS.length).padStart(2, '0')}</b> 技术手记</a>
+              <a href="#projects"><b><NumberTicker value={PORTFOLIO_PROJECTS.length} /></b> 公开构建</a>
+              <a href="#blog"><b><NumberTicker value={KNOWLEDGE_SIGNALS.length} duration={1100} /></b> 技术手记</a>
               <ArchiveLink href="/archive" id="hero-playground"><span className="playground-colors" aria-hidden="true"><i /><i /><i /><i /></span> 个人实验场 <ArrowUpRight size={11} aria-hidden="true" /></ArchiveLink>
             </nav>
           </div>
@@ -122,6 +126,8 @@ export default function Hero() {
         </div>
         <div className={styles.workbench} id="workbench">
           <Terminal ref={terminalRef} commands={commands} welcomeMessage={welcomeMessage} />
+          <BorderBeam duration={11} />
+          <BorderBeam duration={11} delay={5.5} color="var(--color-info)" />
         </div>
         <div className={styles.workbenchFooter}><span><i /> 每个文件都能打开看看，也可以直接敲命令。</span><span>TYPE A COMMAND. FOLLOW A SIGNAL.</span></div>
         <DiscoveryDock onOpenDocument={openDocument} />

@@ -1,6 +1,8 @@
 'use client';
 
 import { useEffect, useLayoutEffect, useRef, type MouseEvent, type ReactNode } from 'react';
+import ClickSpark from '@/app/components/ui/ClickSpark';
+import OffscreenMotion from '@/app/components/ui/OffscreenMotion';
 import { installSpotlight } from '@/app/lib/home-motion';
 import { cancelHomeScroll, restoreHomePosition, scrollToHomeSection } from '@/app/lib/home-navigation';
 
@@ -49,6 +51,8 @@ export default function HomeExperience({ children }: { children: ReactNode }) {
   return (
     <main ref={mainRef} className="min-h-screen" data-home-experience onClick={followAnchor}>
       <div className="home-scroll-progress" aria-hidden="true" />
+      <ClickSpark />
+      <OffscreenMotion />
       {children}
     </main>
   );
